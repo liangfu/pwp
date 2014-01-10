@@ -45,6 +45,7 @@ enum{CV_8U=1,CV_8S,CV_16S,CV_32S,CV_32F,CV_64F};
 #define MAX(a,b) (((a)>(b))?(a):(b))
 #define CV_PI 3.141592653589793
 #define CV_MAT_TYPE(t) ((t)&0xff)
+#define CVAPI(rettype) rettype
 
 CV_INLINE
 CvMat * cvCreateMat(int rows, int cols, int type)
@@ -295,6 +296,7 @@ void cvCalcSurfaceNormal_smooth(CvMat * verts, CvMat * faces, CvMat * norms)
   }
 }
 
+CV_INLINE
 void cvLoadSurface(const char * fn, CvMat ** verts, CvMat ** faces)
 {
   static const int MAXLEN=1024;
@@ -345,6 +347,8 @@ void cvLoadSurface(const char * fn, CvMat ** verts, CvMat ** faces)
   }
   fclose(fp);
 }
+
+CVAPI(int) cvGetFileSuffix(const char * fullname, char * suffix);
 
 #if defined(__cplusplus)
 

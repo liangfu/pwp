@@ -1,8 +1,8 @@
 
 import os
 
-print os.getcwd()+'/src'
-source_list=filter(lambda x:x[-4:-1]=='.cpp',os.listdir(os.getcwd()+'/src'))
+print os.getcwd()
+source_list=filter(lambda x:x[-4:-1]=='.cpp',os.listdir(os.getcwd()))
 print source_list
 
 env=Environment()

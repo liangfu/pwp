@@ -2,7 +2,7 @@
 import os
 
 print os.getcwd()
-source_list=filter(lambda x:x[len(x)-1]=='p',os.listdir(os.getcwd()))
+source_list=filter(lambda x:x[-4:]=='.cpp',os.listdir(os.getcwd()))
 print source_list
 
 env=Environment()

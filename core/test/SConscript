@@ -1,0 +1,13 @@
+
+import os
+
+print os.getcwd()
+source_list=filter(lambda x:x[-4:]=='.cpp',os.listdir(os.getcwd()))
+
+env=Environment()
+# env.ParseConfig('wx-config --libs --cxxflags')
+env.Append(CPPPATH=['../include'])
+source_list.append('../src/cvio.cpp')
+print source_list
+
+env.Program(target='compvis-test',src=source_list)

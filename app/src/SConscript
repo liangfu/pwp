@@ -1,0 +1,13 @@
+
+import os
+
+print os.getcwd()
+source_list=filter(lambda x:x[len(x)-1]=='p',os.listdir(os.getcwd()))
+print source_list
+
+env=Environment()
+env.ParseConfig('wx-config --cxxflags --libs')
+env.Append(CXXFLAGS=['-Wall','-g'])
+env.Append(RPATH='/usr/local/lib')
+
+env.Program(target='../../bin/compvis',source=source_list)

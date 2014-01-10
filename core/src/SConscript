@@ -1,0 +1,11 @@
+
+import os
+
+print os.getcwd()+'/src'
+source_list=filter(lambda x:x[-4:-1]=='.cpp',os.listdir(os.getcwd()+'/src'))
+print source_list
+
+env=Environment()
+
+
+env.Library(target='../bin/compvis-core',src=source_list)

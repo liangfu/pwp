@@ -89,8 +89,8 @@ MyFrame::MyFrame():
   Connect(wxEVT_SIZE, wxSizeEventHandler(MyFrame::OnSize));
   //Bind(wxEVT_COMMAND_MENU_SELECTED, &MyFrame::OnQuit, this, wxID_EXIT);
   Connect(wxID_EXIT,wxEVT_COMMAND_MENU_SELECTED,wxCommandEventHandler(MyFrame::OnQuit));
-  //Bind(wxEVT_COMMAND_MENU_SELECTED, &MyFrame::OnAbout, this, wxID_ABOUT);
-  Connect(wxID_ABOUT,wxEVT_COMMAND_MENU_SELECTED,wxCommandEventHandler(MyFrame::OnAbout));
+  //Bind(wxEVT_COMMAND_MENU_SELECTED, &MyFrame::OnOpen, this, wxID_OPEN);
+  Connect(wxID_OPEN,wxEVT_COMMAND_MENU_SELECTED,wxCommandEventHandler(MyFrame::OnOpen));
   //Bind(wxEVT_COMMAND_MENU_SELECTED, &MyFrame::OnAbout, this, wxID_ABOUT);
   Connect(wxID_ABOUT,wxEVT_COMMAND_MENU_SELECTED,wxCommandEventHandler(MyFrame::OnAbout));
 }
@@ -122,6 +122,29 @@ wxMenuBar *MyFrame::CreateMainMenubar()
   mbar->Append(menuHelp, "&Help");
 
   return mbar;
+}
+
+void MyFrame::OnOpen(wxCommandEvent& event)
+{
+  wxFileDialog* OpenDialog =
+	new wxFileDialog(this, "Choose a file to open", wxEmptyString, wxEmptyString,
+					 "Image files (*.png,*.jpg)|*.png;*.jpg|"
+					 "Text files (*.txt)|*.txt|"
+					 "C++ Source Files (*.cpp, *.cxx)|*.cpp;*.cxx|"
+					 "C Source files (*.c)|*.c|"
+					 "C header files (*.h)|*.h", wxFD_OPEN, wxDefaultPosition);
+
+  // Creates a "open file" dialog with 4 file types
+  if (OpenDialog->ShowModal() == wxID_OK) // if the user click "Open" instead of "Cancel"
+  {
+	wxString currpath = OpenDialog->GetPath();
+	// Sets our current document to the file the user selected
+	// MainEditBox->LoadFile(currpath); 
+	SetTitle(wxString("Edit - ") << OpenDialog->GetFilename()); 
+  }
+
+  // Clean up after ourselves
+  OpenDialog->Destroy();
 }
 
 void MyFrame::OnClose(wxCloseEvent& event)
@@ -157,7 +180,7 @@ void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event) )
 void MyFrame::OnNewWindow(wxCommandEvent& WXUNUSED(event) )
 {
   // create and show another child frame
-  // MyChild *subframe = new MyChild(this);
+  // MyChild * subframe = new MyChild(this);
   // subframe->Show(true);
 }
 
@@ -238,5 +261,10 @@ void MyFrame::InitToolBar(wxToolBar* toolBar)
   toolBar->AddTool(7, "", bitmaps[7], "Rotate right");
 
   toolBar->Realize();
+
+  MyChild * subframe0 = new MyChild(this);
+  subframe0->Show(true);
+  MyChild * subframe1 = new MyChild(this);
+  subframe1->Show(true);
 }
 

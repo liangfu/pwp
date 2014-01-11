@@ -13,7 +13,7 @@
 #include "../res/chart.xpm"
 
 MyChild::MyChild(wxMDIParentFrame *parent):
-  wxMDIChildFrame(parent,wxID_ANY,wxString::Format("Child %u", ++ms_numChildren))
+  wxMDIChildFrame(parent,wxID_ANY,wxString::Format("Child 0"))
 {
   m_canvas = new MyCanvas(this, wxPoint(0, 0), GetClientSize());
 
@@ -30,7 +30,7 @@ MyChild::MyChild(wxMDIParentFrame *parent):
 
   // test that event handlers pushed on top of MDI children do work (this
   // used to be broken, see #11225)
-  // PushEventHandler(new EventHandler(ms_numChildren));
+  PushEventHandler(new EventHandler(ms_numChildren));
 }
 
 MyChild::~MyChild()

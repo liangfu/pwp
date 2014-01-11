@@ -23,7 +23,7 @@ public:
   wxMenuBar * CreateMainMenubar();
 
   int m_numtabs;
-  MyChild * m_tabs;
+  MyChild * m_pTabs;
 
 private:
   void InitToolBar(wxToolBar* toolBar);
@@ -35,6 +35,7 @@ private:
   void OnQuit(wxCommandEvent& event);
   void OnCloseAll(wxCommandEvent& event);
 
+  void OnOpen(wxCommandEvent& event);
   void OnClose(wxCloseEvent& event);
 
   wxTextCtrl *m_textWindow;

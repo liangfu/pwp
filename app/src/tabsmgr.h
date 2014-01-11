@@ -14,20 +14,20 @@
 #include "canvas.h"
 
 // simple test event handler class
-// class EventHandler : public wxEvtHandler
-// {
-// public:
-//     EventHandler(unsigned numChild) : m_numChild(numChild) { }
-// private:
-//     void OnRefresh(wxCommandEvent& event)
-//     {
-//         wxLogMessage("Child #%u refreshed.", m_numChild);
-//         event.Skip();
-//     }
-//     const unsigned m_numChild;
-//     DECLARE_EVENT_TABLE()
-//     wxDECLARE_NO_COPY_CLASS(EventHandler);
-// };
+class EventHandler : public wxEvtHandler
+{
+public:
+    EventHandler(unsigned numChild) : m_numChild(numChild) { }
+private:
+    void OnRefresh(wxCommandEvent& event)
+    {
+        wxLogMessage("Child #%u refreshed.", m_numChild);
+        event.Skip();
+    }
+    const unsigned m_numChild;
+    // DECLARE_EVENT_TABLE()
+    // wxDECLARE_NO_COPY_CLASS(EventHandler);
+};
 
 class MyChild : public wxMDIChildFrame
 {

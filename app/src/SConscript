@@ -7,6 +7,7 @@ print source_list
 
 env=Environment()
 env.ParseConfig('wx-config --cxxflags --libs')
+env.Append(CPPPATH=['../../core/include','../../extra/include'])
 env.Append(CXXFLAGS=['-Wall','-g'])
 env.Append(RPATH='/usr/local/lib')
 

@@ -12,25 +12,52 @@
 
 #include "../res/chart.xpm"
 
-MyChild::MyChild(wxMDIParentFrame *parent):
-  wxMDIChildFrame(parent,wxID_ANY,wxString::Format("Child 0"))
+enum {	wxID_PANEL_REFRESH = wxID_HIGHEST+1};
+
+
+
+// MyChild::MyChild(wxMDIParentFrame *parent):
+//   wxMDIChildFrame(parent,wxID_ANY,wxString::Format("Child 0"))
+MyChild::MyChild(wxFrame *parent):
+  wxPanel(parent,wxID_ANY,wxDefaultPosition,parent->GetClientSize()),pixmap(0)
+  // wxPanel(parent,wxID_ANY)
 {
   m_canvas = new MyCanvas(this, wxPoint(0, 0), GetClientSize());
+  wxBoxSizer * sizer=new wxBoxSizer(wxHORIZONTAL);
+  sizer->Add(m_canvas,1,wxEXPAND|wxALL,0);
+  //sizer->SetSizeHints(this);
+  SetSizer(sizer);
 
-  SetIcon(wxICON(chart));
 
-  const bool canBeResized = !IsAlwaysMaximized();
+  fprintf(stderr,"parent->GetSize(): %d,%d\n",
+		  parent->GetSize().GetWidth(),parent->GetSize().GetHeight());
+  fprintf(stderr,"parent->GetClientSize(): %d,%d\n",
+		  parent->GetClientSize().GetWidth(),parent->GetClientSize().GetHeight());
+  fprintf(stderr,"GetClientSize(): %d,%d\n",
+		  GetClientSize().GetWidth(),GetClientSize().GetHeight());
+
+  // SetIcon(wxICON(chart));
+
+  // const bool canBeResized = !IsAlwaysMaximized();
 
   // create our menu bar: it will be shown instead of the main frame one when
   // we're active
 
   // this should work for MDI frames as well as for normal ones, provided
   // they can be resized at all
-  if ( canBeResized ) { SetSizeHints(100, 100); }
+  // if ( canBeResized ) {
+  // SetSizeHints(100, 100);
+  //}
 
   // test that event handlers pushed on top of MDI children do work (this
   // used to be broken, see #11225)
   PushEventHandler(new EventHandler(ms_numChildren));
+
+  //Bind(wxEVT_COMMAND_MENU_SELECTED, &MyFrame::OnAbout, this, wxID_ABOUT);
+  // Connect(wxID_ABOUT,wxEVT_COMMAND_MENU_SELECTED,wxCommandEventHandler(MyFrame::OnAbout));
+  // Connect(wxID_PANEL_REFRESH,wxEVT_COMMAND_MENU_SELECTED,wxCommandEventHandler(MyChild::OnRefresh));
+  Connect(wxEVT_SIZE,wxSizeEventHandler(MyChild::OnSize));
+  // Connect(wxEVT_SIZE,wxSizeEventHandler(MyChild::OnSize));
 }
 
 MyChild::~MyChild()
@@ -38,6 +65,14 @@ MyChild::~MyChild()
   PopEventHandler(true);
 
   ms_numChildren--;
+}
+
+int MyChild::LoadFile(wxString fname)
+{
+  fprintf(stderr,"%s\n",(const char *)fname.c_str());
+  if (!pixmap){pixmap=new wxBitmap();}
+  *pixmap=wxBitmap(fname,wxBITMAP_TYPE_ANY);
+  m_canvas->Display(*pixmap);
 }
 
 void MyChild::OnClose(wxCommandEvent& WXUNUSED(event))
@@ -88,6 +123,10 @@ void MyChild::OnSize(wxSizeEvent& event)
 	size3 = GetClientSize();
   wxLogStatus("size from event: %dx%d, from frame %dx%d, client %dx%d",
 			  size1.x, size1.y, size2.x, size2.y, size3.x, size3.y);
+
+  // m_canvas->SetClientSize(GetClientSize());
+  // if (pixmap){m_canvas->Display(*pixmap);}
+  
 
   event.Skip();
 }

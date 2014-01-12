@@ -45,9 +45,9 @@
 // BEGIN_EVENT_TABLE(MyCanvas, wxScrolledWindow)
 //     EVT_MOUSE_EVENTS(MyCanvas::OnEvent)
 // END_EVENT_TABLE()
-BEGIN_EVENT_TABLE(MyCanvas, wxWindow)
-    EVT_MOUSE_EVENTS(MyCanvas::OnEvent)
-END_EVENT_TABLE()
+// BEGIN_EVENT_TABLE(MyCanvas, wxWindow)
+//     EVT_MOUSE_EVENTS(MyCanvas::OnEvent)
+// END_EVENT_TABLE()
 
 // ===========================================================================
 // implementation
@@ -82,6 +82,7 @@ bool MyApp::OnInit()
 
 int main(int argc, char * argv[])
 {
+  wxInitAllImageHandlers();
   wxApp::SetInstance( new MyApp() );
   wxEntryStart( argc, argv );
   wxTheApp->OnInit();

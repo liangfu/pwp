@@ -8,17 +8,21 @@
 // Define a constructor for my canvas
 MyCanvas::MyCanvas(wxWindow *parent, const wxPoint& pos, const wxSize& size)
         // : wxScrolledWindow(parent, wxID_ANY, pos, size,
-        : wxWindow(parent, wxID_ANY, pos, size,
-                           wxSUNKEN_BORDER |
-                           wxNO_FULL_REPAINT_ON_RESIZE |
-                           wxVSCROLL | wxHSCROLL)
+        : wxWindow(parent, wxID_ANY, pos, size// ,
+				   // wxSUNKEN_BORDER
+				   // wxNO_FULL_REPAINT_ON_RESIZE |
+				   // wxVSCROLL | wxHSCROLL
+				   )
 {
-    SetBackgroundColour(*wxWHITE);
+    // SetBackgroundColour(*wxWHITE);
+    SetBackgroundColour(*wxBLACK);
     // SetCursor(wxCursor(wxCURSOR_PENCIL));
 
     // SetScrollbars(20, 20, 50, 50);
 
     m_dirty = false;
+
+	Connect(wxEVT_SIZE,wxSizeEventHandler(MyCanvas::OnResize));
 }
 
 // Define the repainting behaviour

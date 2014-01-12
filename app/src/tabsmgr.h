@@ -29,14 +29,18 @@ private:
     // wxDECLARE_NO_COPY_CLASS(EventHandler);
 };
 
-class MyChild : public wxMDIChildFrame
+// class MyChild : public wxMDIChildFrame
+class MyChild : public wxPanel
 {
 public:
-  MyChild(wxMDIParentFrame *parent);
+  // MyChild(wxMDIParentFrame *parent);
+  MyChild(wxFrame *parent);
   virtual ~MyChild();
 
   // unsigned int GetChildrenCount() { return ms_numChildren; }
   unsigned int ms_numChildren;
+  int LoadFile(wxString fname);
+  wxBitmap * pixmap;
 
 private:
   void OnActivate(wxActivateEvent& event);

@@ -48,6 +48,25 @@ enum{CV_8U=1,CV_8S,CV_16S,CV_32S,CV_32F,CV_64F};
 #define CVAPI(rettype) rettype
 
 CV_INLINE
+int cvRound(double x)
+{
+  return round(x);
+}
+
+CV_INLINE
+int cvFloor(double x)
+{
+  return floor(x);
+}
+
+CV_INLINE
+int cvCeil(double x)
+{
+  return ceil(x);
+}
+
+
+CV_INLINE
 CvMat * cvCreateMat(int rows, int cols, int type)
 {
   assert((rows>0)&&(cols>0)&&(type>0));

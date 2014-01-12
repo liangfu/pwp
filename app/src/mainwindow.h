@@ -22,7 +22,7 @@ public:
 
   wxMenuBar * CreateMainMenubar();
 
-  int m_numtabs;
+  // int m_numtabs;
   MyChild * m_pTabs;
 
 private:

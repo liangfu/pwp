@@ -63,8 +63,8 @@ enum
 
 // Define my frame constructor
 MyFrame::MyFrame():
-  wxMDIParentFrame(NULL, wxID_ANY, "CompVis Demo", // wxDefaultPosition
-				   wxPoint(200,200), wxSize(640,480))
+  // wxMDIParentFrame(NULL, wxID_ANY, "CompVis Demo", wxPoint(200,200), wxSize(640,480))
+  wxMDIParentFrame(NULL, wxID_ANY, "CompVis Demo")
 {
   SetIcon(wxICON(sample));
 
@@ -75,7 +75,8 @@ MyFrame::MyFrame():
 
   // This shows that the standard window menu may be customized:
 
-  CreateStatusBar();
+  wxStatusBar * statusbar = CreateStatusBar();
+  statusbar->SetStatusText("Welcome to CompVis !");
 
   // m_textWindow = new wxTextCtrl(this, wxID_ANY, "A help window",
   // 								wxDefaultPosition, wxDefaultSize,
@@ -84,6 +85,15 @@ MyFrame::MyFrame():
   // CreateToolBar(wxNO_BORDER | wxTB_FLAT | wxTB_HORIZONTAL);
   CreateToolBar(wxTB_HORIZONTAL|wxTB_HORZ_TEXT);
   InitToolBar(GetToolBar());
+
+  m_pTabs = new MyChild(this);
+  wxBoxSizer * sizer=new wxBoxSizer(wxHORIZONTAL);
+  sizer->Add(m_pTabs,1,wxEXPAND);
+  //m_pTabs->AddSizer(sizer);
+  sizer->SetSizeHints(this);
+  SetSizer(sizer);
+  
+  m_pTabs->Show(true);
 
   // connect it only now, after creating m_textWindow
   Connect(wxEVT_SIZE, wxSizeEventHandler(MyFrame::OnSize));
@@ -110,8 +120,9 @@ wxMenuBar *MyFrame::CreateMainMenubar()
   menuFile->Append(wxID_EXIT, "&Exit\tCtrl-Q", "Quit the program");
   wxMenu *menuEdit = new wxMenu;
   menuEdit->Append(wxID_UNDO, "&Undo\tCtrl-Z", "Undo previous operation");
+  menuEdit->Append(wxID_REDO, "&Redo\tCtrl-Shift-Z", "Redo canceled operation");
   wxMenu *menuView = new wxMenu;
-  menuView->Append(0xff, "&Toolbar", "Display toolbar");
+  menuView->Append(wxID_ANY, "&Toolbar", "Display toolbar");
   wxMenu *menuHelp = new wxMenu;
   menuHelp->Append(wxID_ABOUT, "&About\tF1");
 
@@ -139,7 +150,8 @@ void MyFrame::OnOpen(wxCommandEvent& event)
   {
 	wxString currpath = OpenDialog->GetPath();
 	// Sets our current document to the file the user selected
-	// MainEditBox->LoadFile(currpath); 
+	// MainEditBox->LoadFile(currpath);
+	m_pTabs->LoadFile(currpath);
 	SetTitle(wxString("Edit - ") << OpenDialog->GetFilename()); 
   }
 
@@ -262,9 +274,7 @@ void MyFrame::InitToolBar(wxToolBar* toolBar)
 
   toolBar->Realize();
 
-  MyChild * subframe0 = new MyChild(this);
-  subframe0->Show(true);
-  MyChild * subframe1 = new MyChild(this);
-  subframe1->Show(true);
+  // MyChild * subframe1 = new MyChild(this);
+  // subframe1->Show(true);
 }
 

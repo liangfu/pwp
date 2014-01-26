@@ -341,7 +341,11 @@ public:
   void display(QString fname)
   {
 	const char * tmp=fname.toAscii();
-	cvLoadSurface(tmp,&m_verts,&m_faces);
+	if (!cvLoadSurface(tmp,&m_verts,&m_faces)){
+	  QMessageBox::warning(this,"Load surface error",
+						   QString("fail to load surface file %1").arg(fname));
+	  return;
+	}
 	initialize();
   }
 

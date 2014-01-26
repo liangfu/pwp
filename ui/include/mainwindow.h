@@ -151,6 +151,22 @@ private slots:
 	}
   }
 
+  void on_actionFirst_triggered()
+  {
+	if (graphicsView){
+	  graphicsView->first();
+	  setWindowTitle(graphicsView->currentFileName());
+	}
+  }
+  
+  void on_actionLast_triggered()
+  {
+	if (graphicsView){
+	  graphicsView->last();
+	  setWindowTitle(graphicsView->currentFileName());
+	}
+  }
+  
   void on_actionPrevious_triggered()
   {
 	if (graphicsView){
@@ -167,13 +183,22 @@ private slots:
 	}
   }
   
+  void on_actionZoomIn_triggered()
+  {
+	if (graphicsView){ graphicsView->zoomIn(); }
+  }
+  void on_actionZoomOut_triggered()
+  {
+	if (graphicsView){ graphicsView->zoomOut(); }
+  }
+  
   void on_actionAbout_triggered()
   {
 	QMessageBox::about(this, tr("About CompVis"),
 					   tr("<b>CompVis</b> is an application designed for "
 						  "vision-base media content manipulations."));
   }
-  
+
 public:
   MainWindow(QWidget * parent=0):
 	QMainWindow(parent),m_initialized(0),graphicsView(NULL),glcanvas(NULL)

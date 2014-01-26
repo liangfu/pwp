@@ -20,6 +20,164 @@ void glDrawWiredCube();
 
 class MeshViewer : public QGLWidget
 {
+  int m_shading;
+  int m_picking;
+  int m_width;
+  int m_height;
+
+  CvMat * m_verts;
+  CvMat * m_faces;
+  CvMat * m_norms;
+  CvMat * m_color;
+
+  float m_size[3];
+  float m_center[3];
+  float m_transform[16];
+  float m_angle[3];
+  
+  void initialize()
+  {
+	int i;
+	m_color=cvCreateMat(m_faces->rows,m_faces->cols,CV_32F);
+	{
+	  float color[3]={.3f,0.3f,0.f};
+	  for (i=0;i<m_faces->rows;i++){memcpy(m_color->data.fl+3*i,color,sizeof(float)*3);}
+	}
+
+	float minval[3],maxval[3];
+	for (i=0;i<3;i++){minval[i]=maxval[i]=m_verts->data.fl[i];}
+	for (i=0;i<m_verts->rows;i++){
+	  minval[0]=MIN(minval[0],(m_verts->data.fl+3*i)[0]);
+	  maxval[0]=MAX(maxval[0],(m_verts->data.fl+3*i)[0]);
+	  minval[1]=MIN(minval[1],(m_verts->data.fl+3*i)[1]);
+	  maxval[1]=MAX(maxval[1],(m_verts->data.fl+3*i)[1]);
+	  minval[2]=MIN(minval[2],(m_verts->data.fl+3*i)[2]);
+	  maxval[2]=MAX(maxval[2],(m_verts->data.fl+3*i)[2]);
+	}
+
+	float size[3]={maxval[0]-minval[0],maxval[1]-minval[1],maxval[2]-minval[2]};
+	float center[3]={(maxval[0]+minval[0])*.5,(maxval[1]+minval[1])*.5,(maxval[2]+minval[2])*.5};
+	float transform[16]={
+	  size[0],0,0,center[0],
+	  0,size[1],0,center[1],
+	  0,0,size[2],center[2],
+	  0,0,0,1
+	};
+
+	memcpy(m_size,size,sizeof(size));
+	memcpy(m_center,center,sizeof(center));
+	memcpy(m_transform,transform,sizeof(transform));
+	memset(m_angle,0,sizeof(m_angle));
+
+	compute_normal();
+  }
+
+  void drawObject()
+  {
+	if (!m_picking){
+	  if (m_shading==CV_SHADING_FLAT){
+		drawObject_flat();
+	  }else{
+		drawObject_smooth();
+		drawObject_smooth_fast();
+	  }
+	}else{
+	  drawObject_pick();
+	}
+  }
+
+  void drawObject_flat()
+  {
+	int i;
+	int vstep=m_verts->cols;
+	float * vptr=m_verts->data.fl;
+	int fstep=m_faces->cols;
+	int * fptr=m_faces->data.i;
+	float * nptr=m_norms->data.fl;
+	int nstep=m_norms->cols;
+	float * cptr=m_color->data.fl;
+	glBegin(GL_TRIANGLES);
+	for (i=0;i<m_faces->rows;i++){
+	  int * f=fptr+fstep*i;
+	  glColor3fv(cptr+i*3);
+	  glNormal3fv(nptr+nstep*i);
+	  glVertex3fv(vptr+vstep*f[0]);
+	  glVertex3fv(vptr+vstep*f[1]);
+	  glVertex3fv(vptr+vstep*f[2]);
+	}
+	glEnd();
+  }
+
+  void drawObject_smooth()
+  {
+	int i;
+	int vstep=m_verts->cols;
+	float * vptr=m_verts->data.fl;
+	int fstep=m_faces->cols;
+	int * fptr=m_faces->data.i;
+	float * nptr=m_norms->data.fl;
+	int nstep=m_norms->cols;
+	float * cptr=m_color->data.fl;
+	glBegin(GL_TRIANGLES);
+	for (i=0;i<m_faces->rows;i++){
+	  int * f=fptr+fstep*i;
+	  glColor3fv(cptr+i*3);
+	  glNormal3fv(nptr+nstep*f[0]);
+	  glVertex3fv(vptr+vstep*f[0]);
+	  glNormal3fv(nptr+nstep*f[1]);
+	  glVertex3fv(vptr+vstep*f[1]);
+	  glNormal3fv(nptr+nstep*f[2]);
+	  glVertex3fv(vptr+vstep*f[2]);
+	}
+	glEnd();
+  }
+
+  void drawObject_smooth_fast()
+  {
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, m_verts->data.ptr);
+	glNormalPointer   (GL_FLOAT, 0, m_norms->data.ptr);
+	glColorPointer (3, GL_FLOAT, 0, m_color->data.ptr);
+	glDrawElements(GL_TRIANGLES,m_faces->rows*3,GL_UNSIGNED_INT,m_faces->data.ptr);
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
+  }
+
+  void drawObject_pick()
+  {
+	int i;
+	int vstep=m_verts->cols;
+	float * vptr=m_verts->data.fl;
+	int fstep=m_faces->cols;
+	int * fptr=m_faces->data.i;
+	float * nptr=m_norms->data.fl;
+	int nstep=m_norms->cols;
+	glBegin(GL_TRIANGLES);
+	for (i=0;i<m_faces->rows;i++){
+	  int * f=fptr+fstep*i;
+	  glColor3ub(((i<<1)&0xff0000)>>16,((i<<1)&0xff00)>>8,((i<<1)&0xff));
+	  glVertex3fv(vptr+vstep*f[0]);
+	  glVertex3fv(vptr+vstep*f[1]);
+	  glVertex3fv(vptr+vstep*f[2]);
+	}
+	glEnd();
+  }
+  
+  void compute_normal()
+  {
+	if (m_norms){cvReleaseMat(&m_norms);m_norms=NULL;}
+	if (m_shading==CV_SHADING_FLAT){
+	  m_norms=cvCreateMat(m_faces->rows,3,CV_32F);
+	  cvCalcSurfaceNormal(m_verts,m_faces,m_norms,CV_SHADING_FLAT);
+	}else if (m_shading==CV_SHADING_SMOOTH){
+	  m_norms=cvCreateMat(m_verts->rows,3,CV_32F);
+	  cvCalcSurfaceNormal(m_verts,m_faces,m_norms,CV_SHADING_SMOOTH);
+	}else{assert(false);}
+  }
+  
 protected:
   void initializeGL()
   {
@@ -102,117 +260,66 @@ protected:
 	glPopMatrix();
   }
 
-  void drawObject(){
-	if (!m_picking){
-	  if (m_shading==CV_SHADING_FLAT){
-		drawObject_flat();
-	  }else{
-		drawObject_smooth();
-		drawObject_smooth_fast();
-	  }
-	}else{
-	  drawObject_pick();
-	}
-  }
-  void drawObject_flat(){
-	int i;
-	int vstep=m_verts->cols;
-	float * vptr=m_verts->data.fl;
-	int fstep=m_faces->cols;
-	int * fptr=m_faces->data.i;
-	float * nptr=m_norms->data.fl;
-	int nstep=m_norms->cols;
-	float * cptr=m_color->data.fl;
-	glBegin(GL_TRIANGLES);
-	for (i=0;i<m_faces->rows;i++){
-	  int * f=fptr+fstep*i;
-	  glColor3fv(cptr+i*3);
-	  glNormal3fv(nptr+nstep*i);
-	  glVertex3fv(vptr+vstep*f[0]);
-	  glVertex3fv(vptr+vstep*f[1]);
-	  glVertex3fv(vptr+vstep*f[2]);
-	}
-	glEnd();
-  }
-  void drawObject_smooth(){
-	int i;
-	int vstep=m_verts->cols;
-	float * vptr=m_verts->data.fl;
-	int fstep=m_faces->cols;
-	int * fptr=m_faces->data.i;
-	float * nptr=m_norms->data.fl;
-	int nstep=m_norms->cols;
-	float * cptr=m_color->data.fl;
-	glBegin(GL_TRIANGLES);
-	for (i=0;i<m_faces->rows;i++){
-	  int * f=fptr+fstep*i;
-	  glColor3fv(cptr+i*3);
-	  glNormal3fv(nptr+nstep*f[0]);
-	  glVertex3fv(vptr+vstep*f[0]);
-	  glNormal3fv(nptr+nstep*f[1]);
-	  glVertex3fv(vptr+vstep*f[1]);
-	  glNormal3fv(nptr+nstep*f[2]);
-	  glVertex3fv(vptr+vstep*f[2]);
-	}
-	glEnd();
-  }
-  void drawObject_smooth_fast(){
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_NORMAL_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, m_verts->data.ptr);
-	glNormalPointer   (GL_FLOAT, 0, m_norms->data.ptr);
-	glColorPointer (3, GL_FLOAT, 0, m_color->data.ptr);
-	glDrawElements(GL_TRIANGLES,m_faces->rows*3,GL_UNSIGNED_INT,m_faces->data.ptr);
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glDisableClientState(GL_NORMAL_ARRAY);
-	glDisableClientState(GL_COLOR_ARRAY);
-  }
-  void drawObject_pick(){
-	int i;
-	int vstep=m_verts->cols;
-	float * vptr=m_verts->data.fl;
-	int fstep=m_faces->cols;
-	int * fptr=m_faces->data.i;
-	float * nptr=m_norms->data.fl;
-	int nstep=m_norms->cols;
-	glBegin(GL_TRIANGLES);
-	for (i=0;i<m_faces->rows;i++){
-	  int * f=fptr+fstep*i;
-	  glColor3ub(((i<<1)&0xff0000)>>16,((i<<1)&0xff00)>>8,((i<<1)&0xff));
-	  glVertex3fv(vptr+vstep*f[0]);
-	  glVertex3fv(vptr+vstep*f[1]);
-	  glVertex3fv(vptr+vstep*f[2]);
-	}
-	glEnd();
-  }
-  
-  void compute_normal()
+  void resizeEvent(QResizeEvent *event)
   {
-	if (m_norms){cvReleaseMat(&m_norms);m_norms=NULL;}
-	if (m_shading==CV_SHADING_FLAT){
-	  m_norms=cvCreateMat(m_faces->rows,3,CV_32F);
-	  cvCalcSurfaceNormal(m_verts,m_faces,m_norms,CV_SHADING_FLAT);
-	}else if (m_shading==CV_SHADING_SMOOTH){
-	  m_norms=cvCreateMat(m_verts->rows,3,CV_32F);
-	  cvCalcSurfaceNormal(m_verts,m_faces,m_norms,CV_SHADING_SMOOTH);
-	}else{assert(false);}
+	// if (width() > image.width() || height() > image.height()) {
+	//   int newWidth = qMax(width() + 128, image.width());
+	//   int newHeight = qMax(height() + 128, image.height());
+	//   resizeImage(&image, QSize(newWidth, newHeight));
+	//   update();
+	// }
+	QGLWidget::resizeEvent(event);
   }
 
-  int m_shading;
-  int m_picking;
-  int m_width;
-  int m_height;
+  struct MouseEventHandler{
+	float x_orig;
+	float x_curr;
+	float y_orig;
+	float y_curr;
+	float x_old;
+	float y_old;
+	int dragging;
+	MouseEventHandler():
+	  x_orig(-1),x_curr(0),y_orig(-1),y_curr(0),x_old(-1),y_old(-1),dragging(0){}
+  } m_mouseEvtHandler;
 
-  CvMat * m_verts;
-  CvMat * m_faces;
-  CvMat * m_norms;
-  CvMat * m_color;
+  void mousePressEvent(QMouseEvent * evt)
+  {
+	if (evt->button() == Qt::LeftButton) {
+	  m_mouseEvtHandler.x_orig=evt->x();
+	  m_mouseEvtHandler.y_orig=evt->y();
+	  m_mouseEvtHandler.x_old=m_angle[1];
+	  m_mouseEvtHandler.y_old=m_angle[0];
+	  m_mouseEvtHandler.dragging=1;
+	}
+	updateGL();
+  }
 
-  float m_size[3];
-  float m_center[3];
-  float m_transform[16];
-  float m_angle[3];
+  void mouseMoveEvent(QMouseEvent * evt)
+  {
+	// if ((evt->button() == Qt::LeftButton) && m_mouseEvtHandler.dragging){
+	if ((evt->buttons() & Qt::LeftButton) && m_mouseEvtHandler.dragging){
+	  m_mouseEvtHandler.x_curr=m_mouseEvtHandler.x_orig-evt->x();
+	  m_angle[1]=m_mouseEvtHandler.x_old-m_mouseEvtHandler.x_curr*.1;
+	  m_mouseEvtHandler.y_curr=m_mouseEvtHandler.y_orig-evt->y();
+	  m_angle[0]=m_mouseEvtHandler.y_old-m_mouseEvtHandler.y_curr*.1;
+	}
+	updateGL();
+  }
+
+  void mouseReleaseEvent(QMouseEvent * evt)
+  {
+	if ((evt->button() == Qt::LeftButton) && m_mouseEvtHandler.dragging){
+	  m_mouseEvtHandler.dragging=0;
+	}
+  }
+
+  void wheelEvent(QWheelEvent * evt)
+  {
+	m_angle[2]=m_angle[2]+float(evt->delta())*.002;
+	updateGL();
+	evt->accept();
+  }
 
 public:
   MeshViewer(QWidget * parent):
@@ -224,57 +331,18 @@ public:
 	m_height=parent->height()-4;
   }
 
-  void display(QString fname)
-  {
-	const char * tmp=fname.toAscii();
-	cvLoadSurface(tmp,&m_verts,&m_faces);
-	initialize();
-  }
-
-  void initialize()
-  {
-	int i;
-	m_color=cvCreateMat(m_faces->rows,m_faces->cols,CV_32F);
-	{
-	  float color[3]={.3f,0.3f,0.f};
-	  for (i=0;i<m_faces->rows;i++){memcpy(m_color->data.fl+3*i,color,sizeof(float)*3);}
-	}
-
-	float min[3],max[3];
-	for (i=0;i<3;i++){min[i]=max[i]=m_verts->data.fl[i];}
-	for (i=0;i<m_verts->rows;i++){
-	  min[0]=MIN(min[0],(m_verts->data.fl+3*i)[0]);
-	  max[0]=MAX(max[0],(m_verts->data.fl+3*i)[0]);
-	  min[1]=MIN(min[1],(m_verts->data.fl+3*i)[1]);
-	  max[1]=MAX(max[1],(m_verts->data.fl+3*i)[1]);
-	  min[2]=MIN(min[2],(m_verts->data.fl+3*i)[2]);
-	  max[2]=MAX(max[2],(m_verts->data.fl+3*i)[2]);
-	}
-
-	float size[3]={max[0]-min[0],max[1]-min[1],max[2]-min[2]};
-	float center[3]={(max[0]+min[0])*.5,(max[1]+min[1])*.5,(max[2]+min[2])*.5};
-	float transform[16]={
-	  size[0],0,0,center[0],
-	  0,size[1],0,center[1],
-	  0,0,size[2],center[2],
-	  0,0,0,1
-	};
-	// LOGI("size: %.1f,%.1f,%.1f",size[0],size[1],size[2]);
-	// LOGI("center: %.1f,%.1f,%.1f",center[0],center[1],center[2]);
-
-	memcpy(m_size,size,sizeof(size));
-	memcpy(m_center,center,sizeof(center));
-	memcpy(m_transform,transform,sizeof(transform));
-	memset(m_angle,0,sizeof(m_angle));
-
-	compute_normal();
-  }
-
   ~MeshViewer()
   {
 	if (m_verts){cvReleaseMat(&m_verts);m_verts=0;}
 	if (m_faces){cvReleaseMat(&m_faces);m_faces=0;}
 	if (m_norms){cvReleaseMat(&m_norms);m_norms=0;}
+  }
+  
+  void display(QString fname)
+  {
+	const char * tmp=fname.toAscii();
+	cvLoadSurface(tmp,&m_verts,&m_faces);
+	initialize();
   }
 };
 

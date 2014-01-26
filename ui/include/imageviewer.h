@@ -33,7 +33,13 @@ public:
 
   void display(QString fname)
   {
+	// const char * fnamestr=fname.toAscii();
+	// fprintf(stderr,"%s\n",fnamestr);
 	QImage img(fname);
+	if (img.isNull()){
+	  QMessageBox::warning(this,"File missing",QString("File %1 doesn't exist!").arg(fname));
+	  return;
+	}
 	QImage scaled;
 	int sw = scrollArea->sceneRect().width();
 	int sh = scrollArea->sceneRect().height();

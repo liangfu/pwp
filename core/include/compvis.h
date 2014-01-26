@@ -178,7 +178,7 @@ void normalize(float v[3]);
 void ncrossprod(float v1[3], float v2[3], float cp[3]);
 void triagnormal(float v1[3], float v2[3], float v3[3], float norm[3]);
 void cvCalcSurfaceNormal(CvMat * verts, CvMat * faces, CvMat * norms);
-void cvLoadSurface(const char * fn, CvMat ** verts, CvMat ** faces);
+int cvLoadSurface(const char * fn, CvMat ** verts, CvMat ** faces);
 
 //-------------------------------------------------------
 // implementations
@@ -316,12 +316,14 @@ void cvCalcSurfaceNormal_smooth(CvMat * verts, CvMat * faces, CvMat * norms)
 }
 
 CV_INLINE
-void cvLoadSurface(const char * fn, CvMat ** verts, CvMat ** faces)
+int cvLoadSurface(const char * fn, CvMat ** verts, CvMat ** faces)
 {
   static const int MAXLEN=1024;
-  if (strcmp(fn+strlen(fn)-4,".obj")){fprintf(stderr,"ERROR: not wavefont .OBJ file\n",fn);}
+  if (strcmp(fn+strlen(fn)-4,".obj")){
+	fprintf(stderr,"ERROR: not wavefont .OBJ file\n",fn);return 0;
+  }
   FILE * fp = fopen(fn,"rt");
-  if (!fp){fprintf(stderr,"ERROR: file '%s' not exist!\n",fn);}
+  if (!fp){fprintf(stderr,"ERROR: file '%s' not exist!\n",fn);return 0;}
   char line[MAXLEN];
 
   int nverts=0,nfaces=0;
@@ -344,6 +346,7 @@ void cvLoadSurface(const char * fn, CvMat ** verts, CvMat ** faces)
   float v[3];
   int f[3];
   fp = fopen(fn,"rt");
+  if (!fp){fprintf(stderr,"ERROR: file '%s' not exist!\n",fn);return 0;}
   while(1)
   {
 	fgets(line,MAXLEN,fp);
@@ -360,11 +363,15 @@ void cvLoadSurface(const char * fn, CvMat ** verts, CvMat ** faces)
 	  for (i=0;i<3;i++){f[i]-=1;}
 	  memcpy((*faces)->data.i+3*fiter,f,sizeof(f));
 	  fiter++;
+	}else if (line[0]=='\n'){
 	}else{
 	  assert(false);
 	}
   }
+  assert(viter==nverts);
+  assert(fiter==nfaces); // ensure all vertices and faces data are collected
   fclose(fp);
+  return 1;
 }
 
 CVAPI(int) cvGetFileSuffix(const char * fullname, char * suffix);

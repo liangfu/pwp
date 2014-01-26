@@ -30,6 +30,25 @@ public:
   // Worker * m_pDataWorker;
   static const int DisplayMode_IMAGE=1;
   static const int DisplayMode_MESH=2;
+
+  void openFile(QString fname)
+  {
+	if (!fname.isEmpty())
+	{
+	  const char * suffix=QFileInfo(fname).suffix().toAscii();
+	  if ((!strcmp(suffix,"jpg"))||(!strcmp(suffix,"png"))){
+		displayImage(fname);
+	  }else if (!strcmp(suffix,"txt")){
+	  }else if (!strcmp(suffix,"xml")){
+	  }else if ((!strcmp(suffix,"avi"))||(!strcmp(suffix,"mp4"))){
+	  }else if (!strcmp(suffix,"obj")){
+		displayMesh(fname);
+	  }else if (!strcmp(suffix,"rawiv")){
+	  }else{
+		assert(false);
+	  }
+	}
+  }
   
 private:
   int m_mode;
@@ -38,8 +57,9 @@ private:
   
   int m_initialized;
   int initialized(){return m_initialized;}
-  int initialize(int mode)
+  void initialize(int mode)
   {
+	removeAllWidgets();
 	if (mode==DisplayMode_IMAGE){
 	  if (!graphicsView){graphicsView = new ImageViewer(widget);}
 	  graphicsView->setObjectName(QString::fromUtf8("graphicsView"));
@@ -51,20 +71,28 @@ private:
 	}else{assert(false);}
 	m_initialized=1;
   }
+  void removeAllWidgets()
+  {
+	if (graphicsView){
+	  gridLayout->removeWidget(graphicsView);
+	  delete graphicsView;
+	  graphicsView=NULL;
+	}
+	if (glcanvas){
+	  gridLayout->removeWidget(glcanvas);
+	  delete glcanvas;
+	  glcanvas=NULL;
+	}
+  }
 
   void displayImage(QString fname)
   {
-	// QImage img(fname);
-	// graphicsView->displayImage(img);
 	initialize(MainWindow::DisplayMode_IMAGE);
 	graphicsView->display(fname);
   }
 
   void displayMesh(QString fname)
   {
-	// CvMat * verts = 0;
-	// CvMat * faces = 0;
-	// icvLoadSurface(fname.toAscii(),verts,faces);
 	initialize(MainWindow::DisplayMode_MESH);
 	glcanvas->display(fname);
   }
@@ -72,32 +100,14 @@ private:
 private slots:
   void on_actionOpen_triggered()
   {
-	QString fileName =
+	QString fname =
 	  QFileDialog::getOpenFileName(this,"select file",".",
 								   "Images files [*.png,*.jpg] (*.png *.xpm *.jpg);;"
 								   "Text files [*.txt] (*.txt);;"
 								   "Video files [*.avi,*.mp4] (*.avi,*.mp4);;"
 								   "Mesh files [*.obj] (*.obj);;"
 								   "Volume data [*.rawiv] (*.rawiv)");
-	if (!fileName.isEmpty())
-	{
-	  const char * suffix=QFileInfo(fileName).suffix().toAscii();
-	  if ((!strcmp(suffix,"jpg"))||(!strcmp(suffix,"png"))){
-		displayImage(fileName);
-	  }else if (!strcmp(suffix,"txt")){
-		
-	  }else if (!strcmp(suffix,"xml")){
-		
-	  }else if ((!strcmp(suffix,"avi"))||(!strcmp(suffix,"mp4"))){
-		
-	  }else if (!strcmp(suffix,"obj")){
-		displayMesh(fileName);
-	  }else if (!strcmp(suffix,"rawiv")){
-		
-	  }else{
-		assert(false);
-	  }
-	}
+	openFile(fname);
   }
   
   void on_actionToolbar_toggled()

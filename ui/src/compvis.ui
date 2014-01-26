@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="../res/res.qrc">
-    <normaloff>:/icon/qt.png</normaloff>:/icon/qt.png</iconset>
+    <normaloff>:/icon/appicon.png</normaloff>:/icon/appicon.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -30,7 +30,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>18</height>
+     <height>29</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

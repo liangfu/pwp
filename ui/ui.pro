@@ -15,7 +15,7 @@ CONFIG += debug warn_on
 QT += opengl
 unix:LIBS += -lGLU
 win32:LIBS += -lGLU32
-#win32:RC_FILE = res/appicon.rc
+win32:RC_FILE = res/appicon.rc
 
 # Input
 FORMS += src/compvis.ui

@@ -51,7 +51,8 @@ class ImageViewer : public QGraphicsView
 	m_pItem->setPixmap(QPixmap::fromImage(scaled));
 	m_pItem->setPos(xpos,ypos);
   }
-  
+
+  // for zoom-out and zoom-in
   void repaint(double scale)
   {
 	QImage scaled=m_currimg.scaledToWidth(m_currimg_scaled.width()*scale);
@@ -59,6 +60,13 @@ class ImageViewer : public QGraphicsView
 	int sh = m_pScene->sceneRect().height();
 	int w = scaled.width();
 	int h = scaled.height();
+	if ((w>sw)||(h>sh)){
+	  m_pScene->setSceneRect(0,0,w,h);
+	}else{
+	  m_pScene->setSceneRect(0,0,width()-4,height()-4);
+	}
+	sw = m_pScene->sceneRect().width();
+	sh = m_pScene->sceneRect().height();
 	int xpos=0;
 	int ypos=0;
 	xpos=(sw-w)*.5;

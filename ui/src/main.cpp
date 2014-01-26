@@ -8,6 +8,10 @@
  * 
  */
 
+#ifdef WIN32
+#pragma comment(linker,"/SUBSYSTEM:CONSOLE")
+#endif 
+
 #include "mainwindow.h"
 #include <QApplication>
 

@@ -35,15 +35,18 @@ public:
   {
 	if (!fname.isEmpty())
 	{
-	  const char * suffix=QFileInfo(fname).suffix().toAscii();
-	  if ((!strcmp(suffix,"jpg"))||(!strcmp(suffix,"png"))){
+	  qDebug(fname.toAscii());
+	  char suffix[1024];
+	  cvGetFileSuffix(fname.toAscii(),suffix);
+	  //const char * suffix=QFileInfo(fname).suffix().toAscii();
+	  if ((!strncmp(suffix+1,"jpg",3))||(!strncmp(suffix+1,"png",3))){
 		displayImage(fname);
-	  }else if (!strcmp(suffix,"txt")){
-	  }else if (!strcmp(suffix,"xml")){
-	  }else if ((!strcmp(suffix,"avi"))||(!strcmp(suffix,"mp4"))){
-	  }else if (!strcmp(suffix,"obj")){
+	  }else if (!strncmp(suffix+1,"txt",3)){
+	  }else if (!strncmp(suffix+1,"xml",3)){
+	  }else if ((!strncmp(suffix+1,"avi",3))||(!strncmp(suffix+1,"mp4",3))){
+	  }else if (!strncmp(suffix+1,"obj",3)){
 		displayMesh(fname);
-	  }else if (!strcmp(suffix,"rawiv")){
+	  }else if (!strncmp(suffix+1,"rawiv",5)){
 	  }else{
 		assert(false);
 	  }

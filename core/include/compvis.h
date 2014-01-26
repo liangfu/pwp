@@ -50,7 +50,11 @@ enum{CV_8U=1,CV_8S,CV_16S,CV_32S,CV_32F,CV_64F};
 CV_INLINE
 int cvRound(double x)
 {
+#if __cplusplus>199711L
   return round(x);
+#else
+  return (int)((x<0)?(x-.5):(x+.5));
+#endif
 }
 
 CV_INLINE
@@ -159,9 +163,9 @@ void cvConvert(CvMat * src, CvMat * dst)
   assert(src->rows==dst->rows);
   assert(src->cols==dst->cols);
   if ((src->type==CV_64F)&&(dst->type==CV_32S)){
-	for (i=0;i<all;i++){dst->data.i[i]=round(src->data.db[i]);}
+	for (i=0;i<all;i++){dst->data.i[i]=cvRound(src->data.db[i]);}
   }else if ((src->type==CV_32F)&&(dst->type==CV_32S)){
-	for (i=0;i<all;i++){dst->data.i[i]=round(src->data.fl[i]);}
+	for (i=0;i<all;i++){dst->data.i[i]=cvRound(src->data.fl[i]);}
   }else if ((src->type==CV_64F)&&(dst->type==CV_32F)){
 	for (i=0;i<all;i++){dst->data.fl[i]=src->data.db[i];}
   }else if ((src->type==CV_32F)&&(dst->type==CV_64F)){
@@ -189,7 +193,7 @@ void cvAddS(CvMat * src, double val, CvMat * dst)
 {
   int i,nr=src->rows,nc=src->cols,type=CV_MAT_TYPE(src->type);
   int all=nr*nc;
-  int ival=round(val);
+  int ival=cvRound(val);
   assert(CV_MAT_TYPE(src->type)==CV_MAT_TYPE(dst->type));
   assert(src->rows==dst->rows);
   assert(src->cols==dst->cols);
@@ -374,7 +378,17 @@ int cvLoadSurface(const char * fn, CvMat ** verts, CvMat ** faces)
   return 1;
 }
 
-CVAPI(int) cvGetFileSuffix(const char * fullname, char * suffix);
+CV_INLINE
+int cvGetFileSuffix(const char * fullname, char * suffix)
+{
+  int i,retval;
+  int len=strlen(fullname);
+  for (i=len-1;i>0;i--){
+	if (fullname[i]=='.'){retval=i;break;}
+  }
+  strncpy(suffix,fullname+retval,len-retval);
+  return retval;
+}
 
 #if defined(__cplusplus)
 

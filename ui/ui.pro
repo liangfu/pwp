@@ -13,8 +13,8 @@ OBJECTS_DIR = .obj
 TARGET = bin/compvis
 CONFIG += debug warn_on
 QT += opengl
-LIBS += -lGLU
-
+unix:LIBS += -lGLU
+win32:LIBS += -lGLU32
 
 # Input
 FORMS += src/compvis.ui

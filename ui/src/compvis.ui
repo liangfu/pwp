@@ -10,6 +10,9 @@
     <height>600</height>
    </rect>
   </property>
+  <property name="acceptDrops">
+   <bool>true</bool>
+  </property>
   <property name="windowTitle">
    <string>CompVis - v0.1 beta</string>
   </property>
@@ -22,7 +25,7 @@
     <item row="0" column="0">
      <widget class="QWidget" name="widget" native="true">
       <property name="acceptDrops">
-       <bool>true</bool>
+       <bool>false</bool>
       </property>
      </widget>
     </item>
@@ -34,7 +37,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>29</height>
+     <height>18</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

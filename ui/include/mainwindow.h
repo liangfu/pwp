@@ -101,6 +101,7 @@ private:
 	glcanvas->display(fname);
   }
 
+protected:
   void dragEnterEvent(QDragEnterEvent *e)
   {
     if (e->mimeData()->hasUrls()) {
@@ -112,12 +113,13 @@ private:
   {
 	int i;
     for (i=0;i<e->mimeData()->urls().count();i++) {
-	  const QUrl &url=e->mimeData()->urls()[i];
-	  const QString &fileName = url.toLocalFile();
-	  qDebug() << "Dropped file:" << fileName;
+	  const QUrl url=e->mimeData()->urls()[i];
+	  const QString fname = url.toLocalFile();
+	  //fprintf(stderr,"Dropped file: %s",qPrintable(fname));
+	  openFile(fname);
 	}
   }
-					
+
 private slots:
   void on_actionOpen_triggered()
   {

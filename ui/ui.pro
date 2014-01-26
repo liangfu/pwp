@@ -21,4 +21,4 @@ win32:RC_FILE = res/appicon.rc
 FORMS += src/compvis.ui
 RESOURCES += res/res.qrc
 HEADERS += include/mainwindow.h include/vid_data.h include/imageviewer.h include/meshviewer.h
-SOURCES += src/main.cpp src/meshviewer.cpp
+SOURCES += src/main.cpp

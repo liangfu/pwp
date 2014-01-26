@@ -20,7 +20,11 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
-     <widget class="QWidget" name="widget" native="true"/>
+     <widget class="QWidget" name="widget" native="true">
+      <property name="acceptDrops">
+       <bool>true</bool>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -249,17 +253,6 @@
    </property>
    <property name="text">
     <string>Toolbar</string>
-   </property>
-  </action>
-  <action name="actionStatus_Bar">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Statusbar</string>
    </property>
   </action>
   <action name="actionStatusbar">

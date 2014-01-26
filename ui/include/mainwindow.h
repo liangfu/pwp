@@ -92,12 +92,30 @@ private:
   {
 	initialize(MainWindow::DisplayMode_IMAGE);
 	graphicsView->display(fname);
+	setWindowTitle(graphicsView->currentFileName());
   }
 
   void displayMesh(QString fname)
   {
 	initialize(MainWindow::DisplayMode_MESH);
 	glcanvas->display(fname);
+  }
+
+  void dragEnterEvent(QDragEnterEvent *e)
+  {
+    if (e->mimeData()->hasUrls()) {
+	  e->acceptProposedAction();
+	}
+  }
+
+  void dropEvent(QDropEvent *e)
+  {
+	int i;
+    for (i=0;i<e->mimeData()->urls().count();i++) {
+	  const QUrl &url=e->mimeData()->urls()[i];
+	  const QString &fileName = url.toLocalFile();
+	  qDebug() << "Dropped file:" << fileName;
+	}
   }
 					
 private slots:
@@ -128,6 +146,22 @@ private slots:
 	  statusbar->show();
 	}else{
 	  statusbar->hide();
+	}
+  }
+
+  void on_actionPrevious_triggered()
+  {
+	if (graphicsView){
+	  graphicsView->previous();
+	  setWindowTitle(graphicsView->currentFileName());
+	}
+  }
+  
+  void on_actionNext_triggered()
+  {
+	if (graphicsView){
+	  graphicsView->next();
+	  setWindowTitle(graphicsView->currentFileName());
 	}
   }
   

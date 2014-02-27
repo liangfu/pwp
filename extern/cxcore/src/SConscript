@@ -1,0 +1,48 @@
+import os
+
+print os.getcwd()
+# source_list = map(lambda x:'src/'+x,os.listdir('src'))
+# source_list = os.listdir('.')
+source_dir = '.'
+# print os.listdir(source_dir)
+source_list = os.listdir(source_dir)
+source_list = filter(lambda x:(x[len(x)-4:]=='.cpp'), source_list)
+# header_list = os.listdir('include')
+header_dir = '../include'
+# print os.listdir(header_dir)
+header_list = os.listdir(header_dir)
+header_list = filter(lambda x:(x[len(x)-2:]=='.h' or
+                               x[len(x)-4:]=='.hpp'), header_list)
+header_list.append(filter(lambda x:(x[len(x)-2:]=='.h'), 
+                          os.listdir(source_dir)))
+
+# Import(['env','debug','win32'])
+env = Environment()
+
+env.Append(CPPPATH = ['.','/usr/include','include',
+                      '../../thirdparty/cxcore/include'])
+debug = ARGUMENTS.get('debug', 1)
+win32 = ARGUMENTS.get('win32', 0)
+if not int(win32):
+    if int(debug):
+        env.Append(CPPFLAGS = ['-g','-Werror'])
+        env.Append(OBJPREFIX = '.obj_debug/')
+    else:
+        env.Append(CPPFLAGS = ['-O2','-Werror'])
+        env.Append(OBJPREFIX = '.obj_release/')
+else:
+    env.Append(CPPFLAGS = ['-O2','-Werror'])
+    env.Append(OBJPREFIX = '.win32obj/')
+    
+if not int(win32):
+    env.Append(LIBPATH = ['/usr/lib'])
+    env.Append(RPATH = ['/usr/lib','.'])
+
+if int(debug):
+    env.SharedLibrary(target='cxcore_d', 
+                      source=source_list, header=header_list)
+else:
+    env.SharedLibrary(target='cxcore', 
+                      source=source_list, header=header_list)
+
+

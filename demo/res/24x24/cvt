@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+for i in $(ls *.png)
+do
+echo convert $i ${i:0:${#i}-4}.xpm
+convert $i ${i:0:${#i}-4}.xpm
+done
+
+./addconst.py .
+cp *.xpm ../bitmaps

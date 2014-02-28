@@ -19,165 +19,12 @@
 #include <memory.h>
 #include <ctype.h>
 
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include <sys/time.h>
-#endif
-
-typedef unsigned char uchar;
-
-typedef struct {
-  int type;
-  int cols;
-  int rows;
-  union{uchar * ptr;short * s;double * db;float * fl;int * i;}data;
-  int step;
-} CvMat;
-
-#ifdef __cplusplus
-#define CV_INLINE inline
-#else
-#define CV_INLINE static
-#endif
-enum{CV_8U=1,CV_8S,CV_16S,CV_32S,CV_32F,CV_64F};
-#define MIN(a,b) (((a)<(b))?(a):(b))
-#define MAX(a,b) (((a)>(b))?(a):(b))
-#define CV_PI 3.141592653589793
-#define CV_MAT_TYPE(t) ((t)&0xff)
-#define CVAPI(rettype) rettype
-
-CV_INLINE
-int cvRound(double x)
-{
-#if __cplusplus>199711L
-  return round(x);
-#else
-  return (int)((x<0)?(x-.5):(x+.5));
-#endif
-}
-
-CV_INLINE
-int cvFloor(double x)
-{
-  return floor(x);
-}
-
-CV_INLINE
-int cvCeil(double x)
-{
-  return ceil(x);
-}
-
-
-CV_INLINE
-CvMat * cvCreateMat(int rows, int cols, int type)
-{
-  assert((rows>0)&&(cols>0)&&(type>0));
-  CvMat * arr = (CvMat*)malloc(sizeof(CvMat));
-  arr->type=type;
-  arr->rows=rows;
-  arr->cols=cols;
-  if ((arr->type==CV_8U)||(arr->type==CV_8S)){
-	arr->data.ptr=(uchar*)malloc(rows*cols);
-	arr->step=cols;
-  }else if (arr->type==CV_16S){
-	arr->data.ptr=(uchar*)malloc(rows*cols*sizeof(short));
-	arr->step=cols*sizeof(short);
-  }else if (arr->type==CV_32S){
-	arr->data.ptr=(uchar*)malloc(rows*cols*sizeof(int));
-	memset(arr->data.ptr,0,rows*cols*sizeof(int));
-	arr->step=cols*sizeof(int);
-  }else if (arr->type==CV_32F){
-	arr->data.ptr=(uchar*)malloc(rows*cols*sizeof(float));
-	arr->step=cols*sizeof(float);
-  }else if (arr->type==CV_64F){
-	arr->data.ptr=(uchar*)malloc(rows*cols*sizeof(double));
-	arr->step=cols*sizeof(double);
-  }
-  return arr;
-}
-
-CV_INLINE
-CvMat cvMat(int rows, int cols, int type, void * ptr)
-{
-  assert((rows>0)&&(cols>0)&&(type>0));
-  CvMat arr;// = (CvMat*)malloc(sizeof(CvMat));
-  arr.type=type;
-  arr.rows=rows;
-  arr.cols=cols;
-  if ((arr.type==CV_8U)||(arr.type==CV_8S)){
-	arr.data.ptr=(uchar*)ptr;
-	arr.step=cols;
-  }else if (arr.type==CV_16S){
-	arr.data.ptr=(uchar*)ptr;
-	arr.step=cols*sizeof(short);
-  }else if (arr.type==CV_32S){
-	arr.data.ptr=(uchar*)ptr;
-	arr.step=cols*sizeof(int);
-  }else if (arr.type==CV_32F){
-	arr.data.ptr=(uchar*)ptr;
-	arr.step=cols*sizeof(float);
-  }else if (arr.type==CV_64F){
-	arr.data.ptr=(uchar*)ptr;
-	arr.step=cols*sizeof(double);
-  }
-  return arr;
-}
-
-CV_INLINE
-void cvReleaseMat(CvMat ** arr)
-{
-  if ((*arr)->data.ptr){free((*arr)->data.ptr);(*arr)->data.ptr=0;}
-  if (*arr){free(*arr);*arr=0;}
-}
-
-CV_INLINE
-CvMat * cvCloneMat(CvMat * src)
-{
-  CvMat * arr=cvCreateMat(src->rows,src->cols,src->type);
-  if ((arr->type==CV_8U)||(arr->type==CV_8S)){
-	memcpy(arr->data.ptr,src->data.ptr,src->rows*src->step);
-	arr->step=src->step;
-  }else if (arr->type==CV_16S){
-	memcpy(arr->data.ptr,src->data.ptr,src->rows*src->step);
-	arr->step=src->step;
-  }else if (arr->type==CV_32S){
-	memcpy(arr->data.ptr,src->data.ptr,src->rows*src->step);
-	arr->step=src->step;
-  }else if (arr->type==CV_32F){
-	memcpy(arr->data.ptr,src->data.ptr,src->rows*src->step);
-	arr->step=src->step;
-  }else if (arr->type==CV_64F){
-	memcpy(arr->data.ptr,src->data.ptr,src->rows*src->step);
-	arr->step=src->step;
-  }
-  return arr;
-}
-
-CV_INLINE
-void cvConvert(CvMat * src, CvMat * dst)
-{
-  int i,nr=src->rows,nc=src->cols;
-  int all=nr*nc;
-  assert(src->rows==dst->rows);
-  assert(src->cols==dst->cols);
-  if ((src->type==CV_64F)&&(dst->type==CV_32S)){
-	for (i=0;i<all;i++){dst->data.i[i]=cvRound(src->data.db[i]);}
-  }else if ((src->type==CV_32F)&&(dst->type==CV_32S)){
-	for (i=0;i<all;i++){dst->data.i[i]=cvRound(src->data.fl[i]);}
-  }else if ((src->type==CV_64F)&&(dst->type==CV_32F)){
-	for (i=0;i<all;i++){dst->data.fl[i]=src->data.db[i];}
-  }else if ((src->type==CV_32F)&&(dst->type==CV_64F)){
-	for (i=0;i<all;i++){dst->data.db[i]=src->data.fl[i];}
-  }else{assert(false);}
-}
+#include "cxcore.h"
 
 //-------------------------------------------------------
 // interfaces
 //-------------------------------------------------------
 
-void cvAddS(CvMat * src, double val, CvMat * dst);
 void normalize(float v[3]);
 void ncrossprod(float v1[3], float v2[3], float cp[3]);
 void triagnormal(float v1[3], float v2[3], float v3[3], float norm[3]);
@@ -187,24 +34,6 @@ int cvLoadSurface(const char * fn, CvMat ** verts, CvMat ** faces);
 //-------------------------------------------------------
 // implementations
 //-------------------------------------------------------
-
-CV_INLINE
-void cvAddS(CvMat * src, double val, CvMat * dst)
-{
-  int i,nr=src->rows,nc=src->cols,type=CV_MAT_TYPE(src->type);
-  int all=nr*nc;
-  int ival=cvRound(val);
-  assert(CV_MAT_TYPE(src->type)==CV_MAT_TYPE(dst->type));
-  assert(src->rows==dst->rows);
-  assert(src->cols==dst->cols);
-  switch(type){
-  case CV_8U:{for(i=0;i<all;i++){dst->data.ptr[i]=src->data.ptr[i]+ival;}break;}
-  case CV_32S:{for(i=0;i<all;i++){dst->data.i[i]=src->data.i[i]+ival;}break;}
-  case CV_32F:{for (i=0;i<all;i++){dst->data.fl[i]=src->data.fl[i]+val;}break;}
-  case CV_64F:{for (i=0;i<all;i++){dst->data.db[i]=src->data.db[i]+val;}break;}
-  default:{assert(false);}
-  }
-}
 
 // normalizes v
 CV_INLINE
@@ -389,62 +218,5 @@ int cvGetFileSuffix(const char * fullname, char * suffix)
   strncpy(suffix,fullname+retval,len-retval);
   return retval;
 }
-
-#if defined(__cplusplus)
-
-class CvTimer
-{
-public:
-  /// Constructor
-  void start()	
-  {
-#ifdef WIN32
-    QueryPerformanceFrequency(&m_CounterFrequency);
-    QueryPerformanceCounter(&m_LastCount);
-#else
-    gettimeofday(&m_LastCount, 0);
-#endif
-  }
-	
-  /// Resets timer (difference) to zero
-  inline void restart() 
-  {
-#ifdef WIN32
-    QueryPerformanceCounter(&m_LastCount);
-#else
-    gettimeofday(&m_LastCount, 0);
-#endif
-  }					
-	
-  /// Get elapsed time in milliseconds
-  float elapsed()
-  {
-    // Get the current count
-#ifdef WIN32
-    LARGE_INTEGER lCurrent;
-    QueryPerformanceCounter(&lCurrent);
-
-    return float((lCurrent.QuadPart - m_LastCount.QuadPart) /
-                 double(m_CounterFrequency.QuadPart))*1000.0f;
-#else
-    timeval lcurrent;
-    gettimeofday(&lcurrent, 0);
-    float fSeconds = float(lcurrent.tv_sec - m_LastCount.tv_sec)*1000.0f;
-    float fFraction =
-        float(lcurrent.tv_usec - m_LastCount.tv_usec) * 0.001f;
-    return fSeconds + fFraction;
-#endif
-  }	
-	
- protected:
-#ifdef WIN32
-  LARGE_INTEGER m_CounterFrequency;
-  LARGE_INTEGER m_LastCount;
-#else
-  timeval m_LastCount;
-#endif
-};
-
-#endif // defined(__cplusplus)
 
 #endif // __COMP_VIS_H__

@@ -5,11 +5,16 @@
 # Template
 win32:TEMPLATE = vcapp
 unix:TEMPLATE = app
-TARGET = ../bin/compvis
+TARGET = compvis
 
 # Dependency
 DEPENDPATH += . res src
-INCLUDEPATH += . src res include ../core/include
+INCLUDEPATH += . src res include ../include \
+               ../extern/cxcore/include \
+               ../extern/cv/include \
+               ../extern/highgui/include
+LIBS += -lcxcore -lcv -lhighgui -lcompvis -L../lib
+QMAKE_LFLAGS += -Wl,-rpath=../lib
 
 # Output
 UI_DIR = include
@@ -25,5 +30,5 @@ QT = core gui
 win32:RC_FILE = res/appicon.rc
 FORMS += src/compvis.ui
 RESOURCES += res/res.qrc
-HEADERS += include/mainwindow.h include/vid_data.h include/imageviewer.h 
+HEADERS += include/mainwindow.h include/canvas.h 
 SOURCES += src/main.cpp

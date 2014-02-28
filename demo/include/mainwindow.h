@@ -19,73 +19,73 @@
 //#include <QtOpenGL>
 
 #include "compvis.h"
-#include "imageviewer.h"
+#include "canvas.h"
+#include "highgui.h"
 // #include "meshviewer.h"
+#include "cvstageddetecthaar.h"
 
 class MainWindow : public QMainWindow,public Ui::MainWindow
 {
   Q_OBJECT
   
+private:
+  CvStagedDetectorHaar m_facedetector;
 public:
-  // Worker * m_pDataWorker;
-  static const int DisplayMode_IMAGE=1;
-  //static const int DisplayMode_MESH=2;
 
   void openFile(QString fname)
   {
-	if (!fname.isEmpty())
-	{
-	  qDebug(fname.toAscii());
-	  char suffix[1024];
-	  cvGetFileSuffix(fname.toAscii(),suffix);
-	  //const char * suffix=QFileInfo(fname).suffix().toAscii();
-	  if ((!strncmp(suffix+1,"jpg",3))||(!strncmp(suffix+1,"png",3))){
-		displayImage(fname);
-	  // }else if (!strncmp(suffix+1,"txt",3)){
-	  // }else if (!strncmp(suffix+1,"xml",3)){
-	  }else if ((!strncmp(suffix+1,"avi",3))||(!strncmp(suffix+1,"mp4",3))){
-	  // }else if (!strncmp(suffix+1,"obj",3)){
-	  // 	displayMesh(fname);
-	  // }else if (!strncmp(suffix+1,"rawiv",5)){
-	  }else{
-		assert(false);
-	  }
-	}
+  	if (!fname.isEmpty())
+  	{
+	  const char * fnamestr=fname.toAscii();
+  	  char suffix[1024];
+  	  cvGetFileSuffix(fnamestr,suffix);
+  	  if ((!strncmp(suffix+1,"jpg",3))||(!strncmp(suffix+1,"png",3))){
+  		// display image
+		test_facedetector_pic(fnamestr);
+		// IplImage * img = cvLoadImage(fnamestr,1);
+		// CvMat img_stub;
+		// CvMat * mat = cvGetMat(img,&img_stub);
+		// widget->display(mat);
+  	  }else if ((!strncmp(suffix+1,"avi",3))||(!strncmp(suffix+1,"mp4",3))){
+  	  }else{
+  		assert(false);
+  	  }
+  	}
   }
   
 private:
-  int m_mode;
-  ImageViewer * graphicsView;
-  //MeshViewer * glcanvas;
-  
   int m_initialized;
   int initialized(){return m_initialized;}
-  void initialize(int mode)
+  void initialize()
   {
-	removeAllWidgets();
-	if (mode==DisplayMode_IMAGE){
-	  if (!graphicsView){graphicsView = new ImageViewer(widget);}
-	  graphicsView->setObjectName(QString::fromUtf8("graphicsView"));
-	  gridLayout->addWidget(graphicsView, 0, 0, 1, 1);
-	}else{assert(false);}
 	m_initialized=1;
   }
-  void removeAllWidgets()
+
+  void test_facedetector_pic(const char * fname)
   {
-	if (graphicsView){
-	  gridLayout->removeWidget(graphicsView);
-	  delete graphicsView;
-	  graphicsView=NULL;
+	int i;
+	IplImage * img = cvLoadImage(fname,1);
+	if (!img){
+	  QMessageBox::warning(this, tr("Warning"),tr("Fail to load image file!"));
+	}else{
+	  CvMat * gray = cvCreateMat(img->height,img->width,CV_8U);
+	  cvCvtColor(img,gray,CV_BGR2GRAY);
+	  CvRect roiarr[50];
+	  int nfaces=m_facedetector.detect(gray,roiarr);
+	  CvMat img_stub;
+	  CvMat * mat = cvGetMat(img,&img_stub);
+	  for (i=0;i<nfaces;i++)
+	  {
+		cvRectangle(mat,
+					cvPoint(roiarr[i].x,roiarr[i].y),
+					cvPoint(roiarr[i].x+roiarr[i].width,
+							roiarr[i].y+roiarr[i].height),CV_RED,3);
+	  }
+	  widget->display(mat);
+	  cvReleaseMat(&gray);
 	}
   }
-
-  void displayImage(QString fname)
-  {
-	initialize(MainWindow::DisplayMode_IMAGE);
-	graphicsView->display(fname);
-	setWindowTitle(graphicsView->currentFileName());
-  }
-
+  
 protected:
   void dragEnterEvent(QDragEnterEvent *e)
   {
@@ -100,95 +100,75 @@ protected:
     for (i=0;i<e->mimeData()->urls().count();i++) {
 	  const QUrl url=e->mimeData()->urls()[i];
 	  const QString fname = url.toLocalFile();
-	  //fprintf(stderr,"Dropped file: %s",qPrintable(fname));
+	  fprintf(stderr,"drop file: %s\n",qPrintable(fname));
 	  openFile(fname);
 	}
   }
 
 private slots:
-  void on_actionOpen_triggered()
+  void on_pushButton_load_clicked()
   {
 	QString fname =
 	  QFileDialog::getOpenFileName(this,"select file",".",
-								   "Images files [*.png,*.jpg] (*.png *.xpm *.jpg);;"
-								   "Text files [*.txt] (*.txt);;"
+								   "Images files [*.png,*.jpg] (*.png *.jpg);;"
 								   "Video files [*.avi,*.mp4] (*.avi,*.mp4);;"
-								   "Mesh files [*.obj] (*.obj);;"
-								   "Volume data [*.rawiv] (*.rawiv)");
+								   "All files (*.*)");
 	openFile(fname);
   }
-  
-  void on_actionToolbar_toggled()
-  {
-	if (actionToolbar->isChecked()){
-	  toolBar->show();
-	}else{
-	  toolBar->hide();
-	}
-  }
-  
-  void on_actionStatusbar_toggled()
-  {
-	if (actionStatusbar->isChecked()){
-	  statusbar->show();
-	}else{
-	  statusbar->hide();
-	}
-  }
 
-  void on_actionFirst_triggered()
+  void on_pushButton_camera_clicked()
   {
-	if (graphicsView){
-	  graphicsView->first();
-	  setWindowTitle(graphicsView->currentFileName());
-	}
   }
   
-  void on_actionLast_triggered()
+  void on_pushButton_start_clicked()
   {
-	if (graphicsView){
-	  graphicsView->last();
-	  setWindowTitle(graphicsView->currentFileName());
-	}
   }
   
-  void on_actionPrevious_triggered()
-  {
-	if (graphicsView){
-	  graphicsView->previous();
-	  setWindowTitle(graphicsView->currentFileName());
-	}
-  }
+  // void on_actionFirst_triggered()
+  // {
+  // 	if (graphicsView){
+  // 	  graphicsView->first();
+  // 	  setWindowTitle(graphicsView->currentFileName());
+  // 	}
+  // }
   
-  void on_actionNext_triggered()
-  {
-	if (graphicsView){
-	  graphicsView->next();
-	  setWindowTitle(graphicsView->currentFileName());
-	}
-  }
+  // void on_actionLast_triggered()
+  // {
+  // 	if (graphicsView){
+  // 	  graphicsView->last();
+  // 	  setWindowTitle(graphicsView->currentFileName());
+  // 	}
+  // }
   
-  void on_actionZoomIn_triggered()
-  {
-	if (graphicsView){ graphicsView->zoomIn(); }
-  }
-  void on_actionZoomOut_triggered()
-  {
-	if (graphicsView){ graphicsView->zoomOut(); }
-  }
+  // void on_actionPrevious_triggered()
+  // {
+  // 	if (graphicsView){
+  // 	  graphicsView->previous();
+  // 	  setWindowTitle(graphicsView->currentFileName());
+  // 	}
+  // }
   
-  void on_actionAbout_triggered()
-  {
-	QMessageBox::about(this, tr("About CompVis"),
-					   tr("<b>CompVis</b> is an application designed for "
-						  "vision-base media content manipulations."));
-  }
+  // void on_actionNext_triggered()
+  // {
+  // 	if (graphicsView){
+  // 	  graphicsView->next();
+  // 	  setWindowTitle(graphicsView->currentFileName());
+  // 	}
+  // }
+  
+  // void on_actionAbout_triggered()
+  // {
+  // 	QMessageBox::about(this, tr("About CompVis"),
+  // 					   tr("<b>CompVis</b> is an application designed for "
+  // 						  "vision-base media content manipulations."));
+  // }
 
 public:
   MainWindow(QWidget * parent=0):
-	QMainWindow(parent),m_initialized(0),graphicsView(NULL)
+	QMainWindow(parent),m_initialized(0)
   {
 	setupUi(this);
+	window()->layout()->setSizeConstraint( QLayout::SetFixedSize );
   }
 };
 

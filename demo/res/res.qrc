@@ -1,21 +1,15 @@
 <RCC>
   <qresource prefix="icon">
-    <file>save.png</file>
+    <file>camera.png</file>
     <file>open.png</file>
-    <file>new.png</file>
-    <file>cut.png</file>
-    <file>paste.png</file>
     <file>copy.png</file>
-    <file>24x24/go-first.png</file>
-    <file>24x24/go-last.png</file>
-    <file>24x24/go-next.png</file>
+    <file>appicon.ico</file>
     <file>appicon.png</file>
-    <file>24x24/go-previous.png</file>
-    <file>24x24/zoom-fit-best.png</file>
-    <file>24x24/zoom-in.png</file>
-    <file>24x24/zoom-original.png</file>
-    <file>24x24/zoom-out.png</file>
-    <file>24x24/object-rotate-left.png</file>
-    <file>24x24/object-rotate-right.png</file>
+    <file>gnome-logout.png</file>
+    <file>media-playback-start.png</file>
+    <file>media-playback-pause.png</file>
+    <file>save.png</file>
+    <file>paste.png</file>
+    <file>cut.png</file>
   </qresource>
 </RCC>

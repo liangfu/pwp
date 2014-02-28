@@ -6,7 +6,7 @@
  error( "Couldn't find the common.pri file!" )
 }
 
-LIBS += cxcore
+LIBS += -lcxcore -L../lib
 
 # Input
 HEADERS += include/cv.h \

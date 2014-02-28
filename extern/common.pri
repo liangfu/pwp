@@ -7,7 +7,8 @@ DEPENDPATH += . include src
 INCLUDEPATH += . src include ../cxcore/include ../cv/include
 QT=
 DEFINES -= UNICODE
-CONFIG += staticlib
+#CONFIG += staticlib
+CONFIG += lib debug
 
 UI_DIR = include
 MOC_DIR = .moc

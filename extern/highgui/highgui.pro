@@ -6,7 +6,8 @@
  error( "Couldn't find the common.pri file!" )
 }
 
-LIBS += -lpng -ljpeg
+DEFINES += HAVE_JPEG HAVE_PNG
+LIBS += -lpng -ljpeg -lcxcore -lcv -L../lib
 
 # Input
 HEADERS += include/bitstrm.h \

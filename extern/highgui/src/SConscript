@@ -15,8 +15,8 @@ env = Environment()
 
 env.Append(CPPPATH = ['.','/usr/include','include',
                       # '/usr/include/gtk-2.0','/usr/include/gio-unix-2.0',
-                      '../../thirdparty/cxcore/include',
-                      '../../thirdparty/highgui/include'])
+                      '../../cxcore/include',
+                      '../../highgui/include'])
 debug = ARGUMENTS.get('debug', 1)
 win32 = ARGUMENTS.get('win32', 0)
 if not int(win32):

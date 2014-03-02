@@ -9,6 +9,10 @@ DEFINES -= UNICODE
 
 CONFIG += lib debug
 
+#build_pass:CONFIG(debug, debug|release) {
+#  TARGET = $$join(TARGET,,,_debug) 
+#}
+
 UI_DIR = include
 MOC_DIR = .moc
 OBJECTS_DIR = .obj

@@ -1,295 +1,541 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="compvis"
-	ProjectGUID="{14EA5DB2-0C31-3936-8469-52E920FD4762}"
-	Keyword="Qt4VSv1.0">
+	ProjectGUID="{A9E10301-8AE8-3CF0-B9FC-02CCFE2F1BBA}"
+	Keyword="Qt4VSv1.0"
+	TargetFrameworkVersion="0"
+	>
 	<Platforms>
 		<Platform
-			Name="Win32" />
+			Name="Win32"
+		/>
 	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="lib\"
-			ATLMinimizesCRunTimeLibraryUsage="false"
-			ConfigurationType="2"
 			IntermediateDirectory=".obj\"
-			UseOfMfc="0">
+			ConfigurationType="2"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			>
 			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;..\..\Qt\4.8.5\include&quot;,&quot;.&quot;,&quot;.&quot;,&quot;src&quot;,&quot;include&quot;,&quot;extern\cxcore\include&quot;,&quot;extern\cv\include&quot;,&quot;extern\highgui\include&quot;,&quot;..\..\Qt\4.8.5\include\ActiveQt&quot;,&quot;.moc&quot;,..\..\Qt\4.8.5\mkspecs\default"
-				AdditionalOptions="-Zm200 -w34100 -w34189"
-				AssemblerListingLocation=".obj\"
-				DebugInformationFormat="3"
-				ExceptionHandling="1"
-				GeneratePreprocessedFile="0"
-				ObjectFile=".obj\"
-				Optimization ="4"
-				PreprocessorDefinitions="_WINDOWS,WIN32,CVAPI_EXPORTS,QT_DLL,QT_HAVE_MMX,QT_HAVE_3DNOW,QT_HAVE_SSE,QT_HAVE_MMXEXT,QT_HAVE_SSE2,QT_THREAD_SUPPORT"
-				ProgramDataBaseFileName=".\"
-				RuntimeLibrary="3"
-				RuntimeTypeInfo="true"
-				SuppressStartupBanner="true"
-				TreatWChar_tAsBuiltInType="false"
-				WarningLevel="3" />
+				Name="VCPreBuildEventTool"
+			/>
 			<Tool
-				Name="VCCustomBuildTool" />
+				Name="VCCustomBuildTool"
+			/>
 			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="cxcore.lib cv.lib highgui.lib"
-				AdditionalLibraryDirectories="e:\Qt\4.8.5\lib,lib"
-				GenerateDebugInformation="true"
-				IgnoreImportLibrary="true"
-				LinkTimeCodeGeneration="0"
-				OutputFile="$(OutDir)\compvis.dll"
-				ProgramDatabaseFile=""
-				SubSystem="0"
-				SuppressStartupBanner="true" />
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
 			<Tool
 				Name="VCMIDLTool"
+				WarningLevel="0"
 				DefaultCharType="0"
 				EnableErrorChecks="1"
-				WarningLevel="0" />
+			/>
 			<Tool
-				Name="VCPostBuildEventTool" />
+				Name="VCCLCompilerTool"
+				AdditionalOptions="-Zm200 -w34100 -w34189"
+				Optimization="4"
+				AdditionalIncludeDirectories="&quot;..\..\Qt\4.8.5\include&quot;,&quot;.&quot;,&quot;.&quot;,&quot;src&quot;,&quot;include&quot;,&quot;extern\cxcore\include&quot;,&quot;extern\cv\include&quot;,&quot;extern\highgui\include&quot;,&quot;..\..\Qt\4.8.5\include\ActiveQt&quot;,&quot;.moc&quot;,..\..\Qt\4.8.5\mkspecs\default"
+				PreprocessorDefinitions="_WINDOWS,WIN32,CVAPI_EXPORTS,QT_DLL,QT_HAVE_MMX,QT_HAVE_3DNOW,QT_HAVE_SSE,QT_HAVE_MMXEXT,QT_HAVE_SSE2,QT_THREAD_SUPPORT"
+				GeneratePreprocessedFile="0"
+				ExceptionHandling="1"
+				RuntimeLibrary="3"
+				TreatWChar_tAsBuiltInType="false"
+				RuntimeTypeInfo="true"
+				AssemblerListingLocation=".obj\"
+				ObjectFile=".obj\"
+				ProgramDataBaseFileName=".\"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+				DebugInformationFormat="3"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool" />
-			<Tool
-				Name="VCPreLinkEventTool" />
+				Name="VCManagedResourceCompilerTool"
+			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_WINDOWS,WIN32,CVAPI_EXPORTS,QT_DLL,QT_HAVE_MMX,QT_HAVE_3DNOW,QT_HAVE_SSE,QT_HAVE_MMXEXT,QT_HAVE_SSE2,QT_THREAD_SUPPORT,_DEBUG" />
+				PreprocessorDefinitions="_WINDOWS,WIN32,CVAPI_EXPORTS,QT_DLL,QT_HAVE_MMX,QT_HAVE_3DNOW,QT_HAVE_SSE,QT_HAVE_MMXEXT,QT_HAVE_SSE2,QT_THREAD_SUPPORT,_DEBUG"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				IgnoreImportLibrary="true"
+				AdditionalDependencies="cxcore.lib cv.lib highgui.lib"
+				OutputFile="$(OutDir)\compvis.dll"
+				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="d:\Qt\4.8.5\lib,lib"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile=""
+				SubSystem="0"
+				LinkTimeCodeGeneration="0"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="lib\"
-			ATLMinimizesCRunTimeLibraryUsage="false"
-			ConfigurationType="2"
 			IntermediateDirectory=".obj\"
-			UseOfMfc="0">
+			ConfigurationType="2"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			>
 			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;..\..\Qt\4.8.5\include&quot;,&quot;.&quot;,&quot;.&quot;,&quot;src&quot;,&quot;include&quot;,&quot;extern\cxcore\include&quot;,&quot;extern\cv\include&quot;,&quot;extern\highgui\include&quot;,&quot;..\..\Qt\4.8.5\include\ActiveQt&quot;,&quot;.moc&quot;,..\..\Qt\4.8.5\mkspecs\default"
-				AdditionalOptions="-Zm200 -w34100 -w34189"
-				AssemblerListingLocation=".obj\"
-				DebugInformationFormat="0"
-				ExceptionHandling="1"
-				GeneratePreprocessedFile="0"
-				ObjectFile=".obj\"
-				Optimization ="2"
-				PreprocessorDefinitions="_WINDOWS,WIN32,CVAPI_EXPORTS,QT_DLL,QT_NO_DEBUG,QT_HAVE_MMX,QT_HAVE_3DNOW,QT_HAVE_SSE,QT_HAVE_MMXEXT,QT_HAVE_SSE2,QT_THREAD_SUPPORT,NDEBUG"
-				ProgramDataBaseFileName=".\"
-				RuntimeLibrary="2"
-				RuntimeTypeInfo="true"
-				SuppressStartupBanner="true"
-				TreatWChar_tAsBuiltInType="false"
-				WarningLevel="3" />
+				Name="VCPreBuildEventTool"
+			/>
 			<Tool
-				Name="VCCustomBuildTool" />
+				Name="VCCustomBuildTool"
+			/>
 			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="cxcore.lib cv.lib highgui.lib"
-				AdditionalLibraryDirectories="e:\Qt\4.8.5\lib,lib"
-				GenerateDebugInformation="false"
-				IgnoreImportLibrary="true"
-				LinkIncremental="1"
-				LinkTimeCodeGeneration="0"
-				OutputFile="$(OutDir)\compvis.dll"
-				ProgramDatabaseFile=""
-				SubSystem="0"
-				SuppressStartupBanner="true" />
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
 			<Tool
 				Name="VCMIDLTool"
+				WarningLevel="0"
 				DefaultCharType="0"
 				EnableErrorChecks="1"
-				WarningLevel="0" />
+			/>
 			<Tool
-				Name="VCPostBuildEventTool" />
+				Name="VCCLCompilerTool"
+				AdditionalOptions="-Zm200 -w34100 -w34189"
+				Optimization="2"
+				AdditionalIncludeDirectories="&quot;..\..\Qt\4.8.5\include&quot;,&quot;.&quot;,&quot;.&quot;,&quot;src&quot;,&quot;include&quot;,&quot;extern\cxcore\include&quot;,&quot;extern\cv\include&quot;,&quot;extern\highgui\include&quot;,&quot;..\..\Qt\4.8.5\include\ActiveQt&quot;,&quot;.moc&quot;,..\..\Qt\4.8.5\mkspecs\default"
+				PreprocessorDefinitions="_WINDOWS,WIN32,CVAPI_EXPORTS,QT_DLL,QT_NO_DEBUG,QT_HAVE_MMX,QT_HAVE_3DNOW,QT_HAVE_SSE,QT_HAVE_MMXEXT,QT_HAVE_SSE2,QT_THREAD_SUPPORT,NDEBUG"
+				GeneratePreprocessedFile="0"
+				ExceptionHandling="1"
+				RuntimeLibrary="2"
+				TreatWChar_tAsBuiltInType="false"
+				RuntimeTypeInfo="true"
+				AssemblerListingLocation=".obj\"
+				ObjectFile=".obj\"
+				ProgramDataBaseFileName=".\"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+				DebugInformationFormat="0"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool" />
-			<Tool
-				Name="VCPreLinkEventTool" />
+				Name="VCManagedResourceCompilerTool"
+			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_WINDOWS,WIN32,CVAPI_EXPORTS,QT_DLL,QT_NO_DEBUG,QT_HAVE_MMX,QT_HAVE_3DNOW,QT_HAVE_SSE,QT_HAVE_MMXEXT,QT_HAVE_SSE2,QT_THREAD_SUPPORT" />
+				PreprocessorDefinitions="_WINDOWS,WIN32,CVAPI_EXPORTS,QT_DLL,QT_NO_DEBUG,QT_HAVE_MMX,QT_HAVE_3DNOW,QT_HAVE_SSE,QT_HAVE_MMXEXT,QT_HAVE_SSE2,QT_THREAD_SUPPORT"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				IgnoreImportLibrary="true"
+				AdditionalDependencies="cxcore.lib cv.lib highgui.lib"
+				OutputFile="$(OutDir)\compvis.dll"
+				LinkIncremental="1"
+				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="d:\Qt\4.8.5\lib,lib"
+				GenerateDebugInformation="false"
+				ProgramDatabaseFile=""
+				SubSystem="0"
+				LinkTimeCodeGeneration="0"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+				EmbedManifest="false"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 	</Configurations>
+	<References>
+	</References>
 	<Files>
 		<Filter
 			Name="Source Files"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+			>
 			<File
-				RelativePath="src\cvaam.cpp" />
+				RelativePath="src\cvaam.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvchamfer.cpp" />
+				RelativePath="src\cvchamfer.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvext_common.cpp" />
+				RelativePath="src\cvext_common.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvext_io.cpp" />
+				RelativePath="src\cvext_io.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvextutils.cpp" />
+				RelativePath="src\cvextutils.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvfacecoder.cpp" />
+				RelativePath="src\cvfacecoder.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvhanddetector.cpp" />
+				RelativePath="src\cvhanddetector.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvhandtracker.cpp" />
+				RelativePath="src\cvhandtracker.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvhandvalid_data.cpp" />
+				RelativePath="src\cvhandvalid_data.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvhandvalidator.cpp" />
+				RelativePath="src\cvhandvalidator.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvhog.cpp" />
+				RelativePath="src\cvhog.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvhog_data.cpp" />
+				RelativePath="src\cvhog_data.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvhomography.cpp" />
+				RelativePath="src\cvhomography.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvimgwarp.cpp" />
+				RelativePath="src\cvimgwarp.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvinvcomp.cpp" />
+				RelativePath="src\cvinvcomp.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvio.cpp" />
+				RelativePath="src\cvio.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvkfd.cpp" />
+				RelativePath="src\cvkfd.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvlda.cpp" />
+				RelativePath="src\cvlda.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvlevelset.cpp" />
+				RelativePath="src\cvlevelset.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvmaxflow.cpp" />
+				RelativePath="src\cvmaxflow.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvmotion.cpp" />
+				RelativePath="src\cvmotion.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvparticlebase.cpp" />
+				RelativePath="src\cvparticlebase.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvparticlefilter.cpp" />
+				RelativePath="src\cvparticlefilter.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvparticleobserve.cpp" />
+				RelativePath="src\cvparticleobserve.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvparticlestate.cpp" />
+				RelativePath="src\cvparticlestate.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvparticleutil.cpp" />
+				RelativePath="src\cvparticleutil.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvpictstruct.cpp" />
+				RelativePath="src\cvpictstruct.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvpwptracker.cpp" />
+				RelativePath="src\cvpwptracker.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvsgkfd.cpp" />
+				RelativePath="src\cvsgkfd.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvshapedesc.cpp" />
+				RelativePath="src\cvshapedesc.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvshapeprior.cpp" />
+				RelativePath="src\cvshapeprior.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvshapeprior_data.cpp" />
+				RelativePath="src\cvshapeprior_data.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvsparsecoding.cpp" />
+				RelativePath="src\cvsparsecoding.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvstageddetecthaar.cpp" />
+				RelativePath="src\cvstageddetecthaar.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvstageddetecthog.cpp" />
+				RelativePath="src\cvstageddetecthog.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvstip.cpp" />
+				RelativePath="src\cvstip.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvsuperres.cpp" />
+				RelativePath="src\cvsuperres.cpp"
+				>
+			</File>
 			<File
-				RelativePath="src\cvsvm4hog.cpp" />
+				RelativePath="src\cvsvm4hog.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+			>
 			<File
-				RelativePath="include\compvis.h" />
+				RelativePath="include\compvis.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvaam.h" />
+				RelativePath="include\cvaam.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvchamfer.h" />
+				RelativePath="include\cvchamfer.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvclassifier.h" />
+				RelativePath="include\cvclassifier.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvclassifier4fdesc.h" />
+				RelativePath="include\cvclassifier4fdesc.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvclassifier4ls.h" />
+				RelativePath="include\cvclassifier4ls.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvext.h" />
+				RelativePath="include\cvext.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvext.hpp" />
+				RelativePath="include\cvext.hpp"
+				>
+			</File>
 			<File
-				RelativePath="include\cvext_c.h" />
+				RelativePath="include\cvext_c.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvext_io.h" />
+				RelativePath="include\cvext_io.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvfacecoder.h" />
+				RelativePath="include\cvfacecoder.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvhanddetector.h" />
+				RelativePath="include\cvhanddetector.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvhandtracker.h" />
+				RelativePath="include\cvhandtracker.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvhandvalidator.h" />
+				RelativePath="include\cvhandvalidator.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvhog.h" />
+				RelativePath="include\cvhog.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvhomography.h" />
+				RelativePath="include\cvhomography.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvimgwarp.h" />
+				RelativePath="include\cvimgwarp.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvinvcomp.h" />
+				RelativePath="include\cvinvcomp.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvkfd.h" />
+				RelativePath="include\cvkfd.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvkfd4hog.h" />
+				RelativePath="include\cvkfd4hog.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvlda.h" />
+				RelativePath="include\cvlda.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvlda4hog.h" />
+				RelativePath="include\cvlda4hog.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvlevelset.h" />
+				RelativePath="include\cvlevelset.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvmaxflow.h" />
+				RelativePath="include\cvmaxflow.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvparticlebase.h" />
+				RelativePath="include\cvparticlebase.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvparticlefilter.h" />
+				RelativePath="include\cvparticlefilter.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvparticleobserve.h" />
+				RelativePath="include\cvparticleobserve.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvparticlestate.h" />
+				RelativePath="include\cvparticlestate.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvparticleutil.h" />
+				RelativePath="include\cvparticleutil.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvpictstruct.h" />
+				RelativePath="include\cvpictstruct.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvpwptracker.h" />
+				RelativePath="include\cvpwptracker.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvsgkfd.h" />
+				RelativePath="include\cvsgkfd.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvsgkfd4hog.h" />
+				RelativePath="include\cvsgkfd4hog.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvshapedesc.h" />
+				RelativePath="include\cvshapedesc.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvshapeprior.h" />
+				RelativePath="include\cvshapeprior.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvsparsecoding.h" />
+				RelativePath="include\cvsparsecoding.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvsql.h" />
+				RelativePath="include\cvsql.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvstageddetecthaar.h" />
+				RelativePath="include\cvstageddetecthaar.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvstageddetecthog.h" />
+				RelativePath="include\cvstageddetecthog.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvstip.h" />
+				RelativePath="include\cvstip.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvsvm4hog.h" />
+				RelativePath="include\cvsvm4hog.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvtimer.h" />
+				RelativePath="include\cvtimer.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvtracker.h" />
+				RelativePath="include\cvtracker.h"
+				>
+			</File>
 			<File
-				RelativePath="include\cvunionfind.h" />
+				RelativePath="include\cvunionfind.h"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

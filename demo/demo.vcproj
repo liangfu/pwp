@@ -1,200 +1,302 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="demo"
-	ProjectGUID="{0353A128-E08F-3A40-9B7C-4396EE9B8AA3}"
-	Keyword="Qt4VSv1.0">
+	ProjectGUID="{7FB56946-445D-3073-91F1-B8FE5CF7DB6D}"
+	Keyword="Qt4VSv1.0"
+	TargetFrameworkVersion="0"
+	>
 	<Platforms>
 		<Platform
-			Name="Win32" />
+			Name="Win32"
+		/>
 	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="debug\"
-			ATLMinimizesCRunTimeLibraryUsage="false"
-			ConfigurationType="1"
 			IntermediateDirectory=".obj\"
-			UseOfMfc="0">
+			ConfigurationType="1"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			>
 			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;..\..\..\Qt\4.8.5\include\QtCore&quot;,&quot;..\..\..\Qt\4.8.5\include\QtGui&quot;,&quot;..\..\..\Qt\4.8.5\include&quot;,&quot;.&quot;,&quot;src&quot;,&quot;res&quot;,&quot;include&quot;,&quot;..\include&quot;,&quot;..\extern\cxcore\include&quot;,&quot;..\extern\cv\include&quot;,&quot;..\extern\highgui\include&quot;,&quot;..\..\..\Qt\4.8.5\include\ActiveQt&quot;,&quot;.moc&quot;,&quot;include&quot;,..\..\..\Qt\4.8.5\mkspecs\default"
-				AdditionalOptions="-Zm200 -w34100 -w34189"
-				AssemblerListingLocation=".obj\"
-				DebugInformationFormat="3"
-				ExceptionHandling="1"
-				GeneratePreprocessedFile="0"
-				ObjectFile=".obj\"
-				Optimization ="4"
-				PreprocessorDefinitions="_WINDOWS,UNICODE,WIN32,QT_DLL,QT_GUI_LIB,QT_CORE_LIB,QT_HAVE_MMX,QT_HAVE_3DNOW,QT_HAVE_SSE,QT_HAVE_MMXEXT,QT_HAVE_SSE2,QT_THREAD_SUPPORT"
-				ProgramDataBaseFileName=".\"
-				RuntimeLibrary="3"
-				RuntimeTypeInfo="true"
-				SuppressStartupBanner="true"
-				TreatWChar_tAsBuiltInType="false"
-				WarningLevel="3" />
+				Name="VCPreBuildEventTool"
+			/>
 			<Tool
-				Name="VCCustomBuildTool" />
+				Name="VCCustomBuildTool"
+			/>
 			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="e:\Qt\4.8.5\lib\qtmaind.lib cxcore.lib cv.lib highgui.lib compvis.lib e:\Qt\4.8.5\lib\QtGuid4.lib e:\Qt\4.8.5\lib\QtCored4.lib"
-				AdditionalLibraryDirectories="e:\Qt\4.8.5\lib,../lib,."
-				AdditionalOptions="&quot;/MANIFESTDEPENDENCY:type=&apos;win32&apos; name=&apos;Microsoft.Windows.Common-Controls&apos; version=&apos;6.0.0.0&apos; publicKeyToken=&apos;6595b64144ccf1df&apos; language=&apos;*&apos; processorArchitecture=&apos;*&apos;&quot;"
-				GenerateDebugInformation="true"
-				IgnoreImportLibrary="true"
-				LinkTimeCodeGeneration="0"
-				OutputFile="$(OutDir)\demo.exe"
-				ProgramDatabaseFile=""
-				SubSystem="2"
-				SuppressStartupBanner="true" />
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
 			<Tool
 				Name="VCMIDLTool"
+				WarningLevel="0"
 				DefaultCharType="0"
 				EnableErrorChecks="1"
-				WarningLevel="0" />
+			/>
 			<Tool
-				Name="VCPostBuildEventTool" />
+				Name="VCCLCompilerTool"
+				AdditionalOptions="-Zm200 -w34100 -w34189"
+				Optimization="4"
+				AdditionalIncludeDirectories="&quot;..\..\..\Qt\4.8.5\include\QtCore&quot;,&quot;..\..\..\Qt\4.8.5\include\QtGui&quot;,&quot;..\..\..\Qt\4.8.5\include&quot;,&quot;.&quot;,&quot;src&quot;,&quot;res&quot;,&quot;include&quot;,&quot;..\include&quot;,&quot;..\extern\cxcore\include&quot;,&quot;..\extern\cv\include&quot;,&quot;..\extern\highgui\include&quot;,&quot;..\..\..\Qt\4.8.5\include\ActiveQt&quot;,&quot;.moc&quot;,&quot;include&quot;,..\..\..\Qt\4.8.5\mkspecs\default"
+				PreprocessorDefinitions="_WINDOWS,UNICODE,WIN32,QT_DLL,QT_GUI_LIB,QT_CORE_LIB,QT_HAVE_MMX,QT_HAVE_3DNOW,QT_HAVE_SSE,QT_HAVE_MMXEXT,QT_HAVE_SSE2,QT_THREAD_SUPPORT"
+				GeneratePreprocessedFile="0"
+				ExceptionHandling="1"
+				RuntimeLibrary="3"
+				TreatWChar_tAsBuiltInType="false"
+				RuntimeTypeInfo="true"
+				AssemblerListingLocation=".obj\"
+				ObjectFile=".obj\"
+				ProgramDataBaseFileName=".\"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+				DebugInformationFormat="3"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool" />
-			<Tool
-				Name="VCPreLinkEventTool" />
+				Name="VCManagedResourceCompilerTool"
+			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_WINDOWS,UNICODE,WIN32,QT_DLL,QT_GUI_LIB,QT_CORE_LIB,QT_HAVE_MMX,QT_HAVE_3DNOW,QT_HAVE_SSE,QT_HAVE_MMXEXT,QT_HAVE_SSE2,QT_THREAD_SUPPORT,_DEBUG" />
+				PreprocessorDefinitions="_WINDOWS,UNICODE,WIN32,QT_DLL,QT_GUI_LIB,QT_CORE_LIB,QT_HAVE_MMX,QT_HAVE_3DNOW,QT_HAVE_SSE,QT_HAVE_MMXEXT,QT_HAVE_SSE2,QT_THREAD_SUPPORT,_DEBUG"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				IgnoreImportLibrary="true"
+				AdditionalOptions="&quot;/MANIFESTDEPENDENCY:type=&apos;win32&apos; name=&apos;Microsoft.Windows.Common-Controls&apos; version=&apos;6.0.0.0&apos; publicKeyToken=&apos;6595b64144ccf1df&apos; language=&apos;*&apos; processorArchitecture=&apos;*&apos;&quot;"
+				AdditionalDependencies="d:\Qt\4.8.5\lib\qtmaind.lib cxcore.lib cv.lib highgui.lib compvis.lib d:\Qt\4.8.5\lib\QtGuid4.lib d:\Qt\4.8.5\lib\QtCored4.lib"
+				OutputFile="$(OutDir)\demo_debug.exe"
+				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="d:\Qt\4.8.5\lib,../lib,."
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile=""
+				SubSystem="2"
+				LinkTimeCodeGeneration="0"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="release\"
-			ATLMinimizesCRunTimeLibraryUsage="false"
-			ConfigurationType="1"
 			IntermediateDirectory=".obj\"
-			UseOfMfc="0">
+			ConfigurationType="1"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			>
 			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;..\..\..\Qt\4.8.5\include\QtCore&quot;,&quot;..\..\..\Qt\4.8.5\include\QtGui&quot;,&quot;..\..\..\Qt\4.8.5\include&quot;,&quot;.&quot;,&quot;src&quot;,&quot;res&quot;,&quot;include&quot;,&quot;..\include&quot;,&quot;..\extern\cxcore\include&quot;,&quot;..\extern\cv\include&quot;,&quot;..\extern\highgui\include&quot;,&quot;..\..\..\Qt\4.8.5\include\ActiveQt&quot;,&quot;.moc&quot;,&quot;include&quot;,..\..\..\Qt\4.8.5\mkspecs\default"
-				AdditionalOptions="-Zm200 -w34100 -w34189"
-				AssemblerListingLocation=".obj\"
-				DebugInformationFormat="0"
-				ExceptionHandling="1"
-				GeneratePreprocessedFile="0"
-				ObjectFile=".obj\"
-				Optimization ="2"
-				PreprocessorDefinitions="_WINDOWS,UNICODE,WIN32,QT_DLL,QT_NO_DEBUG,QT_GUI_LIB,QT_CORE_LIB,QT_HAVE_MMX,QT_HAVE_3DNOW,QT_HAVE_SSE,QT_HAVE_MMXEXT,QT_HAVE_SSE2,QT_THREAD_SUPPORT,NDEBUG"
-				ProgramDataBaseFileName=".\"
-				RuntimeLibrary="2"
-				RuntimeTypeInfo="true"
-				SuppressStartupBanner="true"
-				TreatWChar_tAsBuiltInType="false"
-				WarningLevel="3" />
+				Name="VCPreBuildEventTool"
+			/>
 			<Tool
-				Name="VCCustomBuildTool" />
+				Name="VCCustomBuildTool"
+			/>
 			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="e:\Qt\4.8.5\lib\qtmain.lib cxcore.lib cv.lib highgui.lib compvis.lib e:\Qt\4.8.5\lib\QtGui4.lib e:\Qt\4.8.5\lib\QtCore4.lib"
-				AdditionalLibraryDirectories="e:\Qt\4.8.5\lib,../lib,."
-				AdditionalOptions="&quot;/MANIFESTDEPENDENCY:type=&apos;win32&apos; name=&apos;Microsoft.Windows.Common-Controls&apos; version=&apos;6.0.0.0&apos; publicKeyToken=&apos;6595b64144ccf1df&apos; language=&apos;*&apos; processorArchitecture=&apos;*&apos;&quot;"
-				GenerateDebugInformation="false"
-				IgnoreImportLibrary="true"
-				LinkIncremental="1"
-				LinkTimeCodeGeneration="0"
-				OutputFile="$(OutDir)\demo.exe"
-				ProgramDatabaseFile=""
-				SubSystem="2"
-				SuppressStartupBanner="true" />
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
 			<Tool
 				Name="VCMIDLTool"
+				WarningLevel="0"
 				DefaultCharType="0"
 				EnableErrorChecks="1"
-				WarningLevel="0" />
+			/>
 			<Tool
-				Name="VCPostBuildEventTool" />
+				Name="VCCLCompilerTool"
+				AdditionalOptions="-Zm200 -w34100 -w34189"
+				Optimization="2"
+				AdditionalIncludeDirectories="&quot;..\..\..\Qt\4.8.5\include\QtCore&quot;,&quot;..\..\..\Qt\4.8.5\include\QtGui&quot;,&quot;..\..\..\Qt\4.8.5\include&quot;,&quot;.&quot;,&quot;src&quot;,&quot;res&quot;,&quot;include&quot;,&quot;..\include&quot;,&quot;..\extern\cxcore\include&quot;,&quot;..\extern\cv\include&quot;,&quot;..\extern\highgui\include&quot;,&quot;..\..\..\Qt\4.8.5\include\ActiveQt&quot;,&quot;.moc&quot;,&quot;include&quot;,..\..\..\Qt\4.8.5\mkspecs\default"
+				PreprocessorDefinitions="_WINDOWS,UNICODE,WIN32,QT_DLL,QT_NO_DEBUG,QT_GUI_LIB,QT_CORE_LIB,QT_HAVE_MMX,QT_HAVE_3DNOW,QT_HAVE_SSE,QT_HAVE_MMXEXT,QT_HAVE_SSE2,QT_THREAD_SUPPORT,NDEBUG"
+				GeneratePreprocessedFile="0"
+				ExceptionHandling="1"
+				RuntimeLibrary="2"
+				TreatWChar_tAsBuiltInType="false"
+				RuntimeTypeInfo="true"
+				AssemblerListingLocation=".obj\"
+				ObjectFile=".obj\"
+				ProgramDataBaseFileName=".\"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+				DebugInformationFormat="0"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool" />
-			<Tool
-				Name="VCPreLinkEventTool" />
+				Name="VCManagedResourceCompilerTool"
+			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_WINDOWS,UNICODE,WIN32,QT_DLL,QT_NO_DEBUG,QT_GUI_LIB,QT_CORE_LIB,QT_HAVE_MMX,QT_HAVE_3DNOW,QT_HAVE_SSE,QT_HAVE_MMXEXT,QT_HAVE_SSE2,QT_THREAD_SUPPORT" />
+				PreprocessorDefinitions="_WINDOWS,UNICODE,WIN32,QT_DLL,QT_NO_DEBUG,QT_GUI_LIB,QT_CORE_LIB,QT_HAVE_MMX,QT_HAVE_3DNOW,QT_HAVE_SSE,QT_HAVE_MMXEXT,QT_HAVE_SSE2,QT_THREAD_SUPPORT"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				IgnoreImportLibrary="true"
+				AdditionalOptions="&quot;/MANIFESTDEPENDENCY:type=&apos;win32&apos; name=&apos;Microsoft.Windows.Common-Controls&apos; version=&apos;6.0.0.0&apos; publicKeyToken=&apos;6595b64144ccf1df&apos; language=&apos;*&apos; processorArchitecture=&apos;*&apos;&quot;"
+				AdditionalDependencies="d:\Qt\4.8.5\lib\qtmain.lib cxcore.lib cv.lib highgui.lib compvis.lib d:\Qt\4.8.5\lib\QtGui4.lib d:\Qt\4.8.5\lib\QtCore4.lib"
+				OutputFile="$(OutDir)\compvis-demo.exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="d:\Qt\4.8.5\lib,../lib,."
+				GenerateDebugInformation="false"
+				ProgramDatabaseFile=""
+				SubSystem="2"
+				LinkTimeCodeGeneration="0"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+				EmbedManifest="false"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 	</Configurations>
+	<References>
+	</References>
 	<Files>
 		<Filter
 			Name="Source Files"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+			>
 			<File
-				RelativePath="src\main.cpp" />
+				RelativePath="src\main.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+			>
 			<File
-				RelativePath="include\canvas.h" />
+				RelativePath="include\canvas.h"
+				>
+			</File>
 			<File
-				RelativePath="include\mainwindow.h">
+				RelativePath="include\mainwindow.h"
+				>
 				<FileConfiguration
-					Name="Debug|Win32">
+					Name="Debug|Win32"
+					>
 					<Tool
 						Name="VCCustomBuildTool"
-						AdditionalDependencies="E:\Qt\4.8.5\bin\moc.exe;include\mainwindow.h"
-						CommandLine="E:\Qt\4.8.5\bin\moc.exe  -DUNICODE -DWIN32 -DQT_DLL -DQT_GUI_LIB -DQT_CORE_LIB -DQT_HAVE_MMX -DQT_HAVE_3DNOW -DQT_HAVE_SSE -DQT_HAVE_MMXEXT -DQT_HAVE_SSE2 -DQT_THREAD_SUPPORT -I&quot;..\..\..\Qt\4.8.5\include\QtCore&quot; -I&quot;..\..\..\Qt\4.8.5\include\QtGui&quot; -I&quot;..\..\..\Qt\4.8.5\include&quot; -I&quot;.&quot; -I&quot;src&quot; -I&quot;res&quot; -I&quot;include&quot; -I&quot;..\include&quot; -I&quot;..\extern\cxcore\include&quot; -I&quot;..\extern\cv\include&quot; -I&quot;..\extern\highgui\include&quot; -I&quot;..\..\..\Qt\4.8.5\include\ActiveQt&quot; -I&quot;.moc&quot; -I&quot;include&quot; -I..\..\..\Qt\4.8.5\mkspecs\default -D_MSC_VER=1500 -DWIN32 include\mainwindow.h -o .moc\moc_mainwindow.cpp"
 						Description="MOC include\mainwindow.h"
+						CommandLine="D:\Qt\4.8.5\bin\moc.exe  -DUNICODE -DWIN32 -DQT_DLL -DQT_GUI_LIB -DQT_CORE_LIB -DQT_HAVE_MMX -DQT_HAVE_3DNOW -DQT_HAVE_SSE -DQT_HAVE_MMXEXT -DQT_HAVE_SSE2 -DQT_THREAD_SUPPORT -I&quot;..\..\..\Qt\4.8.5\include\QtCore&quot; -I&quot;..\..\..\Qt\4.8.5\include\QtGui&quot; -I&quot;..\..\..\Qt\4.8.5\include&quot; -I&quot;.&quot; -I&quot;src&quot; -I&quot;res&quot; -I&quot;include&quot; -I&quot;..\include&quot; -I&quot;..\extern\cxcore\include&quot; -I&quot;..\extern\cv\include&quot; -I&quot;..\extern\highgui\include&quot; -I&quot;..\..\..\Qt\4.8.5\include\ActiveQt&quot; -I&quot;.moc&quot; -I&quot;include&quot; -I..\..\..\Qt\4.8.5\mkspecs\default -D_MSC_VER=1500 -DWIN32 include\mainwindow.h -o .moc\moc_mainwindow.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="D:\Qt\4.8.5\bin\moc.exe;include\mainwindow.h"
 						Outputs=".moc\moc_mainwindow.cpp"
-						Path="e:\Qt\4.8.5\bin" />
+					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Win32">
+					Name="Release|Win32"
+					>
 					<Tool
 						Name="VCCustomBuildTool"
-						AdditionalDependencies="E:\Qt\4.8.5\bin\moc.exe;include\mainwindow.h"
-						CommandLine="E:\Qt\4.8.5\bin\moc.exe  -DUNICODE -DWIN32 -DQT_DLL -DQT_NO_DEBUG -DQT_GUI_LIB -DQT_CORE_LIB -DQT_HAVE_MMX -DQT_HAVE_3DNOW -DQT_HAVE_SSE -DQT_HAVE_MMXEXT -DQT_HAVE_SSE2 -DQT_THREAD_SUPPORT -I&quot;..\..\..\Qt\4.8.5\include\QtCore&quot; -I&quot;..\..\..\Qt\4.8.5\include\QtGui&quot; -I&quot;..\..\..\Qt\4.8.5\include&quot; -I&quot;.&quot; -I&quot;src&quot; -I&quot;res&quot; -I&quot;include&quot; -I&quot;..\include&quot; -I&quot;..\extern\cxcore\include&quot; -I&quot;..\extern\cv\include&quot; -I&quot;..\extern\highgui\include&quot; -I&quot;..\..\..\Qt\4.8.5\include\ActiveQt&quot; -I&quot;.moc&quot; -I&quot;include&quot; -I..\..\..\Qt\4.8.5\mkspecs\default -D_MSC_VER=1500 -DWIN32 include\mainwindow.h -o .moc\moc_mainwindow.cpp"
 						Description="MOC include\mainwindow.h"
+						CommandLine="D:\Qt\4.8.5\bin\moc.exe  -DUNICODE -DWIN32 -DQT_DLL -DQT_NO_DEBUG -DQT_GUI_LIB -DQT_CORE_LIB -DQT_HAVE_MMX -DQT_HAVE_3DNOW -DQT_HAVE_SSE -DQT_HAVE_MMXEXT -DQT_HAVE_SSE2 -DQT_THREAD_SUPPORT -I&quot;..\..\..\Qt\4.8.5\include\QtCore&quot; -I&quot;..\..\..\Qt\4.8.5\include\QtGui&quot; -I&quot;..\..\..\Qt\4.8.5\include&quot; -I&quot;.&quot; -I&quot;src&quot; -I&quot;res&quot; -I&quot;include&quot; -I&quot;..\include&quot; -I&quot;..\extern\cxcore\include&quot; -I&quot;..\extern\cv\include&quot; -I&quot;..\extern\highgui\include&quot; -I&quot;..\..\..\Qt\4.8.5\include\ActiveQt&quot; -I&quot;.moc&quot; -I&quot;include&quot; -I..\..\..\Qt\4.8.5\mkspecs\default -D_MSC_VER=1500 -DWIN32 include\mainwindow.h -o .moc\moc_mainwindow.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="D:\Qt\4.8.5\bin\moc.exe;include\mainwindow.h"
 						Outputs=".moc\moc_mainwindow.cpp"
-						Path="e:\Qt\4.8.5\bin" />
+					/>
 				</FileConfiguration>
 			</File>
 		</Filter>
 		<Filter
 			Name="Generated Files"
 			Filter="cpp;c;cxx;moc;h;def;odl;idl;res;"
-			UniqueIdentifier="{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}">
+			UniqueIdentifier="{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}"
+			>
 			<File
-				RelativePath=".obj\appicon.res" />
+				RelativePath=".obj\appicon.res"
+				>
+			</File>
 			<File
-				RelativePath=".moc\moc_mainwindow.cpp" />
+				RelativePath=".moc\moc_mainwindow.cpp"
+				>
+			</File>
 			<File
-				RelativePath="res\qrc_res.cpp" />
+				RelativePath="res\qrc_res.cpp"
+				>
+			</File>
 			<File
-				RelativePath="include\ui_compvis.h" />
+				RelativePath="include\ui_compvis.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Form Files"
 			Filter="ui"
 			UniqueIdentifier="{99349809-55BA-4b9d-BF79-8FDBB0286EB3}"
-			ParseFiles="false">
+			ParseFiles="false"
+			>
 			<File
-				RelativePath="src\compvis.ui">
+				RelativePath="src\compvis.ui"
+				>
 				<FileConfiguration
-					Name="Debug|Win32">
+					Name="Debug|Win32"
+					>
 					<Tool
 						Name="VCCustomBuildTool"
-						AdditionalDependencies="E:\Qt\4.8.5\bin\uic.exe;canvas.h;src\compvis.ui"
-						CommandLine="E:\Qt\4.8.5\bin\uic.exe src\compvis.ui -o include\ui_compvis.h"
 						Description="UIC src\compvis.ui"
+						CommandLine="D:\Qt\4.8.5\bin\uic.exe src\compvis.ui -o include\ui_compvis.h&#x0D;&#x0A;"
+						AdditionalDependencies="D:\Qt\4.8.5\bin\uic.exe;canvas.h;src\compvis.ui"
 						Outputs="include\ui_compvis.h"
-						Path="e:\Qt\4.8.5\bin" />
+					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Win32">
+					Name="Release|Win32"
+					>
 					<Tool
 						Name="VCCustomBuildTool"
-						AdditionalDependencies="E:\Qt\4.8.5\bin\uic.exe;canvas.h;src\compvis.ui"
-						CommandLine="E:\Qt\4.8.5\bin\uic.exe src\compvis.ui -o include\ui_compvis.h"
 						Description="UIC src\compvis.ui"
+						CommandLine="D:\Qt\4.8.5\bin\uic.exe src\compvis.ui -o include\ui_compvis.h&#x0D;&#x0A;"
+						AdditionalDependencies="D:\Qt\4.8.5\bin\uic.exe;canvas.h;src\compvis.ui"
 						Outputs="include\ui_compvis.h"
-						Path="e:\Qt\4.8.5\bin" />
+					/>
 				</FileConfiguration>
 			</File>
 		</Filter>
@@ -202,55 +304,83 @@
 			Name="Resource Files"
 			Filter="qrc;*"
 			UniqueIdentifier="{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}"
-			ParseFiles="false">
+			ParseFiles="false"
+			>
 			<File
-				RelativePath="res\appicon.ico" />
+				RelativePath="res\appicon.ico"
+				>
+			</File>
 			<File
-				RelativePath="res\appicon.png" />
+				RelativePath="res\appicon.png"
+				>
+			</File>
 			<File
-				RelativePath="res\camera.png" />
+				RelativePath="res\camera.png"
+				>
+			</File>
 			<File
-				RelativePath="res\copy.png" />
+				RelativePath="res\copy.png"
+				>
+			</File>
 			<File
-				RelativePath="res\cut.png" />
+				RelativePath="res\cut.png"
+				>
+			</File>
 			<File
-				RelativePath="res\gnome-logout.png" />
+				RelativePath="res\gnome-logout.png"
+				>
+			</File>
 			<File
-				RelativePath="res\media-playback-pause.png" />
+				RelativePath="res\media-playback-pause.png"
+				>
+			</File>
 			<File
-				RelativePath="res\media-playback-start.png" />
+				RelativePath="res\media-playback-start.png"
+				>
+			</File>
 			<File
-				RelativePath="res\open.png" />
+				RelativePath="res\open.png"
+				>
+			</File>
 			<File
-				RelativePath="res\paste.png" />
+				RelativePath="res\paste.png"
+				>
+			</File>
 			<File
-				RelativePath="res\res.qrc">
+				RelativePath="res\res.qrc"
+				>
 				<FileConfiguration
-					Name="Debug|Win32">
+					Name="Debug|Win32"
+					>
 					<Tool
 						Name="VCCustomBuildTool"
-						AdditionalDependencies="E:\Qt\4.8.5\bin\rcc.exe;res\appicon.ico;res\appicon.png;res\camera.png;res\copy.png;res\cut.png;res\gnome-logout.png;res\media-playback-pause.png;res\media-playback-start.png;res\open.png;res\paste.png;res\res.qrc;res\save.png"
-						CommandLine="E:\Qt\4.8.5\bin\rcc.exe -name res res\res.qrc -o res\qrc_res.cpp"
 						Description="RCC res\res.qrc"
+						CommandLine="D:\Qt\4.8.5\bin\rcc.exe -name res res\res.qrc -o res\qrc_res.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="D:\Qt\4.8.5\bin\rcc.exe;res\appicon.ico;res\appicon.png;res\camera.png;res\copy.png;res\cut.png;res\gnome-logout.png;res\media-playback-pause.png;res\media-playback-start.png;res\open.png;res\paste.png;res\res.qrc;res\save.png"
 						Outputs="res\qrc_res.cpp"
-						Path="e:\Qt\4.8.5\bin" />
+					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Win32">
+					Name="Release|Win32"
+					>
 					<Tool
 						Name="VCCustomBuildTool"
-						AdditionalDependencies="E:\Qt\4.8.5\bin\rcc.exe;res\appicon.ico;res\appicon.png;res\camera.png;res\copy.png;res\cut.png;res\gnome-logout.png;res\media-playback-pause.png;res\media-playback-start.png;res\open.png;res\paste.png;res\res.qrc;res\save.png"
-						CommandLine="E:\Qt\4.8.5\bin\rcc.exe -name res res\res.qrc -o res\qrc_res.cpp"
 						Description="RCC res\res.qrc"
+						CommandLine="D:\Qt\4.8.5\bin\rcc.exe -name res res\res.qrc -o res\qrc_res.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="D:\Qt\4.8.5\bin\rcc.exe;res\appicon.ico;res\appicon.png;res\camera.png;res\copy.png;res\cut.png;res\gnome-logout.png;res\media-playback-pause.png;res\media-playback-start.png;res\open.png;res\paste.png;res\res.qrc;res\save.png"
 						Outputs="res\qrc_res.cpp"
-						Path="e:\Qt\4.8.5\bin" />
+					/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="res\save.png" />
+				RelativePath="res\save.png"
+				>
+			</File>
 		</Filter>
 		<File
-			RelativePath="res\appicon.rc" />
+			RelativePath="res\appicon.rc"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

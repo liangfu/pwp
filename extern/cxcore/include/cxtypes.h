@@ -263,8 +263,8 @@ CV_INLINE  int  cvCeil( double value )
 #endif
 }
 
-#define cvInvSqrt(value) ((float)(1./sqrt(value)))
-#define cvSqrt(value)  ((float)sqrt(value))
+#define cvSqrt(value)  ((float)sqrt((float)(value)))
+#define cvInvSqrt(value) ((float)(1./cvSqrt(value)))
 
 CV_INLINE int cvIsNaN( double value )
 {

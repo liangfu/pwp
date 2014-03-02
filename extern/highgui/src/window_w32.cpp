@@ -1203,6 +1203,7 @@ cvCreateTrackbar( const char* trackbar_name, const char* window_name,
                   int* val, int count, CvTrackbarCallback on_notify )
 {
     int result = 0;
+#if 0
 
     CV_FUNCNAME( "cvCreateTrackbar" );
 
@@ -1376,6 +1377,7 @@ cvCreateTrackbar( const char* trackbar_name, const char* window_name,
 
     __END__;
 
+#endif
     return result;
 }
 

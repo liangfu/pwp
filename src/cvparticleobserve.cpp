@@ -60,7 +60,8 @@ void CvParticleObserve::initialize(CvRect roi)
     // };
     // memcpy(ref0hog->data.fl,meanhog0,sizeof(float)*378);
 
-    float meanhog1[]={
+    float meanhog1[378]={
+0,
     };
     memcpy(ref1hog->data.fl,meanhog1,sizeof(float)*378);
     

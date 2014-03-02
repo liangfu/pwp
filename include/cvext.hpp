@@ -220,6 +220,7 @@ public:
       const CvArr * shape CV_DEFAULT(NULL)
                       )
   {
+    return 1;
   }
 
   CVStatus deform(
@@ -227,7 +228,9 @@ public:
       const float beta,
       const float gamma
                  )
-  {}
+  {
+    return 1;
+  }
 
   // virtual void interp()=0;
 };

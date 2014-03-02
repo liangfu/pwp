@@ -25,7 +25,7 @@ class CvStagedDetectorHOG
   typedef int (CvStagedDetectorHOG::*trainfunctype)
   (CvMat **, int, CvMat **, int, int);
   int train_svm(CvMat ** posimgs, int npos, CvMat ** negimgs, int nneg,
-                int iter){}
+                int iter){  return 1; }
   int train_ada(CvMat ** posimgs, int npos, CvMat ** negimgs, int nneg,
                 int iter);
 

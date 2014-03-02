@@ -362,7 +362,7 @@ train(CvMat ** posimgs, int npos, CvMat ** negimgs, int nneg,
       double * wt0ptr = wtptr+count[0]*j;
       for (k=0;k<count[j];k++){
         epsval+=wt0ptr[k]*
-            fabs((((evalresptr[k]*polarity)<(threshold*polarity))?1:0)-j);
+            fabs(double((((evalresptr[k]*polarity)<(threshold*polarity))?1:0)-j));
       }
       }
       epsilon->data.db[i]=epsval;
@@ -480,6 +480,7 @@ int CvStagedDetectorHaar::validate(int ni, double & fi, double & di)
 #else
 #error "not implemented!"
 #endif // CV_STAGED_DETECT_HAAR_PRECOMPUTE_EVAL
+  return 1;
 }
 
 // adjust i-th threshold to target detection ratio

@@ -209,7 +209,7 @@ int icvCalcHOG_optimized(CvMat * img, CvMatND * hog, int ncells, int ngrids)
     // normalize block
     bsum=0;
     for (k=0;k<9;k++) { bsum+=hogptr[k]*hogptr[k]; }
-    bsum=1./(sqrt(bsum)+.01);
+    bsum=1./(cvSqrt(bsum)+.01);
     for (k=0;k<9;k++) { hogptr[k]*=bsum; }
   }    
   }

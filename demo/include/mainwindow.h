@@ -49,7 +49,8 @@ public:
   	  cvGetFileSuffix(fnamestr,suffix);
   	  if ((!strncmp(suffix+1,"jpg",3))||
 		  (!strncmp(suffix+1,"png",3))||
-		  (!strncmp(suffix+1,"pgm",3)))
+		  (!strncmp(suffix+1,"pgm",3))||
+		  (!strncmp(suffix+1,"bmp",3)))
 	  {
 		typeidx=0;
   	  }else if ((!strncmp(suffix+1,"avi",3))||(!strncmp(suffix+1,"mp4",3))){
@@ -133,7 +134,7 @@ private slots:
   {
 	QString fname =
 	  QFileDialog::getOpenFileName(this,"select file",".",
-								   "Images files [*.png,*.jpg] (*.png *.jpg *.pgm);;"
+								   "Images files [*.png,*.jpg ...] (*.png *.jpg *.pgm *.bmp);;"
 								   "Video files [*.avi,*.mp4] (*.avi,*.mp4);;"
 								   "All files (*.*)");
 	openFile(fname);

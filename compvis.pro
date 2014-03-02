@@ -6,6 +6,7 @@ INCLUDEPATH += . src include \
                extern/cxcore/include \
                extern/cv/include \
                extern/highgui/include
+DEFINES += CVAPI_EXPORTS
 LIBS += -lcxcore -lcv -lhighgui -Llib
 DESTDIR = lib
 

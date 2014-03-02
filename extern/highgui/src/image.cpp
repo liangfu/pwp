@@ -201,7 +201,8 @@ bool  CvvImage::Save( const char* filename )
 
 
 
-#ifdef WIN32
+//#ifdef WIN32
+#if 0 
 
 void  CImage::DrawToHDC( HDC hDCDst, RECT* pDstRect ) 
 {

@@ -11,7 +11,7 @@
 #include "cvhog.h"
 #include "cvimgwarp.h"
 
-double icvPartsMeasure(CvMatND * model, CvMatND * observe){}
+double icvPartsMeasure(CvMatND * model, CvMatND * observe){return 0;}
 
 void icvGetWarpFromBox(CvBox2D box, CvSize sz, CvMat * warp_p);
 
@@ -95,6 +95,7 @@ int CvPartsStructure::update(CvMat * img)
   for (i=0;i<nparts;i++){
     cvParticleResample(m_particle[i]);
   }
+  return 0;
 }
 
 int CvPartsStructure::train(char * trainfile)

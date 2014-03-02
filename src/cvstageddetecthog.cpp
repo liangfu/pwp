@@ -143,16 +143,19 @@ train_ada(CvMat ** posimgs, int npos, CvMat ** negimgs, int nneg, int iter)
       cvReleaseMat(&angle[i]);
     }
   }
+  return 1;
 }
 
 int CvStagedDetectorHOG::
 validate(int ni, double & fi, double & di)
 {
+  return 1;
 }
 
 int CvStagedDetectorHOG::
 adjust(int ni, double dtar, double & fi, double & di)
 {
+  return 1;
 }
 
 // cascade detector training framework 
@@ -244,7 +247,7 @@ feature_precompute_hog(CvMat ** posimgs, int npos,
       double tmpval;
       for (ii=1;ii<nr-1;ii++){
       for (jj=1;jj<nc-1;jj++){
-        magptr[jj]=sqrt(dxptr[jj]*dxptr[jj]+dyptr[jj]*dyptr[jj]);
+        magptr[jj]=cvSqrt(dxptr[jj]*dxptr[jj]+dyptr[jj]*dyptr[jj]);
         tmpval=icvFastAtan2(dyptr[jj],dxptr[jj]);
         tmpval=(tmpval<0)?-tmpval:tmpval;
         angptr[jj]=cvFloor(tmpval*9./3.1416);

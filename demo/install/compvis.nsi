@@ -6,7 +6,7 @@
 !define MUI_ICON appicon.ico
 
 !define MUI_FILE "compvis-demo"
-!define MUI_PRODUCT "BlackStone CompVis Ver. ${VERSION}.${REVISION}"
+!define MUI_PRODUCT "CompVis"
 
 ;--------------------------------
 ;Include Modern UI

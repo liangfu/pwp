@@ -3,9 +3,10 @@
 ######################################################################
 
 # Template
-win32:TEMPLATE = vcapp
 unix:TEMPLATE = app
-#TARGET = demo
+unix:TARGET = compvis
+win32:TEMPLATE = vcapp
+win32:TARGET = demo
 
 # Dependency
 DEPENDPATH += . res src

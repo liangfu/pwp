@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioProject
+	ProjectType="Visual C++"
+	Version="9,00"
+	Name="cxcore"
+	ProjectGUID="{50E7A550-9E0D-3FA0-ACE8-5ECDF40D529B}"
+	Keyword="Qt4VSv1.0">
+	<Platforms>
+		<Platform
+			Name="Win32" />
+	</Platforms>
+	<Configurations>
+		<Configuration
+			Name="Debug|Win32"
+			OutputDirectory="..\..\lib\"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			ConfigurationType="2"
+			IntermediateDirectory=".obj\"
+			UseOfMfc="0">
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="&quot;..\..\..\..\Qt\4.8.5\include&quot;,&quot;.&quot;,&quot;.&quot;,&quot;src&quot;,&quot;include&quot;,&quot;..\..\..\..\Qt\4.8.5\include\ActiveQt&quot;,&quot;.moc&quot;,..\..\..\..\Qt\4.8.5\mkspecs\default"
+				AdditionalOptions="-Zm200 -w34100 -w34189"
+				AssemblerListingLocation=".obj\"
+				DebugInformationFormat="3"
+				ExceptionHandling="1"
+				GeneratePreprocessedFile="0"
+				ObjectFile=".obj\"
+				Optimization ="4"
+				PreprocessorDefinitions="_WINDOWS,WIN32,CVAPI_EXPORTS,QT_DLL,QT_HAVE_MMX,QT_HAVE_3DNOW,QT_HAVE_SSE,QT_HAVE_MMXEXT,QT_HAVE_SSE2,QT_THREAD_SUPPORT"
+				ProgramDataBaseFileName=".\"
+				RuntimeLibrary="3"
+				RuntimeTypeInfo="true"
+				SuppressStartupBanner="true"
+				TreatWChar_tAsBuiltInType="false"
+				WarningLevel="3" />
+			<Tool
+				Name="VCCustomBuildTool" />
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalLibraryDirectories="e:\Qt\4.8.5\lib"
+				GenerateDebugInformation="true"
+				IgnoreImportLibrary="true"
+				LinkTimeCodeGeneration="0"
+				OutputFile="$(OutDir)\cxcore.dll"
+				ProgramDatabaseFile=""
+				SubSystem="0"
+				SuppressStartupBanner="true" />
+			<Tool
+				Name="VCMIDLTool"
+				DefaultCharType="0"
+				EnableErrorChecks="1"
+				WarningLevel="0" />
+			<Tool
+				Name="VCPostBuildEventTool" />
+			<Tool
+				Name="VCPreBuildEventTool" />
+			<Tool
+				Name="VCPreLinkEventTool" />
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_WINDOWS,WIN32,CVAPI_EXPORTS,QT_DLL,QT_HAVE_MMX,QT_HAVE_3DNOW,QT_HAVE_SSE,QT_HAVE_MMXEXT,QT_HAVE_SSE2,QT_THREAD_SUPPORT,_DEBUG" />
+		</Configuration>
+		<Configuration
+			Name="Release|Win32"
+			OutputDirectory="..\..\lib\"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			ConfigurationType="2"
+			IntermediateDirectory=".obj\"
+			UseOfMfc="0">
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="&quot;..\..\..\..\Qt\4.8.5\include&quot;,&quot;.&quot;,&quot;.&quot;,&quot;src&quot;,&quot;include&quot;,&quot;..\..\..\..\Qt\4.8.5\include\ActiveQt&quot;,&quot;.moc&quot;,..\..\..\..\Qt\4.8.5\mkspecs\default"
+				AdditionalOptions="-Zm200 -w34100 -w34189"
+				AssemblerListingLocation=".obj\"
+				DebugInformationFormat="0"
+				ExceptionHandling="1"
+				GeneratePreprocessedFile="0"
+				ObjectFile=".obj\"
+				Optimization ="2"
+				PreprocessorDefinitions="_WINDOWS,WIN32,CVAPI_EXPORTS,QT_DLL,QT_NO_DEBUG,QT_HAVE_MMX,QT_HAVE_3DNOW,QT_HAVE_SSE,QT_HAVE_MMXEXT,QT_HAVE_SSE2,QT_THREAD_SUPPORT,NDEBUG"
+				ProgramDataBaseFileName=".\"
+				RuntimeLibrary="2"
+				RuntimeTypeInfo="true"
+				SuppressStartupBanner="true"
+				TreatWChar_tAsBuiltInType="false"
+				WarningLevel="3" />
+			<Tool
+				Name="VCCustomBuildTool" />
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalLibraryDirectories="e:\Qt\4.8.5\lib"
+				GenerateDebugInformation="false"
+				IgnoreImportLibrary="true"
+				LinkIncremental="1"
+				LinkTimeCodeGeneration="0"
+				OutputFile="$(OutDir)\cxcore.dll"
+				ProgramDatabaseFile=""
+				SubSystem="0"
+				SuppressStartupBanner="true" />
+			<Tool
+				Name="VCMIDLTool"
+				DefaultCharType="0"
+				EnableErrorChecks="1"
+				WarningLevel="0" />
+			<Tool
+				Name="VCPostBuildEventTool" />
+			<Tool
+				Name="VCPreBuildEventTool" />
+			<Tool
+				Name="VCPreLinkEventTool" />
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_WINDOWS,WIN32,CVAPI_EXPORTS,QT_DLL,QT_NO_DEBUG,QT_HAVE_MMX,QT_HAVE_3DNOW,QT_HAVE_SSE,QT_HAVE_MMXEXT,QT_HAVE_SSE2,QT_THREAD_SUPPORT" />
+		</Configuration>
+	</Configurations>
+	<Files>
+		<Filter
+			Name="Source Files"
+			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
+			<File
+				RelativePath="src\cxalloc.cpp" />
+			<File
+				RelativePath="src\cxarithm.cpp" />
+			<File
+				RelativePath="src\cxarray.cpp" />
+			<File
+				RelativePath="src\cxcmp.cpp" />
+			<File
+				RelativePath="src\cxconvert.cpp" />
+			<File
+				RelativePath="src\cxcopy.cpp" />
+			<File
+				RelativePath="src\cxdatastructs.cpp" />
+			<File
+				RelativePath="src\cxdrawing.cpp" />
+			<File
+				RelativePath="src\cxdxt.cpp" />
+			<File
+				RelativePath="src\cxerror.cpp" />
+			<File
+				RelativePath="src\cximage.cpp" />
+			<File
+				RelativePath="src\cxjacobieigens.cpp" />
+			<File
+				RelativePath="src\cxlogic.cpp" />
+			<File
+				RelativePath="src\cxlut.cpp" />
+			<File
+				RelativePath="src\cxmathfuncs.cpp" />
+			<File
+				RelativePath="src\cxmatmul.cpp" />
+			<File
+				RelativePath="src\cxmatrix.cpp" />
+			<File
+				RelativePath="src\cxmean.cpp" />
+			<File
+				RelativePath="src\cxmeansdv.cpp" />
+			<File
+				RelativePath="src\cxminmaxloc.cpp" />
+			<File
+				RelativePath="src\cxnorm.cpp" />
+			<File
+				RelativePath="src\cxouttext.cpp" />
+			<File
+				RelativePath="src\cxpersistence.cpp" />
+			<File
+				RelativePath="src\cxprecomp.cpp" />
+			<File
+				RelativePath="src\cxrand.cpp" />
+			<File
+				RelativePath="src\cxsumpixels.cpp" />
+			<File
+				RelativePath="src\cxsvd.cpp" />
+			<File
+				RelativePath="src\cxswitcher.cpp" />
+			<File
+				RelativePath="src\cxtables.cpp" />
+			<File
+				RelativePath="src\cxutils.cpp" />
+		</Filter>
+		<Filter
+			Name="Header Files"
+			Filter="h;hpp;hxx;hm;inl;inc;xsd"
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+			<File
+				RelativePath="src\_cxcore.h" />
+			<File
+				RelativePath="src\_cxipp.h" />
+			<File
+				RelativePath="include\cvver.h" />
+			<File
+				RelativePath="include\cvwimage.h" />
+			<File
+				RelativePath="include\cxcore.h" />
+			<File
+				RelativePath="include\cxcore.hpp" />
+			<File
+				RelativePath="include\cxerror.h" />
+			<File
+				RelativePath="include\cxmisc.h" />
+			<File
+				RelativePath="include\cxtypes.h" />
+		</Filter>
+	</Files>
+	<Globals>
+	</Globals>
+</VisualStudioProject>

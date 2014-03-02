@@ -44,7 +44,9 @@ public:
 	int typeidx=0,funcidx=comboBox->currentIndex();
   	if (!fname.isEmpty())
   	{
-	  const char * fnamestr=fname.toAscii();
+	  //const char * fnamestr=fname.toAscii();
+    char fnamestr[1024];
+    sprintf(fnamestr,"%s",qPrintable(fname));
   	  char suffix[1024];
   	  cvGetFileSuffix(fnamestr,suffix);
   	  if ((!strncmp(suffix+1,"jpg",3))||

@@ -6,8 +6,9 @@
  error( "Couldn't find the common.pri file!" )
 }
 
+INCLUDEPATH += . src include ../cxcore/include ../cv/include
 DEFINES += HAVE_JPEG HAVE_PNG
-LIBS += -lpng -ljpeg -lcxcore -lcv -L../lib
+LIBS += -L../lib -lcxcore -lcv -Llib -lpng -ljpeg 
 
 # Input
 HEADERS += include/bitstrm.h \

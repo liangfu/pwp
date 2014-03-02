@@ -6,6 +6,7 @@
  error( "Couldn't find the common.pri file!" )
 }
 
+INCLUDEPATH += . src include ../cxcore/include
 LIBS += -lcxcore -L../lib
 
 # Input

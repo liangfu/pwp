@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+./configure --prefix=$(pwd)/../../ --enable-static=NO --enable-shared=YES

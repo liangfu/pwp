@@ -34,23 +34,33 @@ public:
 
   void openFile(QString fname)
   {
+	typedef void (MainWindow::*CvTestFuncType)(const char *);
+	static CvTestFuncType func[]={
+	  &MainWindow::test_facedetect_pic,&MainWindow::test_facedetect_vid,
+	  &MainWindow::test_handdetect_pic,&MainWindow::test_handdetect_vid,
+	  0
+	};
+
+	int typeidx=0,funcidx=comboBox->currentIndex();
   	if (!fname.isEmpty())
   	{
 	  const char * fnamestr=fname.toAscii();
   	  char suffix[1024];
   	  cvGetFileSuffix(fnamestr,suffix);
-  	  if ((!strncmp(suffix+1,"jpg",3))||(!strncmp(suffix+1,"png",3))){
-  		// display image
-		test_facedetector_pic(fnamestr);
-		// IplImage * img = cvLoadImage(fnamestr,1);
-		// CvMat img_stub;
-		// CvMat * mat = cvGetMat(img,&img_stub);
-		// widget->display(mat);
+  	  if ((!strncmp(suffix+1,"jpg",3))||
+		  (!strncmp(suffix+1,"png",3))||
+		  (!strncmp(suffix+1,"pgm",3)))
+	  {
+		typeidx=0;
   	  }else if ((!strncmp(suffix+1,"avi",3))||(!strncmp(suffix+1,"mp4",3))){
+		typeidx=1;
   	  }else{
-  		assert(false);
+		QMessageBox::warning(this, tr("Warning"),tr("unsupported file extension!"));
   	  }
-  	}
+	  (this->*func[funcidx*2+typeidx])(fnamestr);
+  	}else{
+	  QMessageBox::warning(this, tr("Warning"),tr("file name string is empty!"));
+	}
   }
   
 private:
@@ -61,7 +71,7 @@ private:
 	m_initialized=1;
   }
 
-  void test_facedetector_pic(const char * fname)
+  void test_facedetect_pic(const char * fname)
   {
 	int i;
 	IplImage * img = cvLoadImage(fname,1);
@@ -82,8 +92,21 @@ private:
 							roiarr[i].y+roiarr[i].height),CV_RED,3);
 	  }
 	  widget->display(mat);
+	  statusBar()->showMessage(QString("number of faces: %1").arg(nfaces));
 	  cvReleaseMat(&gray);
 	}
+  }
+  void test_facedetect_vid(const char * fname)
+  {
+	QMessageBox::warning(this, tr("Warning"),tr("unimplemented function!"));
+  }
+  void test_handdetect_pic(const char * fname)
+  {
+	QMessageBox::warning(this, tr("Warning"),tr("unimplemented function!"));
+  }
+  void test_handdetect_vid(const char * fname)
+  {
+	QMessageBox::warning(this, tr("Warning"),tr("unimplemented function!"));
   }
   
 protected:
@@ -110,7 +133,7 @@ private slots:
   {
 	QString fname =
 	  QFileDialog::getOpenFileName(this,"select file",".",
-								   "Images files [*.png,*.jpg] (*.png *.jpg);;"
+								   "Images files [*.png,*.jpg] (*.png *.jpg *.pgm);;"
 								   "Video files [*.avi,*.mp4] (*.avi,*.mp4);;"
 								   "All files (*.*)");
 	openFile(fname);

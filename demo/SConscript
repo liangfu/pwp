@@ -2,8 +2,9 @@
 import os
 
 print os.getcwd()
-source_list=filter(lambda x:x[-4:]=='.cpp',os.listdir('src'))
-source_list=map(lambda x:os.getcwd()+'/src/'+x,source_list)
+source_list=[]
+source_list.insert(0,map(lambda x:os.getcwd()+'/src/'+x,
+                         filter(lambda x:x[-4:]=='.cpp',os.listdir('src'))))
 source_list.insert(0,map(lambda x:os.getcwd()+'/.moc/'+x,
                          filter(lambda x:x[-4:]=='.cpp',os.listdir('.moc'))))
 source_list.insert(0,map(lambda x:os.getcwd()+'/res/'+x,

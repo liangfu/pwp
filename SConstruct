@@ -4,4 +4,6 @@
 # SConscript('core/src/SConscript')
 # SConscript('core/test/SConscript')
 SConscript('src/SConscript')
+SConscript('test/SConscript')
+SConscript('demo/SConscript')
 # SConscript('app/src/SConscript',variant_dir='bin',duplicate=0)

@@ -77,6 +77,7 @@ SOURCES += src/cvkfd.cpp \
            src/cvsgkfd.cpp \
            src/cvhog.cpp \
            src/cvstageddetecthaar.cpp \
+           src/cvstageddetecthaar_data.cpp \
            src/cvhanddetector.cpp \
            src/cvio.cpp \
            src/cvpwptracker.cpp \

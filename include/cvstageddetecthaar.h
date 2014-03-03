@@ -16,6 +16,13 @@
 // winsize - configure
 // {thresh, polarity}, {x, y, w, h, wt}x3  => 2+5x3 => 17 elements
 
+// 14 stages: .95,.99
+//0,1,8,21,33,42,62,97,148,267,308,339,361,449,986
+CvMat * get_haarclassifier_face20_v0();
+// 10 stages, .85,.96
+//0,1,2,10,29,73,103,160,196,201,316
+CvMat * get_haarclassifier_face20_v1();
+
 class CV_EXPORTS CvStagedDetectorHaar
 {
   int m_initialized;

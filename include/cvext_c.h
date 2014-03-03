@@ -691,6 +691,14 @@ int cvWaitKeyEx(const int delay CV_DEFAULT(10))
 #define CV_SHOW(img) do {} while(false)
 #endif // ANDROID
 
+#ifdef __cplusplus
+class CvWindowManager{
+public:
+  CvWindowManager(){cvNamedWindow("Test");}
+  ~CvWindowManager(){cvDestroyWindow("Test");}
+};
+#endif
+
 //-------------------------------------------------------
 // SIMPLE CALCULATION FUNCTIONS
 //-------------------------------------------------------

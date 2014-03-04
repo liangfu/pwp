@@ -6,7 +6,7 @@
 unix:TEMPLATE = app
 unix:TARGET = compvis
 win32:TEMPLATE = vcapp
-win32:TARGET = demo
+win32:TARGET = compvis
 
 # Dependency
 DEPENDPATH += . res src
@@ -14,7 +14,11 @@ INCLUDEPATH += . src res include ../include \
                ../extern/cxcore/include \
                ../extern/cv/include \
                ../extern/highgui/include
+win32{
+LIBS += -llibcxcore -llibcv -llibhighgui -llibcompvis -L../lib -L.
+}else{
 LIBS += -lcxcore -lcv -lhighgui -lcompvis -L../lib -L.
+}
 unix:QMAKE_LFLAGS += -Wl,-rpath=../lib
 
 # Output

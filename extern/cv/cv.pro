@@ -8,7 +8,11 @@
 
 INCLUDEPATH += . src include ../cxcore/include
 DEFINES += CVAPI_EXPORTS
+win32{
+LIBS += -llibcxcore -L../../lib
+}else{
 LIBS += -lcxcore -L../../lib
+}
 
 # Input
 HEADERS += include/cv.h \

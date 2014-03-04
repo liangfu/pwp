@@ -186,7 +186,7 @@ int CvStagedDetectorHaar::detect(CvMat * img, CvRect roi[])
   cvIntegral(img,imgIntegral);
   int i,j,k,cc=0,maxcc=8000;
 
-#if 1
+#if 0
   CvMat * haarclassifier = get_haarclassifier_face20_v0();
   int winsz,tsize=20;
   int num_classifiers=haarclassifier->rows;

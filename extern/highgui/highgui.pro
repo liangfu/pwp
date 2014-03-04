@@ -9,7 +9,11 @@
 INCLUDEPATH += . src include ../cxcore/include ../cv/include
 unix:DEFINES += HAVE_JPEG HAVE_PNG CVAPI_EXPORTS
 win32:DEFINES += CVAPI_EXPORTS
+win32{
+LIBS += -L../../lib -llibcxcore -llibcv -Llib
+}else{
 LIBS += -L../../lib -lcxcore -lcv -Llib
+}
 unix: LIBS += -lpng -ljpeg 
 #win32: LIBS += -llibpng -ljpeg 
 

@@ -7,7 +7,11 @@ INCLUDEPATH += . . ../include \
                ../extern/cv/include \
                ../extern/highgui/include
 DEFINES += CVAPI_EXPORTS
+win32{
+LIBS += -llibcxcore -llibcv -llibhighgui -L../lib
+}else{
 LIBS += -lcxcore -lcv -lhighgui -L../lib
+}
 DESTDIR = ../lib
 TARGET = compvis
 win32:TARGET = $$join(TARGET,,lib,) 

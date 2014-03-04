@@ -8,6 +8,7 @@ QT=
 DEFINES -= UNICODE
 
 CONFIG += lib debug
+win32:TARGET = $$join(TARGET,,lib,) 
 
 #build_pass:CONFIG(debug, debug|release) {
 #  TARGET = $$join(TARGET,,,_debug) 

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-cd extern/cxcore/ && qmake && cd ../..
-cd extern/cv/ && qmake && cd ../..
-cd extern/highgui/ && qmake && cd ../..
-qmake
-cd demo && qmake && cd ..
+cd extern/cxcore/ && qmake && make && cd ../..
+cd extern/cv/ && qmake && make && cd ../..
+cd extern/highgui/ && qmake && make && cd ../..
+qmake && make
+cd demo && qmake && make && cd ..
+

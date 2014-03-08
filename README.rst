@@ -9,6 +9,9 @@ The CompVis library is built to demostrate its efficient and
 accurate implementation on a few Computer Vision tasks, including face
 detection, face recognition, generic object tracking etc.
 
+Available Modules
+=================
+
 The following modules are implemented in current version:
 
 ===============================  ========================================================================================
@@ -26,7 +29,29 @@ The following modules are implemented in current version:
 ``sparse coding``                implements ``orthogonal matching pursuit (OMP)`` and ``basis pursuit (BP)`` algorithms
 ===============================  ========================================================================================
 
-More code will be available online soon !
+More modules will be available online !
+
+How to Compile and Install
+==========================
+
+Typically, ``qmake`` OR ``scons`` is required for successfully compiling the project. However, there is no such
+restriction for Visual C++ developers, click the solution file ``compvis.sln`` and you're ready to go.
+
+For advance usage, you can create Makefiles with qmake
+
+.. code-block:: bash
+
+ $ ./configure
+
+or build directly with scons
+
+.. code-block:: bash
+
+ $ scons -u
+
+Then try anything you want. 
+
+*Note that it is not necessary to install qmake if you don't want buildint the demo application*.
 
 License
 =======

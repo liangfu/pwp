@@ -17,11 +17,11 @@ The following modules are implemented in current version:
 ``image warping``                image resizing, rotating in an efficient way (with 3, 4 or 6 parameters)
 ``level sets``                   image segmentation with composed energy function
 ``optical flow``                 implements the inverse compositional algorithms
-``active appearance model``      for facial image alignment
+``AAM``                          active appearance model for facial image alignment
 ``LDA``                          fisher discriminant analysis (linear classifier)
 ``KFD``                          kernel fisher discriminant (nonlinear,guassian kernel)
+``PWP``                          pixel-wise posterior, a level sets based tracking framework
 ``particle filter``              a probabilistic tracking framework
-``pixel-wise posterior``         level sets based tracking framework
 ``cascade detector``             implements the classic viola-jones detection framework, with pre-trained feature sets
 ``sparse coding``                implements ``orthogonal matching pursuit (OMP)`` and ``basis pursuit (BP)`` algorithms
 ===============================  ========================================================================================

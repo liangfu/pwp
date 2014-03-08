@@ -30,9 +30,9 @@ OBJECTS_DIR = .obj
 # Configure
 CONFIG += debug warn_on
 QT = core gui 
-build_pass:CONFIG(debug, debug|release) {
-  TARGET = $$join(TARGET,,,_debug) 
-}
+#build_pass:CONFIG(debug, debug|release) {
+#  TARGET = $$join(TARGET,,,_debug) 
+#}
 
 # Input
 win32:RC_FILE = res/appicon.rc

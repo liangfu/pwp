@@ -5,7 +5,7 @@
 !define VERSION 0.1
 !define MUI_ICON appicon.ico
 
-!define MUI_FILE "compvis-demo"
+!define MUI_FILE "compvis"
 !define MUI_PRODUCT "CompVis"
 
 ;--------------------------------
@@ -63,7 +63,7 @@ Section "CompVis full version"
 
   ; List of files
   File /r "Microsoft.VC90.CRT"
-  File "compvis-demo.exe" "compvis-demo.exe.manifest" "cxcore.dll" "cv.dll" "highgui.dll" "compvis.dll" "QtCore4.dll" "QtGui4.dll" "vcredist_x86_vs2008sp1.exe" "RELEASE_NOTES.txt"
+  File "compvis.exe" "compvis.exe.manifest" "libcxcore.dll" "libcv.dll" "libhighgui.dll" "libcompvis.dll" "QtCore4.dll" "QtGui4.dll" "vcredist_x86_vs2008sp1.exe" "RELEASE_NOTES.txt"
   ExecWait "$INSTDIR\vcredist_x86_vs2008sp1.exe"
 
   ;Create desktop shortcut

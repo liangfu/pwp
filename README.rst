@@ -31,19 +31,19 @@ The following modules are implemented in current version:
 
 More modules will be available online !
 
-How to Compile and Install
-==========================
+Compilation
+===========
 
 Typically, ``qmake`` OR ``scons`` is required for successfully compiling the project. However, there is no such
 restriction for Visual C++ developers, click the solution file ``compvis.sln`` and you're ready to go.
 
-For advance usage, you can create Makefiles with qmake
+For advance usage, you can create Makefiles with qmake by running
 
 .. code-block:: bash
 
  $ ./configure
 
-or build directly with scons
+under root directory of the project, or build directly with scons
 
 .. code-block:: bash
 
@@ -51,7 +51,7 @@ or build directly with scons
 
 Then try anything you want. 
 
-*Note that it is not necessary to install qmake if you don't want buildint the demo application*.
+*Note that it is not necessary to install qmake if you don't want to build the demo application*.
 
 License
 =======

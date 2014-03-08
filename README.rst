@@ -31,4 +31,4 @@ More code will be available online soon !
 License
 =======
 
-The source code is released under `MIT license <https://github.com/liangfu/compvis/blob/master/LICENSE>`_ . There is no actural restrictions in (re)-distributing the code in any form.
+The source code is released under `MIT license <https://github.com/liangfu/compvis/blob/master/LICENSE>`_ . There is no actual restrictions in (re)-distributing the code in any form.

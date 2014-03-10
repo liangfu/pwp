@@ -7,15 +7,16 @@
 }
 
 INCLUDEPATH += . src include ../cxcore/include ../cv/include
-unix:DEFINES += HAVE_JPEG HAVE_PNG CVAPI_EXPORTS
-win32:DEFINES += CVAPI_EXPORTS
+unix:DEFINES += CVAPI_EXPORTS HAVE_JPEG HAVE_PNG 
+unix: LIBS += -lpng -ljpeg 
+win32:DEFINES += CVAPI_EXPORTS HAVE_PNG
+win32:INCLUDEPATH += extern/include
+win32:LIBS += -Lextern/lib -llibpng -lzlib
 win32{
 LIBS += -L../../lib -llibcxcore -llibcv -Llib
 }else{
 LIBS += -L../../lib -lcxcore -lcv -Llib
 }
-unix: LIBS += -lpng -ljpeg 
-#win32: LIBS += -llibpng -ljpeg 
 
 # Input
 HEADERS += include/bitstrm.h \

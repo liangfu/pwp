@@ -1,8 +1,17 @@
 #!/usr/bin/env bash
 
+echo "cd extern/cxcore/ && qmake && cd ../.."
 cd extern/cxcore/ && qmake && cd ../..
+
+echo "cd extern/cv/ && qmake && cd ../.."
 cd extern/cv/ && qmake && cd ../..
+
+echo "cd extern/highgui/ && qmake && cd ../.."
 cd extern/highgui/ && qmake && cd ../..
+
+echo "qmake"
 qmake
+
+echo "cd demo && qmake && cd .."
 cd demo && qmake && cd ..
 

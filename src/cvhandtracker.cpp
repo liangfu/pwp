@@ -1,6 +1,6 @@
 /**
  * @file   cvext_hand.cpp
- * @author Liangfu Chen <liangfu.chen@cn.fix8.com>
+ * @author Liangfu Chen <liangfu.chen@nlpr.ia.ac.cn>
  * @date   Mon Dec 10 14:16:16 2012
  * 
  * @brief  

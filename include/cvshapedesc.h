@@ -1,6 +1,6 @@
 /**
  * @file   cvshapedesc.h
- * @author Liangfu Chen <liangfu.chen@cn.fix8.com>
+ * @author Liangfu Chen <liangfu.chen@nlpr.ia.ac.cn>
  * @date   Mon Apr  1 11:16:05 2013
  * 
  * @brief  

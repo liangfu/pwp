@@ -1,6 +1,6 @@
 /**
  * @file   cvext_c.h
- * @author Liangfu Chen <liangfu.chen@cn.fix8.com>
+ * @author Liangfu Chen <liangfu.chen@nlpr.ia.ac.cn>
  * @date   Mon Nov 19 11:00:33 2012
  * 
  * @brief  addtional functions for programming using OpenCV

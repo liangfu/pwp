@@ -1,6 +1,6 @@
 /**
  * @file   cvhomography.h
- * @author Liangfu Chen <liangfu.chen@cn.fix8.com>
+ * @author Liangfu Chen <liangfu.chen@nlpr.ia.ac.cn>
  * @date   Thu Aug 22 10:40:30 2013
  * 
  * @brief  

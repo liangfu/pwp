@@ -1,6 +1,6 @@
 /**
  * @file   cvshapeprior.h
- * @author Liangfu Chen <liangfu.chen@cn.fix8.com>
+ * @author Liangfu Chen <liangfu.chen@nlpr.ia.ac.cn>
  * @date   Thu Mar  7 17:48:01 2013
  * 
  * @brief  

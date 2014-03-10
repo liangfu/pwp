@@ -1,6 +1,6 @@
 /**
  * @file   cvinvcomp.cpp
- * @author Liangfu Chen <liangfu.chen@cn.fix8.com>
+ * @author Liangfu Chen <liangfu.chen@nlpr.ia.ac.cn>
  * @date   Sat Feb 16 14:25:40 2013
  * 
  * @brief  

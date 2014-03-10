@@ -1,6 +1,6 @@
 /**
  * @file   cvlda.h
- * @author Liangfu Chen <liangfu.chen@cn.fix8.com>
+ * @author Liangfu Chen <liangfu.chen@nlpr.ia.ac.cn>
  * @date   Tue Apr  2 08:50:41 2013
  * 
  * @brief  

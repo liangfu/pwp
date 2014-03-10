@@ -1,6 +1,6 @@
 /**
  * @file   cvparticle.cpp
- * @author Liangfu Chen <liangfu.chen@cn.fix8.com>
+ * @author Liangfu Chen <liangfu.chen@nlpr.ia.ac.cn>
  * @date   Sun Jan  6 17:35:33 2013
  * 
  * @brief  

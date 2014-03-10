@@ -1,6 +1,6 @@
 /**
  * @file   cvpwptracker.cpp
- * @author Liangfu Chen <liangfu.chen@cn.fix8.com>
+ * @author Liangfu Chen <liangfu.chen@nlpr.ia.ac.cn>
  * @date   Wed Feb  6 16:35:06 2013
  * 
  * @brief  implementation of the Pixel-Wise Posterior (PWP)

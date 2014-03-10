@@ -1,6 +1,6 @@
 /**
  * @file   cvstageddetectorhog.cpp
- * @author Liangfu Chen <liangfu.chen@cn.fix8.com>
+ * @author Liangfu Chen <liangfu.chen@nlpr.ia.ac.cn>
  * @date   Tue Sep 10 15:46:21 2013
  * 
  * @brief  

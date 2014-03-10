@@ -1,6 +1,6 @@
 /**
  * @file   cvpictstruct.cpp
- * @author Liangfu Chen <liangfu.chen@cn.fix8.com>
+ * @author Liangfu Chen <liangfu.chen@nlpr.ia.ac.cn>
  * @date   Fri Jun 28 18:10:57 2013
  * 
  * @brief  

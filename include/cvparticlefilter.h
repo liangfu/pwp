@@ -1,6 +1,6 @@
 /**
  * @file   cvpfilter.h
- * @author Liangfu Chen <liangfu.chen@cn.fix8.com>
+ * @author Liangfu Chen <liangfu.chen@nlpr.ia.ac.cn>
  * @date   Sun Jan  6 14:33:35 2013
  * 
  * @brief  general particle filter implementation

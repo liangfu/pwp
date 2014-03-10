@@ -1,6 +1,6 @@
 /**
  * @file   cvsparsecoding.cpp
- * @author Liangfu Chen <liangfu.chen@cn.fix8.com>
+ * @author Liangfu Chen <liangfu.chen@nlpr.ia.ac.cn>
  * @date   Fri Jul 19 16:30:06 2013
  * 
  * @brief  

@@ -1,6 +1,6 @@
 /**
 * @file   cvext_pca.hpp
-* @author Liangfu Chen <liangfu.chen@cn.fix8.com>
+* @author Liangfu Chen <liangfu.chen@nlpr.ia.ac.cn>
 * @date   Wed Nov 28 09:21:18 2012
 * 
 * @brief  interface of classes based on PCA

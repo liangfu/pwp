@@ -56,61 +56,43 @@ CV_IMPL void cvReleaseCapture( CvCapture** pcapture )
 {
     if( pcapture && *pcapture )
     {
-        CvCapture* capture = *pcapture;
-        if( capture && capture->vtable &&
-            capture->vtable->count >= CV_CAPTURE_BASE_API_COUNT &&
-            capture->vtable->close )
-            capture->vtable->close( capture );
-        cvFree( pcapture );
+        delete *pcapture;
+        *pcapture = 0;
     }
 }
 
 CV_IMPL IplImage* cvQueryFrame( CvCapture* capture )
 {
-    if( capture && capture->vtable &&
-        capture->vtable->count >= CV_CAPTURE_BASE_API_COUNT &&
-        capture->vtable->grab_frame && capture->vtable->retrieve_frame &&
-        capture->vtable->grab_frame( capture ))
-        return capture->vtable->retrieve_frame( capture );
-    return 0;
+    return capture ? capture->queryFrame() : 0;
 }
+
 
 CV_IMPL int cvGrabFrame( CvCapture* capture )
 {
-    if( capture && capture->vtable &&
-        capture->vtable->count >= CV_CAPTURE_BASE_API_COUNT &&
-        capture->vtable->grab_frame )
-        return capture->vtable->grab_frame( capture );
-    return 0;
-} 
+    return capture ? capture->grabFrame() : 0;
+}
 
 CV_IMPL IplImage* cvRetrieveFrame( CvCapture* capture )
 {
-    if( capture && capture->vtable &&
-        capture->vtable->count >= CV_CAPTURE_BASE_API_COUNT &&
-        capture->vtable->retrieve_frame )
-        return capture->vtable->retrieve_frame( capture );
-    return 0;
-}                                       
+    return capture ? capture->retrieveFrame() : 0;
+}
 
 CV_IMPL double cvGetCaptureProperty( CvCapture* capture, int id )
 {
-    if( capture && capture->vtable &&
-        capture->vtable->count >= CV_CAPTURE_BASE_API_COUNT &&
-        capture->vtable->get_property )
-        return capture->vtable->get_property( capture, id );
-    return 0;
+    return capture ? capture->getProperty(id) : 0;
 }
 
 CV_IMPL int cvSetCaptureProperty( CvCapture* capture, int id, double value )
 {
-    if( capture && capture->vtable &&
-        capture->vtable->count >= CV_CAPTURE_BASE_API_COUNT &&
-        capture->vtable->set_property )
-        return capture->vtable->set_property( capture, id, value );
-    return 0;
+    return capture ? capture->setProperty(id, value) : 0;
 }
 
+#if defined(ANDROID)
+CV_IMPL CvCapture* cvCreateSocketCapture( const char *address, const char* port, int width, int height )
+{
+	return cvCreateCameraCapture_Socket(address, port, width, height);
+}
+#endif // ANDROID
 
 /**
  * Camera dispatching method: index is the camera number.
@@ -230,28 +212,3 @@ CV_IMPL CvCapture * cvCaptureFromFile (const char * filename)
 	
 	return result;
 }
-
-#ifndef HAVE_FFMPEG
-#ifndef HAVE_VFW
-#ifndef HAVE_QUICKTIME
-
-// quick fix for rc1
-
-CV_IMPL CvVideoWriter* cvCreateVideoWriter( const char* filename, int fourcc,
-                                            double fps, CvSize frameSize, int is_color )
-{
-    return 0;
-}
-
-CV_IMPL int cvWriteFrame( CvVideoWriter* _writer, const IplImage* image )
-{
-  return 0;
-}
-
-CV_IMPL void cvReleaseVideoWriter( CvVideoWriter** writer )
-{
-}
-
-#endif
-#endif
-#endif

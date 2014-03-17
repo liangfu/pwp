@@ -52,101 +52,41 @@
 #include <ctype.h>
 #include <assert.h>
 
-#ifndef WIN32
-// #include "cvconfig.h"
-#else
-void  FillBitmapInfo( BITMAPINFO* bmi, int width, int height, int bpp, int origin );
-#endif
-
 /* Errors */
 #define HG_OK          0 /* Don't bet on it! */
 #define HG_BADNAME    -1 /* Bad window or file name */
 #define HG_INITFAILED -2 /* Can't initialize HigHGUI. Possibly, can't find vlgrfmts.dll */
 #define HG_WCFAILED   -3 /* Can't create a window */
 #define HG_NULLPTR    -4 /* The null pointer where it should not appear */
-#define HG_BADPARAM   -5 
+#define HG_BADPARAM   -5
 
 #define CV_WINDOW_MAGIC_VAL     0x00420042
 #define CV_TRACKBAR_MAGIC_VAL   0x00420043
-
+#ifdef ANDROID
+#define cvShowImage NULL
+#endif // ANDROID
 /***************************** CvCapture structure ******************************/
 
-#define CV_CAPTURE_BASE_API_COUNT 6
-
-typedef void         (CV_CDECL* CvCaptureCloseFunc)         ( CvCapture* capture );
-typedef int          (CV_CDECL* CvCaptureGrabFrameFunc)     ( CvCapture* capture );
-typedef IplImage   * (CV_CDECL* CvCaptureRetrieveFrameFunc) ( CvCapture* capture );
-typedef double       (CV_CDECL* CvCaptureGetPropertyFunc)   ( CvCapture* capture, int id );
-typedef int          (CV_CDECL* CvCaptureSetPropertyFunc)   ( CvCapture* capture,
-                                                              int id, double value );
-typedef const char * (CV_CDECL* CvCaptureGetDescriptionFunc)( CvCapture* capture );
-
-typedef struct CvCaptureVTable
+struct CvCapture
 {
-    int                           count;
-    CvCaptureCloseFunc            close;
-    CvCaptureGrabFrameFunc        grab_frame;
-    CvCaptureRetrieveFrameFunc    retrieve_frame;
-    CvCaptureGetPropertyFunc      get_property;
-    CvCaptureSetPropertyFunc      set_property;
-    CvCaptureGetDescriptionFunc   get_description;
-}
-CvCaptureVTable;
+    virtual ~CvCapture() {}
+    virtual double getProperty(int) { return 0; }
+    virtual bool setProperty(int, double) { return 0; }
+    virtual bool grabFrame() { return true; }
+    virtual IplImage* retrieveFrame() { return 0; }
+    virtual IplImage* queryFrame() { return grabFrame() ? retrieveFrame() : 0; }
+};
 
-typedef struct CvCapture
-{
-    CvCaptureVTable* vtable;
-}
-CvCapture;
+#ifdef ANDROID
+CvCapture* cvCreateCameraCapture_Socket( const char *address, const char* port, int width, int height );
+#endif // ANDROID
 
+CVAPI(int) cvHaveImageReader(const char* filename);
+CVAPI(int) cvHaveImageWriter(const char* filename);
 
-#ifdef WIN32
-#define HAVE_VFW 1
-
-/* uncomment to enable OpenEXR codec (will not compile under MSVC6) */ 
-//#define HAVE_ILMIMF 1
-
-/* uncomment to enable CMUCamera1394 fireware camera module */
-//#define HAVE_CMU1394 1
+#if defined(HAVE_FFMPEG)
+CvCapture* cvCaptureFromFile_FFMPEG( const char* filename );
 #endif
 
-
-#if defined (HAVE_CAMV4L) || defined (HAVE_CAMV4L2)
-CvCapture * cvCaptureFromCAM_V4L( int index );
-#endif
-
-#ifdef HAVE_DC1394
-CvCapture * cvCaptureFromCAM_DC1394( int index );
-#endif
-
-#ifdef HAVE_MIL
-CvCapture* cvCaptureFromCAM_MIL( int index );
-#endif
-
-#ifdef HAVE_CMU1394
-CvCapture * cvCaptureFromCAM_CMU( int index );
-#endif
-
-#ifdef HAVE_TYZX
-CV_IMPL CvCapture * cvCaptureFromCAM_TYZX( int index );
-#endif
-
-#ifdef WIN32
-CvCapture* cvCaptureFromCAM_VFW( int index );
-CvCapture* cvCaptureFromFile_VFW( const char* filename );
-#endif
-
-#ifdef HAVE_XINE
-CvCapture* cvCaptureFromFile_XINE   (const char* filename);
-#endif
-
-#ifdef HAVE_FFMPEG
-CvCapture* cvCaptureFromFile_FFMPEG (const char* filename);
-#endif
-
-#ifdef HAVE_QUICKTIME
-CvCapture * cvCaptureFromFile_QT (const char  * filename);
-CvCapture * cvCaptureFromCAM_QT  (const int     index);
-#endif
 
 #endif /* __HIGHGUI_H_ */

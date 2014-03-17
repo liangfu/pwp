@@ -41,7 +41,7 @@
 
 #include "_highgui.h"
 
-
+#ifdef HAVE_FFMPEG
 extern "C" {
 #include <ffmpeg/avformat.h>
 #include <ffmpeg/imgconvert.h>
@@ -53,28 +53,23 @@ extern "C" {
 #define CV_WARN(message) fprintf(stderr, "warning: %s (%s:%d)\n", message, __FILE__, __LINE__)
 #endif
 
-# if __WORDSIZE == 64
-#  define INT64_C(c)	c ## L
-# else
-#  define INT64_C(c)	c ## LL
-# endif
-// typedef void         (CV_CDECL* CvCaptureCloseFunc)         ( CvCapture* capture );
-// typedef int          (CV_CDECL* CvCaptureGrabFrameFunc)     ( CvCapture* capture );
-// typedef IplImage   * (CV_CDECL* CvCaptureRetrieveFrameFunc) ( CvCapture* capture );
-// typedef double       (CV_CDECL* CvCaptureGetPropertyFunc)   ( CvCapture* capture, int id );
-// typedef int          (CV_CDECL* CvCaptureSetPropertyFunc)   ( CvCapture* capture,
-//                                                               int id, double value );
-// typedef const char * (CV_CDECL* CvCaptureGetDescriptionFunc)( CvCapture* capture );
-// typedef struct CvCaptureVTable
-// {
-//     int                           count;
-//     CvCaptureCloseFunc            close;
-//     CvCaptureGrabFrameFunc        grab_frame;
-//     CvCaptureRetrieveFrameFunc    retrieve_frame;
-//     CvCaptureGetPropertyFunc      get_property;
-//     CvCaptureSetPropertyFunc      set_property;
-//     CvCaptureGetDescriptionFunc   get_description;
-// }CvCaptureVTable;
+typedef void         (CV_CDECL* CvCaptureCloseFunc)         ( CvCapture* capture );
+typedef int          (CV_CDECL* CvCaptureGrabFrameFunc)     ( CvCapture* capture );
+typedef IplImage   * (CV_CDECL* CvCaptureRetrieveFrameFunc) ( CvCapture* capture );
+typedef double       (CV_CDECL* CvCaptureGetPropertyFunc)   ( CvCapture* capture, int id );
+typedef int          (CV_CDECL* CvCaptureSetPropertyFunc)   ( CvCapture* capture,
+                                                              int id, double value );
+typedef const char * (CV_CDECL* CvCaptureGetDescriptionFunc)( CvCapture* capture );
+typedef struct CvCaptureVTable
+{
+    int                           count;
+    CvCaptureCloseFunc            close;
+    CvCaptureGrabFrameFunc        grab_frame;
+    CvCaptureRetrieveFrameFunc    retrieve_frame;
+    CvCaptureGetPropertyFunc      get_property;
+    CvCaptureSetPropertyFunc      set_property;
+    CvCaptureGetDescriptionFunc   get_description;
+}CvCaptureVTable;
 
 typedef struct CvCaptureAVI_FFMPEG
 {
@@ -257,6 +252,16 @@ static const IplImage* icvRetrieveFrameAVI_FFMPEG( CvCaptureAVI_FFMPEG* capture 
 
 static int icvSetPropertyAVI_FFMPEG( CvCaptureAVI_FFMPEG* capture,
                                      int property_id, double value );
+
+/* Signed.  */
+# define INT8_C(c)	c
+# define INT16_C(c)	c
+# define INT32_C(c)	c
+# if __WORDSIZE == 64
+#  define INT64_C(c)	c ## L
+# else
+#  define INT64_C(c)	c ## LL
+# endif
 
 static double icvGetPropertyAVI_FFMPEG( CvCaptureAVI_FFMPEG* capture, int property_id )
 {
@@ -821,3 +826,5 @@ CV_IMPL void cvReleaseVideoWriter( CvVideoWriter ** writer )
 	// mark as released
 	(*writer) = 0;
 }
+
+#endif // HAVE_FFMPEG

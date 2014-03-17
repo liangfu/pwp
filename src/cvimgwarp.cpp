@@ -214,9 +214,12 @@ CVAPI(void) icvWarp(CvMat * img, CvMat * dst,
     0,0,0,&icvWarp3_8u ,&icvWarp4_8u ,0,&icvWarp6_8u 
   };
 #if defined(__x86_64__) || defined(_WIN64) || defined(__ppc64__)
-// #error "possible error here !!!"
-#endif
+  //#error "possible error here !!!"
+  static CvMat warpfuncmat = cvMat(2,7,CV_64F,warpfuncarr);
+#else
   static CvMat warpfuncmat = cvMat(2,7,CV_32S,warpfuncarr);
+#endif
+  // static CvMat warpfuncmat = cvMat(2,7,CV_32S,warpfuncarr);
   int srctype = CV_MAT_TYPE(img->type);
   int dsttype = CV_MAT_TYPE(dst->type);
   int pnr=warp_p->rows;

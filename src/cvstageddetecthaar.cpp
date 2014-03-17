@@ -9,7 +9,7 @@
  */
 #include "cvstageddetecthaar.h"
 
-#define CV_STAGED_DETECT_HAAR_PRECOMPUTE_EVAL
+#define CV_STAGED_DETECT_HAAR_PRECOMPUTE_EVAL 1
 
 CvMat * icvCreateHaarFeatureSetEx(int tsize);
 
@@ -48,10 +48,10 @@ void icvWeightedThresholdClassify_v1(CvMat ** evalarr,
     maxval=MAX(evalptr[1][j],maxval);
   }
   if (mu[1]<mu[0]) {
-    ratio=var[1]/(var[0]+var[1]);ratio=pow(ratio,1.1);
+    ratio=var[1]/(var[0]+var[1]);//ratio=pow(ratio,1.1);
     thres=MIN(maxval,mu[1]+(mu[0]-mu[1])*ratio);p=1;
   } else {
-    ratio=var[0]/(var[0]+var[1]);ratio=pow(ratio,1.1);
+    ratio=var[0]/(var[0]+var[1]);//ratio=pow(ratio,1.1);
     thres=MAX(minval,mu[1]-(mu[1]-mu[0])*ratio);p=-1;
   }
 }
@@ -266,11 +266,12 @@ train(CvMat ** posimgs, int npos, CvMat ** negimgs, int nneg,
 // cvPrintf(stderr,"%.0f,",features,cvRect(0,0,features->cols,5));
   int nfeatures = features->rows,nsamples=m+l;
   if (!weights) {
-    weights = cvCreateMat((startiter==0)?8000:maxiter+1,nsamples,CV_64F);
+    // weights = cvCreateMat((startiter==0)?8000:maxiter+1,nsamples,CV_64F);
+    weights = cvCreateMat(1,nsamples,CV_64F);
   }
   double wtsum,invwtsum; double * wtptr; double epsval;
   for (i=0;i<2;i++){ imgIntegral[i]=new CvMat *[count[i]]; }
-#ifdef CV_STAGED_DETECT_HAAR_PRECOMPUTE_EVAL
+#if CV_STAGED_DETECT_HAAR_PRECOMPUTE_EVAL
   for (i=0;i<2;i++){
     if (!evalres_precomp[i]){
       evalres_precomp[i]=cvCreateMat(nfeatures,count[i],CV_32F);
@@ -295,7 +296,7 @@ train(CvMat ** posimgs, int npos, CvMat ** negimgs, int nneg,
   weights_initialized=1;
   }
   
-#ifdef CV_STAGED_DETECT_HAAR_PRECOMPUTE_EVAL
+#if CV_STAGED_DETECT_HAAR_PRECOMPUTE_EVAL
   // precompute evaluation results
   if (!evalres_precomputed){
   for (i=0;i<nfeatures;i++){
@@ -323,21 +324,23 @@ train(CvMat ** posimgs, int npos, CvMat ** negimgs, int nneg,
     // normalize weights
     {
     wtsum=0;
-    wtptr = weights->data.db+nsamples*iter;
+    wtptr = weights->data.db;//+nsamples*iter;
     for (i=0;i<nsamples;i++){wtsum+=wtptr[i];}
     invwtsum=1./wtsum;
     for (i=0;i<nsamples;i++){wtptr[i]=wtptr[i]*invwtsum;}
     }
 
-    for (i=iter;i<nfeatures;i++)
+    // for (i=iter;i<nfeatures;i++)
+    for (i=0;i<nfeatures;i++)
     {
       float * ftsptr = features->data.fl+i*features->cols;
       // extract feature values from integral images
       for (j=0;j<2;j++){
-#ifdef CV_STAGED_DETECT_HAAR_PRECOMPUTE_EVAL
+#if CV_STAGED_DETECT_HAAR_PRECOMPUTE_EVAL
         memcpy(evalres[j]->data.ptr,
                evalres_precomp[j]->data.ptr+i*evalres_precomp[j]->step,
                sizeof(float)*count[j]);
+		assert(evalres_precomp[j]->step==sizeof(float)*count[j]);
 #else
       for (k=0;k<count[j];k++){
         evalres[j]->data.fl[k]=icvEval(imgIntegral[j][k],ftsptr+3);
@@ -356,47 +359,86 @@ train(CvMat ** posimgs, int npos, CvMat ** negimgs, int nneg,
       double * wt0ptr = wtptr+count[0]*j;
       for (k=0;k<count[j];k++){
         epsval+=wt0ptr[k]*
-            fabs(double((((evalresptr[k]*polarity)<(threshold*polarity))?1:0)-j));
+		  fabs(double((((evalresptr[k]*polarity)<(threshold*polarity))?1:0)-j));
+		// assert(((((evalresptr[k]*polarity)<(threshold*polarity))?1:0)-j)==0||
+		// 	      ((((evalresptr[k]*polarity)<(threshold*polarity))?1:0)-j)==1);
       }
       }
       epsilon->data.db[i]=epsval;
     } // end of i loop
     
     // min error feature classifier
-    double minval=epsilon->data.db[iter]; int minloc;
-    for (i=iter;i<nfeatures;i++){
+    // double minval=epsilon->data.db[iter]; int minloc;
+    // for (i=iter;i<nfeatures;i++){
+    //   double epsval = epsilon->data.db[i];
+    //   if (epsval<minval){minval=epsval;minloc=i;}
+    // }
+    double minval=epsilon->data.db[0]; int minloc;
+    for (i=0;i<nfeatures;i++){
       double epsval = epsilon->data.db[i];
       if (epsval<minval){minval=epsval;minloc=i;}
     }
-    swap(features->data.ptr+features->step*iter,
-         features->data.ptr+features->step*minloc,
-         features->step);
-#ifdef CV_STAGED_DETECT_HAAR_PRECOMPUTE_EVAL
-    for (j=0;j<2;j++){
-    swap(evalres_precomp[j]->data.ptr+evalres_precomp[j]->step*iter,
-         evalres_precomp[j]->data.ptr+evalres_precomp[j]->step*minloc,
-         evalres_precomp[j]->step);
-    }
-#endif // CV_STAGED_DETECT_HAAR_PRECOMPUTE_EVAL
+	selected.push_back(minloc);
+//     swap(features->data.ptr+features->step*iter,
+//          features->data.ptr+features->step*minloc,
+//          features->step);
+// #if CV_STAGED_DETECT_HAAR_PRECOMPUTE_EVAL
+//     for (j=0;j<2;j++){
+//     swap(evalres_precomp[j]->data.ptr+evalres_precomp[j]->step*iter,
+//          evalres_precomp[j]->data.ptr+evalres_precomp[j]->step*minloc,
+//          evalres_precomp[j]->step);
+//     }
+// #endif // CV_STAGED_DETECT_HAAR_PRECOMPUTE_EVAL
     
     // update the weights
+    // {
+    // double * wt0ptr = weights->data.db+nsamples*iter;
+    // double * wt1ptr = weights->data.db+nsamples*(iter+1);
+    // float thres = (features->data.fl+iter*features->cols)[0];
+    // float polar = (features->data.fl+iter*features->cols)[1];
+    // double beta = minval/(1.-minval),ei;
+    // (features->data.fl+iter*features->cols)[2]=log(1./(beta+1e-6)); // alpha
+    // k=0;
+    // for (i=0;i<2;i++){
+    // float * evalresptr = evalres[i]->data.fl;
+    // for (j=0;j<count[i];j++,k++){
+    //   ei = ((evalresptr[j]*polar)<(thres*polar))?1:0;
+    //   wt1ptr[k]=wt0ptr[k]*pow(beta,ei);
+    // }
+    // }
+	// assert(k==nsamples);
+    // }
+	
     {
-    double * wt0ptr = weights->data.db+nsamples*iter;
-    double * wt1ptr = weights->data.db+nsamples*(iter+1);
-    float thres = (features->data.fl+iter*features->cols)[0];
-    float polar = (features->data.fl+iter*features->cols)[1];
+	// CvMat * tmp = cvCreateMat(weights->rows,weights->cols,CV_64F);
+	CvMat * tmp = cvCreateMat(1,nsamples,CV_64F);
+	cvCopy(weights,tmp);  
+    double * wt0ptr = tmp->data.db;
+    double * wt1ptr = weights->data.db;
+    float thres = (features->data.fl+minloc*features->cols)[0];
+    float polar = (features->data.fl+minloc*features->cols)[1];
     double beta = minval/(1.-minval),ei;
-    (features->data.fl+iter*features->cols)[2]=log(1./(beta+1e-6));
+	float * evalresptr;
+    //(features->data.fl+minloc*features->cols)[2]=log(1./(beta+1e-6)); // alpha
+    (features->data.fl+minloc*features->cols)[2]=log(1./beta); // alpha
     k=0;
     for (i=0;i<2;i++){
-    float * evalresptr = evalres[i]->data.fl;
+    evalresptr = evalres_precomp[i]->data.fl+minloc*evalres_precomp[i]->cols;
+	assert(evalres_precomp[i]->cols*sizeof(float)==evalres_precomp[i]->step);
     for (j=0;j<count[i];j++,k++){
-      ei = ((evalresptr[j]*polar)<(thres*polar))?1:0;
+      //ei = ((evalresptr[j]*polar)<(thres*polar))?1:0;
+      ei = ((evalresptr[j]*polar)<(thres*polar))?0:1;
       wt1ptr[k]=wt0ptr[k]*pow(beta,ei);
     }
     }
 	assert(k==nsamples);
+	cvReleaseMat(&tmp);
     }
+	
+	if (selected.size()){
+	  cvPrintf(stderr,"%f,",epsilon,cvRect(minloc-2,0,5,1));
+	  cvPrintf(stderr,"%f,",weights,cvRect(100,0,5,1));
+	}
     
 // fprintf(stderr,"minloc: %d(%f) at %dth iter!\n",minloc,minval,iter);
 // fprintf(stderr," /* %04d */ ",iter);
@@ -412,13 +454,13 @@ train(CvMat ** posimgs, int npos, CvMat ** negimgs, int nneg,
       CvMat * disp = cvCreateMat(tsize,tsize,CV_8U);
       cvSet(disp,cvScalar(128));
       // memcpy(disp->data.ptr,posimgs[0]->data.ptr,(tsize-1)*(tsize-1));
-      float * curptr = features->data.fl+iter*features->cols+3;
+      float * curptr = features->data.fl+minloc*features->cols+3;
       CvMat subdisp0_stub,subdisp1_stub;
       CvMat * subdisp0 = cvGetSubRect(disp,&subdisp0_stub,
                          cvRect(curptr[0],curptr[1],curptr[2],curptr[3]));
       CvMat * subdisp1 = cvGetSubRect(disp,&subdisp1_stub,
                          cvRect(curptr[5],curptr[6],curptr[7],curptr[8]));
-	  if ((features->data.fl+iter*features->cols)[1]>0){
+	  if ((features->data.fl+minloc*features->cols)[1]>0){
 		cvSet(subdisp0,cvScalar((curptr[4]>0)?255:0));
 		cvSet(subdisp1,cvScalar((curptr[9]>0)?255:0));
 	  }else{
@@ -449,8 +491,8 @@ train(CvMat ** posimgs, int npos, CvMat ** negimgs, int nneg,
 // validate i-th classifier on the validation set
 int CvStagedDetectorHaar::validate(int ni, double & fi, double & di)
 {
-#ifdef CV_STAGED_DETECT_HAAR_PRECOMPUTE_EVAL
-  int i,j,iter=ni-1;float thres,polar; int fcc=0,dcc=0;
+#if CV_STAGED_DETECT_HAAR_PRECOMPUTE_EVAL
+  int i,j,k,iter;float thres,polar; int fcc=0,dcc=0;
   int count[2];
   for (i=0;i<2;i++) { count[i] = evalres_precomp[i]->cols; }
   CvMat * frate = cvCreateMat(1,count[0],CV_32S);
@@ -459,7 +501,8 @@ int CvStagedDetectorHaar::validate(int ni, double & fi, double & di)
   cvSet(drate,cvScalar(1));
   int * frateptr = frate->data.i;
   int * drateptr = drate->data.i;
-  for (iter=0;iter<ni;iter++){
+  for (k=0;k<selected.size();k++){
+  iter=selected[k];
   thres=CV_MAT_ELEM(*features,float,iter,0);
   polar=CV_MAT_ELEM(*features,float,iter,1);
   for (i=0;i<2;i++){
@@ -473,7 +516,7 @@ int CvStagedDetectorHaar::validate(int ni, double & fi, double & di)
     }
   } // j loop
   } // i loop
-  } // iter loop
+  } // k loop
   fi=cvSum(frate).val[0]/double(count[0]);
   di=cvSum(drate).val[0]/double(count[1]);
   cvReleaseMat(&frate);
@@ -488,8 +531,8 @@ int CvStagedDetectorHaar::validate(int ni, double & fi, double & di)
 int CvStagedDetectorHaar::adjust(int ni, double dtar,
                                  double & fi, double & di)
 {
-  float * featptr = (float*)(features->data.ptr+features->step*(ni-1));
-  int i,j,iter=ni-1;float thres,polar; int fcc=0,dcc=0;
+  int i,j,iter=selected[selected.size()-1];float thres,polar; int fcc=0,dcc=0;
+  float * featptr = (float*)(features->data.ptr+features->step*iter);
   float * evalresptr;
   if (featptr[1]>0){
     while(di<dtar){
@@ -609,11 +652,11 @@ cascadetrain(CvMat ** posimgs, int npos, CvMat ** negimgs, int nneg,
       // compute fi under this threshold
       validate(ni,fi,di);
       //if (fi==fi_old){ni--;}
-fprintf(stderr,"/* %d,fi:%.4f,di:%.2f */",ni-1,fi,di);
-fprintf(stderr,"%.2f,",(features->data.fl+(ni-1)*features->cols)[0]);
-fprintf(stderr,"%.0f,",(features->data.fl+(ni-1)*features->cols)[1]);
-fprintf(stderr,"%.2f,",(features->data.fl+(ni-1)*features->cols)[2]);
-cvPrintf(stderr,"%.0f,",features,cvRect(3,ni-1,features->cols-3,1));
+fprintf(stderr,"/* %d,fi:%.4f,di:%.2f */",selected[selected.size()-1],fi,di);
+fprintf(stderr,"%.2f,",(features->data.fl+(selected[selected.size()-1])*features->cols)[0]);
+fprintf(stderr,"%.0f,",(features->data.fl+(selected[selected.size()-1])*features->cols)[1]);
+fprintf(stderr,"%.2f,",(features->data.fl+(selected[selected.size()-1])*features->cols)[2]);
+cvPrintf(stderr,"%.0f,",features,cvRect(3,selected[selected.size()-1],features->cols-3,1));
     }
     Frate->data.db[i]=fi;//Frate->data.db[i-1]*fi;
     Drate->data.db[i]=di;//Drate->data.db[i-1];
@@ -642,10 +685,10 @@ CvMat * icvCreateHaarFeatureSetEx(int tsize)
   haar * buff = (haar*)malloc(sizeof(haar)*(1<<log2count));
   int i,j,m,n,count=0,pstep=2,x,y,dx,dy;
 
-  // for (x=0;x<tsize;x+=pstep){
-  // for (y=0;y<tsize;y+=pstep){
-  for (x=0;x<tsize;x++){
-  for (y=0;y<tsize;y++){
+  for (x=0;x<tsize;x+=pstep){
+  for (y=0;y<tsize;y+=pstep){
+  // for (x=0;x<tsize;x++){
+  // for (y=0;y<tsize;y++){
   for (dx=2;dx<tsize;dx+=pstep){
   for (dy=2;dy<tsize;dy+=pstep){
 

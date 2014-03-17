@@ -10,11 +10,12 @@
 
 #include "cvinvcomp.h"
 #include "cvext.h"
+#include <ctype.h>
 
 int main(int argc, char * argv[])
 {
 
-#if 0
+#if 1
   const CvSize imsize = cvSize(320, 240);
 #else
   const CvSize imsize = cvSize(160, 120);
@@ -28,7 +29,7 @@ int main(int argc, char * argv[])
   // CvMSEPF pfilter;
   // CvAbstractTracker tracker;
   // CvGeneticTracker tracker;
-  CvHandTracker tracker;
+  // CvHandTracker tracker;
   CvCapture * capture = NULL;
   IplImage * grayImage = NULL;
   IplImage * rawImage = cvCreateImage(imsize, IPL_DEPTH_8U, 3);

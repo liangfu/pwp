@@ -22,6 +22,7 @@ else:
   env.Append(CPPFLAGS = ['-O2','-Wall'])
   env.Append(OBJPREFIX = '.obj_release/')
     
+env.Append(LIBS = ['cxcore','cv','highgui'])
 env.Append(LIBPATH = ['/usr/lib'])
 env.Append(RPATH = ['/usr/lib','.'])
 

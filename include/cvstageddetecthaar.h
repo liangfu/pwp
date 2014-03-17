@@ -11,6 +11,7 @@
 #define __CV_STAGED_DETECTOR_HAAR_H__
 
 #include "cvext_c.h"
+#include <vector>
 
 // final classifier design :
 // winsize - configure
@@ -30,6 +31,7 @@ class CV_EXPORTS CvStagedDetectorHaar
   CvMat * evalres_precomp[2];
   int evalres_precomputed;
   CvMat * weights;
+  std::vector<int> selected;
   int weights_initialized;
   int validate(int ni, double & fi, double & di);
   int adjust(int ni, double dtar, double & fi, double & di);
@@ -41,6 +43,7 @@ public:
       weights(0),weights_initialized(0)
   {
     evalres_precomp[0]=0;evalres_precomp[1]=0;
+	selected.clear();
   }
 
   ~CvStagedDetectorHaar()

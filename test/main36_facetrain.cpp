@@ -58,7 +58,7 @@ int main(int argc, char * argv[])
   CvStagedDetectorHaar detector;
 
 #if 1
-  detector.cascadetrain(samples[0],count[0],samples[1],count[1]);
+  detector.cascadetrain(samples[0],count[0],samples[1],count[1],0.7,0.94,0.001);
 
 #else
 

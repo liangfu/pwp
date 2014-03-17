@@ -34,3 +34,13 @@ env.Append(RPATH = ['/usr/lib','.','../lib'])
 
 header_list=[]
 env.Program(target='../bin/facetrain',source='main36_facetrain.cpp',header=header_list)
+env.Program(target='../bin/facemake24',source='main36_makeface24x24.cpp',header=header_list)
+
+env.Append(LIBS = ['avcodec','avdevice','avformat','avutil'])
+env.Append(LIBPATH = ['../extern/highgui/extern/lib'])
+env.Append(RPATH = ['../extern/highgui/extern/lib'])
+
+env.Program(target='../bin/template',source='main00_template.cpp',header=header_list)
+env.Program(target='../bin/pwptracker',source='main27_pwptracker.cpp',header=header_list)
+
+

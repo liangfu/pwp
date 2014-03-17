@@ -293,6 +293,23 @@ CVAPI(void) cvReleaseCapture( CvCapture** capture );
 CVAPI(double) cvGetCaptureProperty( CvCapture* capture, int property_id );
 CVAPI(int)    cvSetCaptureProperty( CvCapture* capture, int property_id, double value );
 
+/* "black box" video file writer structure */
+typedef struct CvVideoWriter CvVideoWriter;
+
+#define CV_FOURCC(c1,c2,c3,c4)  \
+    (((c1)&255) + (((c2)&255)<<8) + (((c3)&255)<<16) + (((c4)&255)<<24))
+
+/* initialize video file writer */
+CVAPI(CvVideoWriter*) cvCreateVideoWriter( const char* filename, int fourcc,
+                                           double fps, CvSize frame_size,
+                                           int is_color CV_DEFAULT(1));
+
+/* write frame to video file */
+CVAPI(int) cvWriteFrame( CvVideoWriter* writer, const IplImage* image );
+
+/* close video file writer */
+CVAPI(void) cvReleaseVideoWriter( CvVideoWriter** writer );
+	
 /****************************************************************************************\
 *                              Obsolete functions/synonyms                               *
 \****************************************************************************************/

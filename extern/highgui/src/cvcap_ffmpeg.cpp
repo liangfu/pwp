@@ -236,8 +236,9 @@ static int icvGrabFrameAVI_FFMPEG( CvCaptureAVI_FFMPEG* capture )
 
 static const IplImage* icvRetrieveFrameAVI_FFMPEG( CvCaptureAVI_FFMPEG* capture )
 {
-    if( !capture || !capture->video_st || !capture->picture->data[0] )
-    return 0;
+  if( !capture || !capture->video_st || !capture->picture->data[0] ){
+	return 0;
+  }
 #if LIBAVFORMAT_BUILD > 4628
     img_convert( (AVPicture*)&capture->rgb_picture, PIX_FMT_BGR24,
                  (AVPicture*)capture->picture,
@@ -309,48 +310,50 @@ static double icvGetPropertyAVI_FFMPEG( CvCaptureAVI_FFMPEG* capture, int proper
 static int icvSetPropertyAVI_FFMPEG( CvCaptureAVI_FFMPEG* capture,
                                      int property_id, double value )
 {
-    if( !capture || !capture->video_st || !capture->picture->data[0] )
-    return 0;
+  if( !capture || !capture->video_st || !capture->picture->data[0] ){
+    //return 0;
+  }
     switch( property_id )
     {
-#if 0    
+#if 1
     case CV_CAP_PROP_POS_MSEC:
     case CV_CAP_PROP_POS_FRAMES:
     case CV_CAP_PROP_POS_AVI_RATIO:
-        {
+	  {
         int64_t timestamp = AV_NOPTS_VALUE;
         switch( property_id )
-            {
+		{
         case CV_CAP_PROP_POS_FRAMES:
-        if(capture->ic->start_time != AV_NOPTS_VALUE) {
-            value *= (double)capture->video_st->codec.frame_rate_base
-            / (double)capture->video_st->codec.frame_rate;
+		  if(capture->ic->start_time != AV_NOPTS_VALUE) {
+            value *= .0333333; // assume 30 fps
+			  // (double)capture->video_st->codec->frame_rate_base /
+			  // (double)capture->video_st->codec->frame_rate;
             timestamp = capture->ic->start_time+(int64_t)(value*AV_TIME_BASE);
-        }
-        break;
+		  }
+		  break;
         case CV_CAP_PROP_POS_MSEC:
-        if(capture->ic->start_time != AV_NOPTS_VALUE)
+		  if(capture->ic->start_time != AV_NOPTS_VALUE)
             timestamp = capture->ic->start_time+(int64_t)(value*AV_TIME_BASE/1000);
-        break;
+		  break;
         case CV_CAP_PROP_POS_AVI_RATIO:
-        if(capture->ic->start_time != AV_NOPTS_VALUE && capture->ic->duration != AV_NOPTS_VALUE)
+		  if(capture->ic->start_time != AV_NOPTS_VALUE && capture->ic->duration != AV_NOPTS_VALUE)
             timestamp = capture->ic->start_time+(int64_t)(value*capture->ic->duration);
-        break;
+		  break;
         }
         if(timestamp != AV_NOPTS_VALUE) {
-        //printf("timestamp=%g\n",(double)timestamp);
-        int ret = av_seek_frame(capture->ic, -1, timestamp, 0);
-        if (ret < 0) {
+		  //printf("timestamp=%g\n",(double)timestamp);
+		  int ret = av_seek_frame(capture->ic, -1, timestamp, 0);
+		  if (ret < 0) {
             fprintf(stderr, "HIGHGUI ERROR: AVI: could not seek to position %0.3f\n", 
-                (double)timestamp / AV_TIME_BASE);
+					(double)timestamp / AV_TIME_BASE);
             return 0;
+		  }
         }
-        }
-    }
-        break;
+	  }
+	  break;
 #endif  
     default:
-        return 0;
+	  return 0;
     }
 
     return 1;

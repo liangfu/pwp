@@ -6,15 +6,28 @@ source_list=filter(lambda x:x[-4:]=='.cpp',os.listdir('src'))
 header_list=filter(lambda x:x[-2:]=='.h',os.listdir('include'))
 source_list=map(lambda x:os.getcwd()+'/src/'+x,source_list)
 header_list=map(lambda x:os.getcwd()+'/include/'+x,header_list)
-print source_list
-print header_list
+# print source_list
+# print header_list
 
 env=Environment()
 
 env.Append(CPPPATH = ['.','/usr/include','include',
                       '../cxcore/include',
-                      '../cv/include'])
+                      '../cv/include',
+                      'extern/include'])
 env.Append(LIBS = ['cxcore','cv'])
+
+env.Append(LIBPATH = ['extern/lib'])
+env.Append(LIBS = ['avcodec','avdevice','avformat','avutil'])
+
+env.ParseConfig('pkg-config --cflags glib-2.0')
+env.ParseConfig('pkg-config --cflags gtk+-2.0')
+env.ParseConfig('pkg-config --cflags libpng')
+env.ParseConfig('pkg-config --libs glib-2.0')
+env.ParseConfig('pkg-config --libs gtk+-2.0')
+env.ParseConfig('pkg-config --libs libpng')
+env.Append(CPPDEFINES=['HAVE_GTK','HAVE_GTHREAD','HAVE_PNG','HAVE_FFMPEG'])
+
 debug = ARGUMENTS.get('debug', 1)
 
 if int(debug):

@@ -7,15 +7,16 @@
 }
 
 INCLUDEPATH += . src include ../cxcore/include ../cv/include
-unix:DEFINES += CVAPI_EXPORTS HAVE_JPEG HAVE_PNG 
-unix: LIBS += -lpng -ljpeg 
-win32:DEFINES += CVAPI_EXPORTS HAVE_PNG
-win32:INCLUDEPATH += extern/include
-win32:LIBS += -Lextern/lib -llibpng -lzlib
 win32{
-LIBS += -L../../lib -llibcxcore -llibcv -Llib
+  DEFINES += CVAPI_EXPORTS HAVE_PNG
+  INCLUDEPATH += extern/include
+  LIBS += -Lextern/lib -llibpng -lzlib
+  LIBS += -L../../lib -llibcxcore -llibcv -Llib
 }else{
-LIBS += -L../../lib -lcxcore -lcv -Llib
+  DEFINES += CVAPI_EXPORTS HAVE_JPEG HAVE_PNG HAVE_FFMPEG
+  INCLUDEPATH += extern/include
+  LIBS += -lpng -ljpeg -lavcodec -lavdevice -lavformat -lavutil
+  LIBS += -L../../lib -lcxcore -lcv -Llib -Lextern/lib
 }
 
 # Input

@@ -107,7 +107,11 @@ CV_IMPL int cvSetCaptureProperty( CvCapture* capture, int id, double value )
     if( capture && capture->vtable &&
         capture->vtable->count >= CV_CAPTURE_BASE_API_COUNT &&
         capture->vtable->set_property )
-        return capture->vtable->set_property( capture, id, value );
+	{
+	  return capture->vtable->set_property( capture, id, value );
+	}else{
+	  fprintf(stderr,"warning: %s not implemented!\n",__func__);
+	}
     return 0;
 }
 

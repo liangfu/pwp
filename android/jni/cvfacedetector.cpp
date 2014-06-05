@@ -153,365 +153,365 @@ int CvFaceDetector::detect(CvMat * img, CvRect roi[])
   return cc;
 }
 
-int CvFaceDetector::train(CvTrainSample * poslist, int npos,
-                          CvTrainSample * neglist, int nneg)
-{
-  IcvHaarFeatureSet * features = icvCreateHaarFeatureSet(25);
-  extractSamples(poslist,npos,neglist,nneg);
-  calcIntegrals();
+// int CvFaceDetector::train(CvTrainSample * poslist, int npos,
+//                           CvTrainSample * neglist, int nneg)
+// {
+//   IcvHaarFeatureSet * features = icvCreateHaarFeatureSet(25);
+//   extractSamples(poslist,npos,neglist,nneg);
+//   calcIntegrals();
 
-  static uchar face_data[576];
-  static int integral_data[625];
-  static CvMat face = cvMat(24,24,CV_8U,face_data);
-  static CvMat integral = cvMat(25,25,CV_32S,integral_data);
-  const int facedatasz = sizeof(face_data);
-  const int integralsz = sizeof(integral_data);
-  int i,j,iter,maxiter = 30;
-  const int numsamples = 40;
-  // CvMat * weights = cvCreateMat(features->count,1,CV_64F);
-  // CvMat * weights = cvCreateMat(numsamples,1,CV_64F);
+//   static uchar face_data[576];
+//   static int integral_data[625];
+//   static CvMat face = cvMat(24,24,CV_8U,face_data);
+//   static CvMat integral = cvMat(25,25,CV_32S,integral_data);
+//   const int facedatasz = sizeof(face_data);
+//   const int integralsz = sizeof(integral_data);
+//   int i,j,iter,maxiter = 30;
+//   const int numsamples = 40;
+//   // CvMat * weights = cvCreateMat(features->count,1,CV_64F);
+//   // CvMat * weights = cvCreateMat(numsamples,1,CV_64F);
   
-  CvAdaBoostClassifier classifier;
-  classifier.count = features->count;
-  classifier.h = new CvWeakClassifier[features->count];
-  for (i=0;i<features->count;i++){
-    classifier.h[i].featureid=i;
-    classifier.h[i].weight=1./double(features->count);
-    // weights->data.db[i]=1./double(features->count);
-  }
+//   CvAdaBoostClassifier classifier;
+//   classifier.count = features->count;
+//   classifier.h = new CvWeakClassifier[features->count];
+//   for (i=0;i<features->count;i++){
+//     classifier.h[i].featureid=i;
+//     classifier.h[i].weight=1./double(features->count);
+//     // weights->data.db[i]=1./double(features->count);
+//   }
 
-  for (iter=0;iter<maxiter;iter++){
-    CvMat * epsilon = cvCreateMat(1,features->count,CV_64F);
+//   for (iter=0;iter<maxiter;iter++){
+//     CvMat * epsilon = cvCreateMat(1,features->count,CV_64F);
 
-    // normalize weights
-    {
-      double invwtsum,wtsum = 0;//1./cvSum(weights).val[0];
-      for (i=0;i<features->count;i++){ wtsum+=classifier.h[i].weight; }
-      invwtsum = 1./wtsum;
-      // for (i=0;i<weights->rows;i++){ weights->data.db[i] *= invwtsum; }
-      for (i=0;i<features->count;i++){ classifier.h[i].weight *= invwtsum; }
-    }
+//     // normalize weights
+//     {
+//       double invwtsum,wtsum = 0;//1./cvSum(weights).val[0];
+//       for (i=0;i<features->count;i++){ wtsum+=classifier.h[i].weight; }
+//       invwtsum = 1./wtsum;
+//       // for (i=0;i<weights->rows;i++){ weights->data.db[i] *= invwtsum; }
+//       for (i=0;i<features->count;i++){ classifier.h[i].weight *= invwtsum; }
+//     }
     
-    // compute weight for each feature
-    for (i=0;i<features->count;i++){
-      CvMat * posRes = cvCreateMat(numsamples,1,CV_32S);
-      CvMat * negRes = cvCreateMat(numsamples,1,CV_32S);
-      double minval=0xffffff,maxval=-0xffffff;
-      double wt = classifier.h[i].weight;
-      double epsval = 0;
+//     // compute weight for each feature
+//     for (i=0;i<features->count;i++){
+//       CvMat * posRes = cvCreateMat(numsamples,1,CV_32S);
+//       CvMat * negRes = cvCreateMat(numsamples,1,CV_32S);
+//       double minval=0xffffff,maxval=-0xffffff;
+//       double wt = classifier.h[i].weight;
+//       double epsval = 0;
       
-      // for (j=0;j<m_positive->rows;j++){
-      for (j=0;j<posRes->rows;j++){
-        memcpy(integral_data,m_posIntegral->data.ptr+j*integralsz,
-               integralsz);
-        int posresval =
-            icvCalcHaarFeature(integral_data,features->feature[i]);
-        posRes->data.i[j] = posresval;
-        minval = MIN(posresval,minval);
-        maxval = MAX(posresval,maxval);
-      }
-      for (j=0;j<negRes->rows;j++){
-        memcpy(integral_data,m_negIntegral->data.ptr+j*integralsz,
-               integralsz);
-        negRes->data.i[j] =
-            icvCalcHaarFeature(integral_data,features->feature[i]);
-      }
+//       // for (j=0;j<m_positive->rows;j++){
+//       for (j=0;j<posRes->rows;j++){
+//         memcpy(integral_data,m_posIntegral->data.ptr+j*integralsz,
+//                integralsz);
+//         int posresval =
+//             icvCalcHaarFeature(integral_data,features->feature[i]);
+//         posRes->data.i[j] = posresval;
+//         minval = MIN(posresval,minval);
+//         maxval = MAX(posresval,maxval);
+//       }
+//       for (j=0;j<negRes->rows;j++){
+//         memcpy(integral_data,m_negIntegral->data.ptr+j*integralsz,
+//                integralsz);
+//         negRes->data.i[j] =
+//             icvCalcHaarFeature(integral_data,features->feature[i]);
+//       }
 
-      double posavg = cvAvg(posRes).val[0];
-      double negavg = cvAvg(negRes).val[0];
-      if (posavg<negavg){
-        classifier.h[i].threshold=maxval;classifier.h[i].parity=1;
-      }else{
-        classifier.h[i].threshold=minval;classifier.h[i].parity=-1;
-      }
+//       double posavg = cvAvg(posRes).val[0];
+//       double negavg = cvAvg(negRes).val[0];
+//       if (posavg<negavg){
+//         classifier.h[i].threshold=maxval;classifier.h[i].parity=1;
+//       }else{
+//         classifier.h[i].threshold=minval;classifier.h[i].parity=-1;
+//       }
 
-      double threshold = classifier.h[i].threshold;
-      double parity = classifier.h[i].parity;
-      epsval=0;
-      for (j=0;j<posRes->rows;j++){
-        epsval += wt*//weights->data.db[j]*
-            fabs((((parity*posRes->data.i[j])<(parity*threshold))?1:0)-1);
-      }
-      for (j=0;j<negRes->rows;j++){
-        epsval += wt*//weights->data.db[j]*
-            fabs((((parity*negRes->data.i[j])<(parity*threshold))?1:0)-0);
-      }
-      epsilon->data.db[i]=epsval;
+//       double threshold = classifier.h[i].threshold;
+//       double parity = classifier.h[i].parity;
+//       epsval=0;
+//       for (j=0;j<posRes->rows;j++){
+//         epsval += wt*//weights->data.db[j]*
+//             fabs((((parity*posRes->data.i[j])<(parity*threshold))?1:0)-1);
+//       }
+//       for (j=0;j<negRes->rows;j++){
+//         epsval += wt*//weights->data.db[j]*
+//             fabs((((parity*negRes->data.i[j])<(parity*threshold))?1:0)-0);
+//       }
+//       epsilon->data.db[i]=epsval;
       
-      if (i%1000==1){fprintf(stderr, "-");}
-      cvReleaseMat(&posRes);
-      cvReleaseMat(&negRes);
-    }
+//       if (i%1000==1){fprintf(stderr, "-");}
+//       cvReleaseMat(&posRes);
+//       cvReleaseMat(&negRes);
+//     }
 
-    double minval=0xffffff,maxval=-0xffffff; CvPoint minloc,maxloc;
-    //cvMinMaxLoc(epsilon,&minval,&maxval,&minloc,&maxloc);
-    for (i=iter;i<features->count;i++){
-      double epsval = epsilon->data.db[i];
-      if (epsval<minval){minval=epsval;minloc.x=i;minloc.y=0;}
-      if (epsval>maxval){maxval=epsval;maxloc.x=i;maxloc.y=0;}
-    }
-    swap(&classifier.h[iter],&classifier.h[minloc.x],
-         sizeof(CvWeakClassifier));
-    swap(&features->feature[iter],&features->feature[minloc.x],
-         sizeof(IcvHaarFeature));
-    fprintf(stderr, "minloc: %d(%f) at %dth iteration\n",
-            minloc.x,minval,iter);
-    {
-      //cvSet(&face,cvScalar(128));
-      memcpy(face_data,m_positive->data.ptr,facedatasz);
-      CvMat subface0_stub;
-      CvMat * subface0 =
-          cvGetSubRect(&face,&subface0_stub,
-            features->feature[iter].rect[0].roi);
-      cvSet(subface0,cvScalar(0));
-      CvMat subface1_stub;
-      CvMat * subface1 =
-          cvGetSubRect(&face,&subface1_stub,
-            features->feature[iter].rect[1].roi);
-      cvSet(subface1,cvScalar(255));
-    }
-    //cvShowImage("Test",&face); CV_WAIT2(10);
+//     double minval=0xffffff,maxval=-0xffffff; CvPoint minloc,maxloc;
+//     //cvMinMaxLoc(epsilon,&minval,&maxval,&minloc,&maxloc);
+//     for (i=iter;i<features->count;i++){
+//       double epsval = epsilon->data.db[i];
+//       if (epsval<minval){minval=epsval;minloc.x=i;minloc.y=0;}
+//       if (epsval>maxval){maxval=epsval;maxloc.x=i;maxloc.y=0;}
+//     }
+//     swap(&classifier.h[iter],&classifier.h[minloc.x],
+//          sizeof(CvWeakClassifier));
+//     swap(&features->feature[iter],&features->feature[minloc.x],
+//          sizeof(IcvHaarFeature));
+//     fprintf(stderr, "minloc: %d(%f) at %dth iteration\n",
+//             minloc.x,minval,iter);
+//     {
+//       //cvSet(&face,cvScalar(128));
+//       memcpy(face_data,m_positive->data.ptr,facedatasz);
+//       CvMat subface0_stub;
+//       CvMat * subface0 =
+//           cvGetSubRect(&face,&subface0_stub,
+//             features->feature[iter].rect[0].roi);
+//       cvSet(subface0,cvScalar(0));
+//       CvMat subface1_stub;
+//       CvMat * subface1 =
+//           cvGetSubRect(&face,&subface1_stub,
+//             features->feature[iter].rect[1].roi);
+//       cvSet(subface1,cvScalar(255));
+//     }
+//     //cvShowImage("Test",&face); CV_WAIT2(10);
 
-    for (i=0;i<features->count;i++){
-      classifier.h[i].weight *=
-          pow(epsilon->data.db[i]/(1.-epsilon->data.db[i]),
-              1.-((i<=iter)?0:1));
-    }
+//     for (i=0;i<features->count;i++){
+//       classifier.h[i].weight *=
+//           pow(epsilon->data.db[i]/(1.-epsilon->data.db[i]),
+//               1.-((i<=iter)?0:1));
+//     }
 
-    // fprintf(stderr,"\n");
-    cvReleaseMat(&epsilon);
-  }
-  // cvReleaseMat(&weights);
+//     // fprintf(stderr,"\n");
+//     cvReleaseMat(&epsilon);
+//   }
+//   // cvReleaseMat(&weights);
 
-  // {
-  //   for (k=0;k<m_classifier->count;k++){
-  //     fprintf(stderr,"%.1f,%d.0, %d.0,%d.,%d.,%d.,%d., "
-  //             "%d.,%d.,%d.,%d.,%d., %d.,%d.,%d.,%d.,%d., \n",
-  //             m_classifier->h[k].threshold,m_classifier->h[k].parity,
-  //             m_features->feature[k].rect[0].roi.x,
-  //             m_features->feature[k].rect[0].roi.y,
-  //             m_features->feature[k].rect[0].roi.width,
-  //             m_features->feature[k].rect[0].roi.height,
-  //             m_features->feature[k].rect[0].wt,
-  //             m_features->feature[k].rect[1].roi.x,
-  //             m_features->feature[k].rect[1].roi.y,
-  //             m_features->feature[k].rect[1].roi.width,
-  //             m_features->feature[k].rect[1].roi.height,
-  //             m_features->feature[k].rect[1].wt,
-  //             m_features->feature[k].rect[2].roi.x,
-  //             m_features->feature[k].rect[2].roi.y,
-  //             m_features->feature[k].rect[2].roi.width,
-  //             m_features->feature[k].rect[2].roi.height,
-  //             m_features->feature[k].rect[2].wt);
-  //   }exit(0);
-  // }
+//   // {
+//   //   for (k=0;k<m_classifier->count;k++){
+//   //     fprintf(stderr,"%.1f,%d.0, %d.0,%d.,%d.,%d.,%d., "
+//   //             "%d.,%d.,%d.,%d.,%d., %d.,%d.,%d.,%d.,%d., \n",
+//   //             m_classifier->h[k].threshold,m_classifier->h[k].parity,
+//   //             m_features->feature[k].rect[0].roi.x,
+//   //             m_features->feature[k].rect[0].roi.y,
+//   //             m_features->feature[k].rect[0].roi.width,
+//   //             m_features->feature[k].rect[0].roi.height,
+//   //             m_features->feature[k].rect[0].wt,
+//   //             m_features->feature[k].rect[1].roi.x,
+//   //             m_features->feature[k].rect[1].roi.y,
+//   //             m_features->feature[k].rect[1].roi.width,
+//   //             m_features->feature[k].rect[1].roi.height,
+//   //             m_features->feature[k].rect[1].wt,
+//   //             m_features->feature[k].rect[2].roi.x,
+//   //             m_features->feature[k].rect[2].roi.y,
+//   //             m_features->feature[k].rect[2].roi.width,
+//   //             m_features->feature[k].rect[2].roi.height,
+//   //             m_features->feature[k].rect[2].wt);
+//   //   }exit(0);
+//   // }
 
-  // icvPrintClassifier("../src/cvfacedetector_data.cpp",
-  //                    classifier,*features,iter);
+//   // icvPrintClassifier("../src/cvfacedetector_data.cpp",
+//   //                    classifier,*features,iter);
   
-  icvReleaseHaarFeatureSet(&features);
-}
+//   icvReleaseHaarFeatureSet(&features);
+// }
     
-int CvFaceDetector::extractSamples(CvTrainSample * poslist, int npos,
-                                   CvTrainSample * neglist, int nneg)
-{
-  int i;
-  static uchar face_data[576];
-  const int facedatasz = sizeof(face_data);
+// int CvFaceDetector::extractSamples(CvTrainSample * poslist, int npos,
+//                                    CvTrainSample * neglist, int nneg)
+// {
+//   int i;
+//   static uchar face_data[576];
+//   const int facedatasz = sizeof(face_data);
 
-  // collect positive training samples
-#if 0
-  {
-  CvMat * pos = cvCreateMat(npos*2,facedatasz,CV_8U);
+//   // collect positive training samples
+// #if 0
+//   {
+//   CvMat * pos = cvCreateMat(npos*2,facedatasz,CV_8U);
 
-  fprintf(stderr, "INFO: collecting positive samples!\n");
-  int poscount = 0;
-  for (i=0;i<npos;i++){
-    IplImage * raw = cvLoadImage(poslist[i].fn,0);
-    CvMat img_stub;
-    CvMat * img = cvGetMat(raw, &img_stub);
-    CvMat face = cvMat(24,24,CV_8U,face_data);
-    CvPoint2D32f center = poslist[i].box.center;
-    float xscale = poslist[i].box.size.width/24.;
-    float yscale = poslist[i].box.size.height/24.;
-    float radius = -poslist[i].box.angle*CV_PI/180.;
-#if 0
-    float warp_p_data[4] = {
-      xscale*cos(radius),yscale*sin(radius),
-      center.x-12.*xscale*cos(radius)+12.*yscale*sin(radius),
-      center.y-12.*xscale*sin(radius)-12.*yscale*cos(radius)
-    };
-    CvMat warp_p = cvMat(4,1,CV_32F,warp_p_data);
-    icvWarp(img,&face,&warp_p);
-#elif 1
-    float map_matrix_data[6]={
-      xscale*cos(radius),-yscale*sin(radius),
-      center.x,
-      xscale*sin(radius),yscale*cos(radius),
-      center.y
-    };
-    CvMat map_matrix = cvMat(2,3,CV_32F,map_matrix_data);
-    cvGetQuadrangleSubPix(img,&face,&map_matrix);
-#else
-    float map_matrix_data[6]={
-      xscale*cos(radius),-yscale*sin(radius),
-      center.x-12.*xscale*cos(radius)+12.*yscale*sin(radius),
-      xscale*sin(radius),yscale*cos(radius),
-      center.y-12.*xscale*sin(radius)-12.*yscale*cos(radius)
-    };
-    CvMat map_matrix = cvMat(2,3,CV_32F,map_matrix_data);
-    cvWarpAffine(img,&face,&map_matrix,
-                 CV_INTER_CUBIC+CV_WARP_FILL_OUTLIERS+
-                 CV_WARP_INVERSE_MAP,cvScalarAll(0));
-#endif
-    float avgval = cvAvg(&face).val[0];
-    // fprintf(stderr, "id: %d,avg: %f\n", i,avgval);
-    if (avgval>35) {
-      memcpy(pos->data.ptr+poscount*facedatasz,face_data,facedatasz);
-      // fprintf(stderr, "file: %s\n", poslist[i].fn);
-      // cvShowImage("Test",&face); CV_WAIT();
-      cvFlip(&face,&face,1);
-      memcpy(pos->data.ptr+poscount*facedatasz+facedatasz,face_data,
-             facedatasz);
-      poscount += 2;
-      if (i%100==1) { fprintf(stderr, "-"); }
-    }
-    cvReleaseImage(&raw);
-  }
-  fprintf(stderr, "\n");
+//   fprintf(stderr, "INFO: collecting positive samples!\n");
+//   int poscount = 0;
+//   for (i=0;i<npos;i++){
+//     IplImage * raw = cvLoadImage(poslist[i].fn,0);
+//     CvMat img_stub;
+//     CvMat * img = cvGetMat(raw, &img_stub);
+//     CvMat face = cvMat(24,24,CV_8U,face_data);
+//     CvPoint2D32f center = poslist[i].box.center;
+//     float xscale = poslist[i].box.size.width/24.;
+//     float yscale = poslist[i].box.size.height/24.;
+//     float radius = -poslist[i].box.angle*CV_PI/180.;
+// #if 0
+//     float warp_p_data[4] = {
+//       xscale*cos(radius),yscale*sin(radius),
+//       center.x-12.*xscale*cos(radius)+12.*yscale*sin(radius),
+//       center.y-12.*xscale*sin(radius)-12.*yscale*cos(radius)
+//     };
+//     CvMat warp_p = cvMat(4,1,CV_32F,warp_p_data);
+//     icvWarp(img,&face,&warp_p);
+// #elif 1
+//     float map_matrix_data[6]={
+//       xscale*cos(radius),-yscale*sin(radius),
+//       center.x,
+//       xscale*sin(radius),yscale*cos(radius),
+//       center.y
+//     };
+//     CvMat map_matrix = cvMat(2,3,CV_32F,map_matrix_data);
+//     cvGetQuadrangleSubPix(img,&face,&map_matrix);
+// #else
+//     float map_matrix_data[6]={
+//       xscale*cos(radius),-yscale*sin(radius),
+//       center.x-12.*xscale*cos(radius)+12.*yscale*sin(radius),
+//       xscale*sin(radius),yscale*cos(radius),
+//       center.y-12.*xscale*sin(radius)-12.*yscale*cos(radius)
+//     };
+//     CvMat map_matrix = cvMat(2,3,CV_32F,map_matrix_data);
+//     cvWarpAffine(img,&face,&map_matrix,
+//                  CV_INTER_CUBIC+CV_WARP_FILL_OUTLIERS+
+//                  CV_WARP_INVERSE_MAP,cvScalarAll(0));
+// #endif
+//     float avgval = cvAvg(&face).val[0];
+//     // fprintf(stderr, "id: %d,avg: %f\n", i,avgval);
+//     if (avgval>35) {
+//       memcpy(pos->data.ptr+poscount*facedatasz,face_data,facedatasz);
+//       // fprintf(stderr, "file: %s\n", poslist[i].fn);
+//       // cvShowImage("Test",&face); CV_WAIT();
+//       cvFlip(&face,&face,1);
+//       memcpy(pos->data.ptr+poscount*facedatasz+facedatasz,face_data,
+//              facedatasz);
+//       poscount += 2;
+//       if (i%100==1) { fprintf(stderr, "-"); }
+//     }
+//     cvReleaseImage(&raw);
+//   }
+//   fprintf(stderr, "\n");
 
-  assert(!m_positive);
-  m_positive = cvCreateMat(poscount,facedatasz,CV_8U);
-  memcpy(m_positive->data.ptr,pos->data.ptr,poscount*facedatasz);
+//   assert(!m_positive);
+//   m_positive = cvCreateMat(poscount,facedatasz,CV_8U);
+//   memcpy(m_positive->data.ptr,pos->data.ptr,poscount*facedatasz);
 
-  // write to binary file
-  {
-    FILE * fp = fopen("../data/face24x24.bin","w");
-    fwrite(&m_positive->rows,4,1,fp);
-    fwrite(&m_positive->cols,4,1,fp);
-    fwrite(m_positive->data.ptr,1,poscount*facedatasz,fp);
-    fclose(fp);
-  }
+//   // write to binary file
+//   {
+//     FILE * fp = fopen("../data/face24x24.bin","w");
+//     fwrite(&m_positive->rows,4,1,fp);
+//     fwrite(&m_positive->cols,4,1,fp);
+//     fwrite(m_positive->data.ptr,1,poscount*facedatasz,fp);
+//     fclose(fp);
+//   }
   
-  cvReleaseMat(&pos);
-  }
-#else
-  // read directly from saved binary file
-  {
-    int nr,nc;
-    FILE * fp = fopen("../data/face24x24.bin","r");
-    fread(&nr,4,1,fp);
-    fread(&nc,4,1,fp);
-    assert(!m_positive);
-    assert(facedatasz==nc);
-    m_positive = cvCreateMat(nr,nc,CV_8U);
-    fread(m_positive->data.ptr,1,nr*nc,fp);
-    fclose(fp);
-  }
-#endif
-  // finish collecting positive training samples
+//   cvReleaseMat(&pos);
+//   }
+// #else
+//   // read directly from saved binary file
+//   {
+//     int nr,nc;
+//     FILE * fp = fopen("../data/face24x24.bin","r");
+//     fread(&nr,4,1,fp);
+//     fread(&nc,4,1,fp);
+//     assert(!m_positive);
+//     assert(facedatasz==nc);
+//     m_positive = cvCreateMat(nr,nc,CV_8U);
+//     fread(m_positive->data.ptr,1,nr*nc,fp);
+//     fclose(fp);
+//   }
+// #endif
+//   // finish collecting positive training samples
 
-  // start to collect negative training samples
-#if 0
-  {
-    assert(m_positive);
-    int negcount = m_positive->rows;
-    m_negative = cvCreateMat(negcount,facedatasz,CV_8U);
-    CvRNG rng = cvRNG();
-    CvMat * pts = cvCreateMat(negcount,1,CV_32S);
-    CvMat * sizes = cvCreateMat(negcount,1,CV_32S);
-    cvRandArr(&rng,pts,CV_RAND_UNI,cvScalar(0),cvScalar(nneg));
-    cvRandArr(&rng,sizes,CV_RAND_UNI,cvScalar(30),cvScalar(80));
+//   // start to collect negative training samples
+// #if 0
+//   {
+//     assert(m_positive);
+//     int negcount = m_positive->rows;
+//     m_negative = cvCreateMat(negcount,facedatasz,CV_8U);
+//     CvRNG rng = cvRNG();
+//     CvMat * pts = cvCreateMat(negcount,1,CV_32S);
+//     CvMat * sizes = cvCreateMat(negcount,1,CV_32S);
+//     cvRandArr(&rng,pts,CV_RAND_UNI,cvScalar(0),cvScalar(nneg));
+//     cvRandArr(&rng,sizes,CV_RAND_UNI,cvScalar(30),cvScalar(80));
 
-    fprintf(stderr, "INFO: collecting negative samples!\n");
-    for (i=0;i<negcount;i++){
-      IplImage * raw = cvLoadImage(neglist[pts->data.i[i]].fn,0);
-      CvMat img_stub;
-      CvMat * img = cvGetMat(raw,&img_stub);
-      int nr=img->rows,nc=img->cols;
-      int xloc = cvFloor(cvRandReal(&rng)*(nc-90));
-      int yloc = cvFloor(cvRandReal(&rng)*(nr-90));
-      int winsize = sizes->data.i[i]; 
-      // winsize = MAX(winsize,nc-xloc-1);
-      // winsize = MAX(winsize,nr-yloc-1);
-      assert(winsize>=24);
-      CvMat face = cvMat(24,24,CV_8U,face_data);
-      float warp_p_data[3]={float(winsize)/24.,xloc,yloc};
-      CvMat warp_p = cvMat(3,1,CV_32F,warp_p_data);
-      icvWarp(img,&face,&warp_p);
-      memcpy(m_negative->data.ptr+i*facedatasz,face_data,facedatasz);
-      if (i%100==1) { fprintf(stderr, "-"); }
-      //cvShowImage("Test",&face); CV_WAIT();
-      cvReleaseImage(&raw);
-    }
-    fprintf(stderr, "\n");
+//     fprintf(stderr, "INFO: collecting negative samples!\n");
+//     for (i=0;i<negcount;i++){
+//       IplImage * raw = cvLoadImage(neglist[pts->data.i[i]].fn,0);
+//       CvMat img_stub;
+//       CvMat * img = cvGetMat(raw,&img_stub);
+//       int nr=img->rows,nc=img->cols;
+//       int xloc = cvFloor(cvRandReal(&rng)*(nc-90));
+//       int yloc = cvFloor(cvRandReal(&rng)*(nr-90));
+//       int winsize = sizes->data.i[i]; 
+//       // winsize = MAX(winsize,nc-xloc-1);
+//       // winsize = MAX(winsize,nr-yloc-1);
+//       assert(winsize>=24);
+//       CvMat face = cvMat(24,24,CV_8U,face_data);
+//       float warp_p_data[3]={float(winsize)/24.,xloc,yloc};
+//       CvMat warp_p = cvMat(3,1,CV_32F,warp_p_data);
+//       icvWarp(img,&face,&warp_p);
+//       memcpy(m_negative->data.ptr+i*facedatasz,face_data,facedatasz);
+//       if (i%100==1) { fprintf(stderr, "-"); }
+//       //cvShowImage("Test",&face); CV_WAIT();
+//       cvReleaseImage(&raw);
+//     }
+//     fprintf(stderr, "\n");
 
-    cvReleaseMat(&pts);
-    cvReleaseMat(&sizes);
+//     cvReleaseMat(&pts);
+//     cvReleaseMat(&sizes);
 
-    // write to binary file
-    {
-      FILE * fp = fopen("../data/nonface24x24.bin","w");
-      fwrite(&m_negative->rows,4,1,fp);
-      fwrite(&m_negative->cols,4,1,fp);
-      fwrite(m_negative->data.ptr,1,negcount*facedatasz,fp);
-      fclose(fp);
-    }
-  }
-#else
-  {
-    int nr,nc;
-    FILE * fp = fopen("../data/nonface24x24.bin","r");
-    fread(&nr,4,1,fp);
-    fread(&nc,4,1,fp);
-    assert(!m_negative);
-    assert(facedatasz==nc);
-    m_negative = cvCreateMat(nr,nc,CV_8U);
-    fread(m_negative->data.ptr,1,nr*nc,fp);
-    fclose(fp);
-  }
-#endif
+//     // write to binary file
+//     {
+//       FILE * fp = fopen("../data/nonface24x24.bin","w");
+//       fwrite(&m_negative->rows,4,1,fp);
+//       fwrite(&m_negative->cols,4,1,fp);
+//       fwrite(m_negative->data.ptr,1,negcount*facedatasz,fp);
+//       fclose(fp);
+//     }
+//   }
+// #else
+//   {
+//     int nr,nc;
+//     FILE * fp = fopen("../data/nonface24x24.bin","r");
+//     fread(&nr,4,1,fp);
+//     fread(&nc,4,1,fp);
+//     assert(!m_negative);
+//     assert(facedatasz==nc);
+//     m_negative = cvCreateMat(nr,nc,CV_8U);
+//     fread(m_negative->data.ptr,1,nr*nc,fp);
+//     fclose(fp);
+//   }
+// #endif
   
-  fprintf(stderr, "INFO: %d positive samples!\n", m_positive->rows);
-  fprintf(stderr, "INFO: %d negative samples!\n", m_negative->rows);
-  // for (i=0;i<m_positive->rows;i++){
-  //   CvMat face = cvMat(24,24,CV_8U,face_data);
-  //   memcpy(face_data,m_positive->data.ptr+facedatasz*i,facedatasz);
-  //   cvShowImage("Test",&face); CV_WAIT();
-  // }
-  // for (i=0;i<m_negative->rows;i++){
-  //   CvMat face = cvMat(24,24,CV_8U,face_data);
-  //   memcpy(face_data,m_negative->data.ptr+facedatasz*i,facedatasz);
-  //   cvShowImage("Test",&face); CV_WAIT();
-  // }
-}
+//   fprintf(stderr, "INFO: %d positive samples!\n", m_positive->rows);
+//   fprintf(stderr, "INFO: %d negative samples!\n", m_negative->rows);
+//   // for (i=0;i<m_positive->rows;i++){
+//   //   CvMat face = cvMat(24,24,CV_8U,face_data);
+//   //   memcpy(face_data,m_positive->data.ptr+facedatasz*i,facedatasz);
+//   //   cvShowImage("Test",&face); CV_WAIT();
+//   // }
+//   // for (i=0;i<m_negative->rows;i++){
+//   //   CvMat face = cvMat(24,24,CV_8U,face_data);
+//   //   memcpy(face_data,m_negative->data.ptr+facedatasz*i,facedatasz);
+//   //   cvShowImage("Test",&face); CV_WAIT();
+//   // }
+// }
 
-int CvFaceDetector::calcIntegrals()
-{
-  int i;
-  static uchar face_data[576];
-  static int integral_data[625];
-  static CvMat face = cvMat(24,24,CV_8U,face_data);
-  static CvMat integral = cvMat(25,25,CV_32S,integral_data);
-  const int facedatasz = sizeof(face_data);
-  const int integralsz = sizeof(integral_data);
-  assert(integralsz==2500);
-  m_posIntegral = cvCreateMat(m_positive->rows,integralsz,CV_32S);
-  m_negIntegral = cvCreateMat(m_negative->rows,integralsz,CV_32S);
+// int CvFaceDetector::calcIntegrals()
+// {
+//   int i;
+//   static uchar face_data[576];
+//   static int integral_data[625];
+//   static CvMat face = cvMat(24,24,CV_8U,face_data);
+//   static CvMat integral = cvMat(25,25,CV_32S,integral_data);
+//   const int facedatasz = sizeof(face_data);
+//   const int integralsz = sizeof(integral_data);
+//   assert(integralsz==2500);
+//   m_posIntegral = cvCreateMat(m_positive->rows,integralsz,CV_32S);
+//   m_negIntegral = cvCreateMat(m_negative->rows,integralsz,CV_32S);
 
-  for (i=0;i<m_positive->rows;i++)
-  {
-    memcpy(face_data,m_positive->data.ptr+i*facedatasz,facedatasz);
-    cvIntegral(&face,&integral);
-    memcpy(m_posIntegral->data.ptr+i*integralsz,integral_data,integralsz);
-  }
-  for (i=0;i<m_negative->rows;i++)
-  {
-    memcpy(face_data,m_negative->data.ptr+i*facedatasz,facedatasz);
-    cvIntegral(&face,&integral);
-    memcpy(m_negIntegral->data.ptr+i*integralsz,integral_data,integralsz);
-  }
-}
+//   for (i=0;i<m_positive->rows;i++)
+//   {
+//     memcpy(face_data,m_positive->data.ptr+i*facedatasz,facedatasz);
+//     cvIntegral(&face,&integral);
+//     memcpy(m_posIntegral->data.ptr+i*integralsz,integral_data,integralsz);
+//   }
+//   for (i=0;i<m_negative->rows;i++)
+//   {
+//     memcpy(face_data,m_negative->data.ptr+i*facedatasz,facedatasz);
+//     cvIntegral(&face,&integral);
+//     memcpy(m_negIntegral->data.ptr+i*integralsz,integral_data,integralsz);
+//   }
+// }
 
 int icvHaarFeatureExtract(int * iptr, int step, int * fptr)
 {
@@ -593,68 +593,68 @@ if ((x+dx*2<winsize)&&(y+dy*2<winsize))
   return features;
 }
 
-IcvHaarFeatureSet * icvCreateHaarFeatureSet(const int wsz)
-{
-  assert(wsz==25);
-  IcvHaarFeatureSet * features = new IcvHaarFeatureSet;
-  int log2feat=8;
-  IcvHaarFeature * buff =
-      (IcvHaarFeature*)malloc(sizeof(IcvHaarFeature)*(1<<log2feat));
-  int x,y,dx,dy,count=0,pixelstep=2;
+// IcvHaarFeatureSet * icvCreateHaarFeatureSet(const int wsz)
+// {
+//   assert(wsz==25);
+//   IcvHaarFeatureSet * features = new IcvHaarFeatureSet;
+//   int log2feat=8;
+//   IcvHaarFeature * buff =
+//       (IcvHaarFeature*)malloc(sizeof(IcvHaarFeature)*(1<<log2feat));
+//   int x,y,dx,dy,count=0,pixelstep=2;
 
-  for (x=0;x<wsz;x+=pixelstep){
-  for (y=0;y<wsz;y+=pixelstep){
-  for (dx=2;dx<wsz;dx+=pixelstep){
-  for (dy=2;dy<wsz;dy+=pixelstep){
+//   for (x=0;x<wsz;x+=pixelstep){
+//   for (y=0;y<wsz;y+=pixelstep){
+//   for (dx=2;dx<wsz;dx+=pixelstep){
+//   for (dy=2;dy<wsz;dy+=pixelstep){
 
-  if ((1<<log2feat)-10<count){
-    buff = (IcvHaarFeature*)
-        realloc(buff,sizeof(IcvHaarFeature)*(1<<(++log2feat)));
-    if (!buff) {
-      fprintf(stderr, "ERROR: memory allocation failure!\n");
-      exit(1);
-    }
-  }
+//   if ((1<<log2feat)-10<count){
+//     buff = (IcvHaarFeature*)
+//         realloc(buff,sizeof(IcvHaarFeature)*(1<<(++log2feat)));
+//     if (!buff) {
+//       fprintf(stderr, "ERROR: memory allocation failure!\n");
+//       exit(1);
+//     }
+//   }
           
-if ((x+dx*2<wsz)&&(y+dy<wsz))
-  buff[count++]=icvHaarFeature("x2",wsz,x,y,dx*2,dy,-1,x+dx,y,dx,dy,2);
-if ((x+dx*2<wsz)&&(y+dy<wsz))
-  buff[count++]=icvHaarFeature("y2",wsz,y,x,dy,dx*2,-1,y,x+dx,dy,dx,2);
-if ((x+dx*3<wsz)&&(y+dy<wsz))
-  buff[count++]=icvHaarFeature("x3",wsz,x,y,dx*3,dy,-1,x+dx,y,dx,dy,3);
-if ((x+dx*3<wsz)&&(y+dy<wsz))
-  buff[count++]=icvHaarFeature("y3",wsz,y,x,dy,dx*3,-1,y,x+dx,dy,dx,3);
-if ((x+dx*4<wsz)&&(y+dy<wsz))
-  buff[count++]=icvHaarFeature("x4",wsz,x,y,dx*4,dy,-1,x+dx,y,dx*2,dy,2);
-if ((x+dx*4<wsz)&&(y+dy<wsz))
-  buff[count++]=icvHaarFeature("y4",wsz,y,x,dy,dx*4,-1,y,x+dx,dy,dx*2,2);
-if ((x+dx*2<wsz)&&(y+dy*2<wsz))
-  buff[count++]=
-      icvHaarFeature("x2y2",wsz,
-                     x,y,dx*2,dy*2,-1,x,y,dx,dy,2,x+dx,y+dy,dx,dy,2);
+// if ((x+dx*2<wsz)&&(y+dy<wsz))
+//   buff[count++]=icvHaarFeature("x2",wsz,x,y,dx*2,dy,-1,x+dx,y,dx,dy,2);
+// if ((x+dx*2<wsz)&&(y+dy<wsz))
+//   buff[count++]=icvHaarFeature("y2",wsz,y,x,dy,dx*2,-1,y,x+dx,dy,dx,2);
+// if ((x+dx*3<wsz)&&(y+dy<wsz))
+//   buff[count++]=icvHaarFeature("x3",wsz,x,y,dx*3,dy,-1,x+dx,y,dx,dy,3);
+// if ((x+dx*3<wsz)&&(y+dy<wsz))
+//   buff[count++]=icvHaarFeature("y3",wsz,y,x,dy,dx*3,-1,y,x+dx,dy,dx,3);
+// if ((x+dx*4<wsz)&&(y+dy<wsz))
+//   buff[count++]=icvHaarFeature("x4",wsz,x,y,dx*4,dy,-1,x+dx,y,dx*2,dy,2);
+// if ((x+dx*4<wsz)&&(y+dy<wsz))
+//   buff[count++]=icvHaarFeature("y4",wsz,y,x,dy,dx*4,-1,y,x+dx,dy,dx*2,2);
+// if ((x+dx*2<wsz)&&(y+dy*2<wsz))
+//   buff[count++]=
+//       icvHaarFeature("x2y2",wsz,
+//                      x,y,dx*2,dy*2,-1,x,y,dx,dy,2,x+dx,y+dy,dx,dy,2);
 
-  }
-  }
-  }
-  }
+//   }
+//   }
+//   }
+//   }
 
-  fprintf(stderr, "count: %d\n", count);
+//   fprintf(stderr, "count: %d\n", count);
 
-  assert(wsz==25);
-  features->winsize=cvSize(wsz,wsz);
-  features->count   = count;
-  features->feature = new IcvHaarFeature[count];
-  memcpy(features->feature,buff,sizeof(IcvHaarFeature)*count);
-  free(buff);
+//   assert(wsz==25);
+//   features->winsize=cvSize(wsz,wsz);
+//   features->count   = count;
+//   features->feature = new IcvHaarFeature[count];
+//   memcpy(features->feature,buff,sizeof(IcvHaarFeature)*count);
+//   free(buff);
   
-  return features;
-}
+//   return features;
+// }
 
-void icvReleaseHaarFeatureSet(IcvHaarFeatureSet ** features)
-{
-  delete [] (*features)->feature;
-  delete (*features);
-}
+// void icvReleaseHaarFeatureSet(IcvHaarFeatureSet ** features)
+// {
+//   delete [] (*features)->feature;
+//   delete (*features);
+// }
 
 // int icvPrintClassifier(const char * fn,
 //                        CvAdaBoostClassifier classifier,

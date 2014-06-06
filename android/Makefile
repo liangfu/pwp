@@ -1,7 +1,7 @@
 
-first: build.xml
+first: build.xml release.keystore
 	ndk-build
-	ant debug
+	ant release
 
 clean: 
 	rm -rf apk
@@ -16,3 +16,6 @@ build.xml:
 install:
 	adb -d install -r ./apk/CvTracker-debug.apk
 
+release.keystore:
+	keytool -genkey -v -keystore release.keystore -alias releasekey -keyalg RSA -keysize 2048 -validity 30
+	jarsigner -verbose -keystore release.keystore apk/CvTracker-release-unsigned.apk releasekey

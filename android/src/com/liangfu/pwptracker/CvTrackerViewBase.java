@@ -77,6 +77,7 @@ public abstract class CvTrackerViewBase
   {
     Log.i(TAG, "surfaceCreated");
     mCamera = Camera.open();
+    mCamera.setDisplayOrientation(90);
     mCamera.setPreviewCallback(
         new PreviewCallback()
         {

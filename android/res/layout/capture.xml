@@ -61,16 +61,16 @@
 							/>
 			<!-- android:gravity="center" -->
 			<!-- android:background="@drawable/shape" -->
-			<Button android:id="@+id/galleryButton"
-							android:layout_width="wrap_content"
-							android:layout_height="wrap_content"
-							android:text="Gallery" 
-							android:padding="10dp"
-							android:drawableTop="@drawable/gallery"
-							android:background="@android:color/transparent"
-							android:textColor="@drawable/button_text_color"
-							android:onClick="browsePicture"
-							/>
+			<!-- <Button android:id="@+id/galleryButton" -->
+			<!-- 				android:layout_width="wrap_content" -->
+			<!-- 				android:layout_height="wrap_content" -->
+			<!-- 				android:text="Gallery"  -->
+			<!-- 				android:padding="10dp" -->
+			<!-- 				android:drawableTop="@drawable/gallery" -->
+			<!-- 				android:background="@android:color/transparent" -->
+			<!-- 				android:textColor="@drawable/button_text_color" -->
+			<!-- 				android:onClick="browsePicture" -->
+			<!-- 				/> -->
 			<!-- android:gravity="center" -->
 			<!-- android:background="@drawable/shape" -->
 

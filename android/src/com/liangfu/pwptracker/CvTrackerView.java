@@ -4,7 +4,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 
 // class Sample0View extends SampleViewBase {
-class CvTrackerView extends CvTrackerViewBase {
+class CvTrackerView extends CvTrackerViewBase 
+{
 
   static {
     System.loadLibrary("cvext");

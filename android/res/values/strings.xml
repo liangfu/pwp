@@ -1,16 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">CompVis</string>
-    <string-array name="Planets">
-        <item>Mercury</item>
-        <item>Venus</item>
-        <item>Earth</item>
-        <item>Mars</item>
-        <item>Jupiter</item>
-        <item>Saturn</item>
-        <item>Uranus</item>
-        <item>Neptune</item>
-        <item>Pluto</item>
-    </string-array>
-    <string name="planet_prompt">Select a planet</string>
+    <string name="title_activity_entry">CompVis</string>
+    <string name="title_activity_capture">CompVis</string>
+    <string name="title_activity_editor">CompVis</string>
 </resources>

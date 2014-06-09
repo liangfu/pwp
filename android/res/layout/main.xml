@@ -26,9 +26,10 @@
  -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
-		android:gravity="center" 
+		android:gravity="center"
+		android:background="@drawable/background"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content" 
+    android:layout_height="wrap_content"
 		>
 
     <!--
@@ -49,16 +50,22 @@
 		<!-- 		android:layout_width="fill_parent" -->
 		<!-- 		android:layout_height="fill_parent" > -->
 			
-			<Button android:id="@+id/button01"
+			<Button android:id="@+id/cameraButton"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:text="Button 01" />
+							android:text="Camera" 
+							android:drawableTop="@drawable/camera"
+							/>
 			<!-- android:gravity="center" -->
-			<Button android:id="@+id/button02"
+			<!-- android:background="@drawable/shape" -->
+			<Button android:id="@+id/galleryButton"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:text="Button 02" />
+							android:text="Gallery" 
+							android:drawableTop="@drawable/gallery"
+							/>
 			<!-- android:gravity="center" -->
+			<!-- android:background="@drawable/shape" -->
 
 		<!-- </LinearLayout> -->
 

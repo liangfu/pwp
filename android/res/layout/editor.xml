@@ -44,7 +44,7 @@
  -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
-		android:gravity="center"
+		android:gravity="left"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
 		>
@@ -53,20 +53,23 @@
 			<Button android:id="@+id/cameraButton"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:text="MaskBrush"
+							android:text="Brush"
 							android:padding="10dp"
+							android:drawableTop="@drawable/editor_brush"
+							android:background="@android:color/transparent"
+							android:textColor="@drawable/button_text_color"
 							/>
-							<!-- android:drawableTop="@drawable/camera" -->
-							<!-- android:background="@android:color/transparent" -->
-							<!-- android:textColor="@drawable/button_text_color" -->
 			<!-- android:gravity="center" -->
 			<!-- android:background="@drawable/shape" -->
 
 			<Button android:id="@+id/galleryButton"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:text="RegionSelector"
+							android:text="Region"
 							android:padding="10dp"
+							android:drawableTop="@drawable/editor_region"
+							android:background="@android:color/transparent"
+							android:textColor="@drawable/button_text_color"
 							/>
 							<!-- android:drawableTop="@drawable/gallery" -->
 							<!-- android:background="@android:color/transparent" -->

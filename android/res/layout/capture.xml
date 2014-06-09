@@ -59,6 +59,7 @@
 							android:background="@android:color/transparent"
 							android:textColor="@drawable/button_text_color"
 							/>
+
 			<!-- android:gravity="center" -->
 			<!-- android:background="@drawable/shape" -->
 			<!-- <Button android:id="@+id/galleryButton" -->

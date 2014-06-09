@@ -15,11 +15,6 @@ import com.liangfu.pwptracker.R;
 
 public class EditorActivity extends Activity 
 {
-
-	// this is the action code we use in our intent, 
-	// this way we know we're looking at the response from our own action
-	private static final int SELECT_PICTURE = 1;
-
 	private String selectedImagePath;
 
 	public void onCreate(Bundle savedInstanceState) {
@@ -35,16 +30,6 @@ public class EditorActivity extends Activity
 			setImagePath(path);
 		}
 
-
-		// ((Button) findViewById(R.id.cameraButton)).setOnClickListener(new OnClickListener() {
-		// 		public void onClick(View arg0) {
-		// 			Intent intent = new Intent();
-		// 			intent.setType("image/*");
-		// 			intent.setAction(Intent.ACTION_GET_CONTENT);
-		// 			startActivityForResult(Intent.createChooser(intent,
-		// 																									"Select Picture"), SELECT_PICTURE);
-		// 		}
-		// 	});
 	}
 
 	public void setImagePath(String imagePath)

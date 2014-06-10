@@ -10,6 +10,8 @@ import android.widget.Button;
 import android.provider.MediaStore;
 import android.database.Cursor;
 import android.widget.TextView;
+import android.view.MotionEvent;
+import android.util.Log;
 
 import com.liangfu.pwptracker.R;
 
@@ -35,8 +37,18 @@ public class EditorActivity extends Activity
 	public void setImagePath(String imagePath)
 	{
 		selectedImagePath=imagePath;
-		EditorSurfaceView v=((EditorSurfaceView)findViewById(R.id.editorSurfaceView));
+		EditorImageView v=((EditorImageView)findViewById(R.id.editorImageView));
 		v.setImagePath(imagePath);
 	}
+
+	// @Override
+	// public boolean onTouchEvent(MotionEvent e) {
+	// 	float x = e.getX();
+	// 	float y = e.getY();
+	// 	TextView logger=((TextView)findViewById(R.id.editorLog));
+	// 	logger.setText("Tapped at: (" + x + "," + y + ")");
+	// 	return true;
+	// }
+
 }
 

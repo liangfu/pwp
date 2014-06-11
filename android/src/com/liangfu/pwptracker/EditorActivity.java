@@ -35,6 +35,11 @@ public class EditorActivity extends Activity
 			setImagePath(path);
 		}
 
+		Button eraserButton=((Button)findViewById(R.id.eraserButton));
+		Button regionButton=((Button)findViewById(R.id.regionButton));
+		eraserButton.setOnClickListener(new OnClickListener(){public void onClick(View v){
+			
+		}});
 	}
 
 	public void setImagePath(String imagePath)

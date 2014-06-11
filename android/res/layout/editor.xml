@@ -68,19 +68,20 @@
 		>
 		<!-- android:background="@drawable/background" -->
 			
-			<Button android:id="@+id/cameraButton"
+			<Button android:id="@+id/eraserButton"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:text="Brush"
+							android:text="Eraser"
 							android:padding="10dp"
-							android:drawableTop="@drawable/editor_brush"
-							android:background="@android:color/transparent"
+							android:drawableTop="@drawable/editor_eraser"
+							android:background="@drawable/button_background_color"
 							android:textColor="@drawable/button_text_color"
 							/>
+							<!-- android:background="@drawable/button_background_color" -->
 			<!-- android:gravity="center" -->
 			<!-- android:background="@drawable/shape" -->
 
-			<Button android:id="@+id/galleryButton"
+			<Button android:id="@+id/regionButton"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:text="Region"

@@ -15,12 +15,12 @@ clean:
 	rm build.xml
 
 build.xml:
-	android update project -p . -s --target android-10
+	android update project -p . -s --target android-10 --name CompVis
 
 install:
-	adb -d install -r ./apk/CvTracker-debug.apk
+	adb -d install -r ./apk/CompVis-debug.apk
 
 release.keystore:
 	keytool -genkey -v -keystore release.keystore -alias releasekey -keyalg RSA -keysize 2048 -validity 30
-	jarsigner -verbose -keystore release.keystore apk/CvTracker-release-unsigned.apk releasekey
+	jarsigner -verbose -keystore release.keystore apk/CompVis-release-unsigned.apk releasekey
 

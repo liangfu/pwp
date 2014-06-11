@@ -12,6 +12,9 @@ import android.database.Cursor;
 import android.widget.TextView;
 import android.view.MotionEvent;
 import android.util.Log;
+import android.graphics.BitmapFactory;
+
+import com.liangfu.widgets.GestureImageView;
 
 import com.liangfu.pwptracker.R;
 
@@ -37,8 +40,10 @@ public class EditorActivity extends Activity
 	public void setImagePath(String imagePath)
 	{
 		selectedImagePath=imagePath;
-		EditorImageView v=((EditorImageView)findViewById(R.id.editorImageView));
-		v.setImagePath(imagePath);
+		// EditorImageView v=((EditorImageView)findViewById(R.id.editorImageView));
+		// v.setImagePath(imagePath);
+		GestureImageView v=((GestureImageView)findViewById(R.id.gestureImageView));
+		v.setImageBitmap(BitmapFactory.decodeFile(imagePath));
 	}
 
 	// @Override

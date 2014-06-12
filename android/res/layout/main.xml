@@ -58,6 +58,7 @@
 							android:drawableTop="@drawable/camera"
 							android:background="@android:color/transparent"
 							android:textColor="@drawable/button_text_color"
+							android:onClick="dispatchTakePictureIntent"
 							/>
 			<!-- android:gravity="center" -->
 			<!-- android:background="@drawable/shape" -->

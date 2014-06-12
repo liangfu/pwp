@@ -42,8 +42,6 @@ public class CvTracker extends Activity
   // public static final int     VIEW_MODE_RGBA = 0;
   // public static final int     VIEW_MODE_GRAY = 1;
 
-  // private MenuItem            mItemPreviewRGBA;
-  // private MenuItem            mItemPreviewGray;
 	// private Button cameraButton  = (Button) findViewById(R.id.cameraButton);
 	// private Button galleryButton = (Button) findViewById(R.id.galleryButton);
 
@@ -82,17 +80,24 @@ public class CvTracker extends Activity
 	}
 
   public void dispatchTakePictureIntent(View v) {
+		Log.d(TAG,"=======================================================");
     Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
     // if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
     //   startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
     // }
+		Log.d(TAG,"1");
     fileUri = getOutputMediaFileUri(MEDIA_TYPE_IMAGE);
+		Log.d(TAG,"2");
     intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
+		Log.d(TAG,"3");
     startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+		Log.d(TAG,"4");
+		Log.d(TAG,"=======================================================");
   }
 
 	public void onActivityResult(int requestCode, int resultCode, Intent data)
   {
+		Log.d(TAG,"-------------------------------------------------------");
 		if (resultCode == RESULT_OK) {
 			if (requestCode == SELECT_PICTURE) {
 				Uri selectedImageUri = data.getData();
@@ -103,27 +108,31 @@ public class CvTracker extends Activity
 			}
 		}
 
+		Log.d(TAG,"5");
     if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
+		Log.d(TAG,"6");
       if (resultCode == RESULT_OK) {
+		Log.d(TAG,"7");
         // Image captured and saved to fileUri specified in the Intent
+        // Toast.makeText(this, "Image saved to:\n" +
+        //                data.getData(), Toast.LENGTH_LONG).show();
         Toast.makeText(this, "Image saved to:\n" +
-                       data.getData(), Toast.LENGTH_LONG).show();
+                       fileUri, Toast.LENGTH_LONG).show();
+		Log.d(TAG,"8");
+		    Uri selectedImageUri = fileUri;//data.getData();
+		Log.d(TAG,"9");
+				selectedImagePath = getPath(selectedImageUri);
+		Log.d(TAG,"10");
+				Intent intent = new Intent(this, EditorActivity.class);
+		Log.d(TAG,"11");
+				intent.putExtra("selectedImagePath",selectedImagePath);
+		Log.d(TAG,"12");
+				startActivity(intent);
+		Log.d(TAG,"13");
       } else if (resultCode == RESULT_CANCELED) {
         // User cancelled the image capture
       } else {
         // Image capture failed, advise user
-      }
-    }
-
-    if (requestCode == CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE) {
-      if (resultCode == RESULT_OK) {
-        // Video captured and saved to fileUri specified in the Intent
-        Toast.makeText(this, "Video saved to:\n" +
-                       data.getData(), Toast.LENGTH_LONG).show();
-      } else if (resultCode == RESULT_CANCELED) {
-        // User cancelled the video capture
-      } else {
-        // Video capture failed, advise user
       }
     }
 	}
@@ -165,6 +174,8 @@ public class CvTracker extends Activity
     return mediaFile;
   }
   
+  // private MenuItem            mItemPreviewRGBA;
+  // private MenuItem            mItemPreviewGray;
   // @Override
   // public boolean onCreateOptionsMenu(Menu menu) {
   //   Log.i(TAG, "onCreateOptionsMenu");
@@ -172,7 +183,6 @@ public class CvTracker extends Activity
   //   mItemPreviewGray = menu.add("Preview GRAY");
   //   return true;
   // }
-
   // @Override
   // public boolean onOptionsItemSelected(MenuItem item) {
   //   Log.i(TAG, "Menu Item selected " + item);

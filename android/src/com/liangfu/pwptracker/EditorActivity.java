@@ -21,6 +21,9 @@ import com.liangfu.pwptracker.R;
 public class EditorActivity extends Activity 
 {
 	private String selectedImagePath;
+	private GestureImageView view=null;
+	private Button eraserButton=null;
+	private Button regionButton=null;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -35,8 +38,8 @@ public class EditorActivity extends Activity
 			setImagePath(path);
 		}
 
-		Button eraserButton=((Button)findViewById(R.id.eraserButton));
-		Button regionButton=((Button)findViewById(R.id.regionButton));
+		eraserButton=((Button)findViewById(R.id.eraserButton));
+		regionButton=((Button)findViewById(R.id.regionButton));
 		eraserButton.setOnClickListener(new OnClickListener(){public void onClick(View v){
 			
 		}});
@@ -47,8 +50,8 @@ public class EditorActivity extends Activity
 		selectedImagePath=imagePath;
 		// EditorImageView v=((EditorImageView)findViewById(R.id.editorImageView));
 		// v.setImagePath(imagePath);
-		GestureImageView v=((GestureImageView)findViewById(R.id.gestureImageView));
-		v.setImageBitmap(BitmapFactory.decodeFile(imagePath));
+		view=((GestureImageView)findViewById(R.id.gestureImageView));
+		view.setImageBitmap(BitmapFactory.decodeFile(imagePath));
 	}
 
 	// @Override

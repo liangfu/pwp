@@ -37,6 +37,12 @@
 		<!-- 		android:layout_weight = "1" -->
 		<!-- 		android:scaleType="matrix" -->
 		<!-- 		/> -->
+		
+		<ImageView
+				android:layout_height="wrap_content"
+				android:layout_width="wrap_content"
+				android:src="@drawable/layers" />
+		
     <com.liangfu.widgets.GestureImageView
         android:id="@+id/gestureImageView"
         android:layout_width="match_parent"

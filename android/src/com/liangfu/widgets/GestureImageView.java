@@ -212,7 +212,8 @@ public class GestureImageView extends ImageView  {
 				y = startY;
 			}	
 
-			gestureImageViewTouchListener = new GestureImageViewTouchListener(this, measuredWidth, measuredHeight);
+			gestureImageViewTouchListener = 
+				new GestureImageViewTouchListener(this, measuredWidth, measuredHeight);
 			
 			if(isLandscape()) {
 				gestureImageViewTouchListener.setMinScale(minScale * fitScaleHorizontal);
@@ -246,12 +247,14 @@ public class GestureImageView extends ImageView  {
 		}
 	}
 	
-	protected void computeCropScale(int imageWidth, int imageHeight, int measuredWidth, int measuredHeight) {
+	protected void computeCropScale(int imageWidth, int imageHeight, 
+																	int measuredWidth, int measuredHeight) {
 		fitScaleHorizontal = (float) measuredWidth / (float) imageWidth;
 		fitScaleVertical = (float) measuredHeight / (float) imageHeight;
 	}
 	
-	protected void computeStartingScale(int imageWidth, int imageHeight, int measuredWidth, int measuredHeight) {
+	protected void computeStartingScale(int imageWidth, int imageHeight, 
+																			int measuredWidth, int measuredHeight) {
 		switch(getScaleType()) {
 			case CENTER:
 				// Center the image in the view, but perform no scaling.
@@ -260,14 +263,17 @@ public class GestureImageView extends ImageView  {
 				
 			case CENTER_CROP:
 				// Scale the image uniformly (maintain the image's aspect ratio) so that both dimensions
-				// (width and height) of the image will be equal to or larger than the corresponding dimension of the view (minus padding).
-				startingScale = Math.max((float) measuredHeight / (float) imageHeight, (float) measuredWidth/ (float) imageWidth);
+				// (width and height) of the image will be equal to or 
+				// larger than the corresponding dimension of the view (minus padding).
+				startingScale = Math.max((float) measuredHeight / (float) imageHeight, 
+																 (float) measuredWidth/ (float) imageWidth);
 				break;
 				
 			case CENTER_INSIDE:
 
 				// Scale the image uniformly (maintain the image's aspect ratio) so that both dimensions
-				// (width and height) of the image will be equal to or less than the corresponding dimension of the view (minus padding).
+				// (width and height) of the image will be equal to or 
+				// less than the corresponding dimension of the view (minus padding).
 				float wRatio = (float) imageWidth / (float) measuredWidth;
 				float hRatio = (float) imageHeight / (float) measuredHeight;
 

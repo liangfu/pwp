@@ -48,10 +48,11 @@ public class EditorActivity extends Activity
 	public void setImagePath(String imagePath)
 	{
 		selectedImagePath=imagePath;
-		// EditorImageView v=((EditorImageView)findViewById(R.id.editorImageView));
-		// v.setImagePath(imagePath);
-		view=((GestureImageView)findViewById(R.id.gestureImageView));
-		view.setImageBitmap(BitmapFactory.decodeFile(imagePath));
+		EditorImageView v=((EditorImageView)findViewById(R.id.editorImageView));
+		v.setImagePath(imagePath);
+
+		// view=((GestureImageView)findViewById(R.id.gestureImageView));
+		// view.setImageBitmap(BitmapFactory.decodeFile(imagePath));
 	}
 
 	// @Override

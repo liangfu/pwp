@@ -18,8 +18,10 @@ LOCAL_C_INCLUDES := \
         $(LOCAL_PATH)/../../extern/cv/include 
 
 LOCAL_CFLAGS := $(LOCAL_C_INCLUDES:%=-I%)
-LOCAL_LDLIBS := -L$(SYSROOT)/usr/lib -ldl -llog \
-								-L$(TARGET_OUT) -lcxcore -lcv #-lhighgui 
+LOCAL_LDLIBS := -L$(SYSROOT)/usr/lib -ldl -llog 
+# LOCAL_LDLIBS := -L$(SYSROOT)/usr/lib -ldl -llog 
+# 								-L$(TARGET_OUT) -lcxcore -lcv #-lhighgui
+LOCAL_STATIC_LIBRARIES := cxcore cv
 
 LOCAL_SRC_FILES := cvjnimain.cpp \
 				   cvfacedetector.cpp 

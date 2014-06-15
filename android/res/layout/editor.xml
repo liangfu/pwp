@@ -38,17 +38,24 @@
 		<!-- 		android:scaleType="matrix" -->
 		<!-- 		/> -->
 		
-		<ImageView
-				android:layout_height="wrap_content"
-				android:layout_width="wrap_content"
-				android:src="@drawable/layers" />
-		
-    <com.liangfu.widgets.GestureImageView
-        android:id="@+id/gestureImageView"
+		<com.liangfu.pwptracker.EditorImageView
+        android:id="@+id/editorImageView"
         android:layout_width="match_parent"
 				android:layout_height="0px"
-				android:layout_weight = "1"
-				/>
+				android:src="@drawable/layers"
+ 				android:layout_weight = "1" />
+
+		<!-- <ImageView -->
+		<!-- 		android:layout_height="wrap_content" -->
+		<!-- 		android:layout_width="wrap_content" -->
+		<!-- 		android:src="@drawable/layers" /> -->
+		
+    <!-- <com.liangfu.widgets.GestureImageView -->
+    <!--     android:id="@+id/gestureImageView" -->
+    <!--     android:layout_width="match_parent" -->
+		<!-- 		android:layout_height="0px" -->
+		<!-- 		android:layout_weight = "1" -->
+		<!-- 		/> -->
 
         <!-- android:layout_width="fill_parent" -->
 				<!-- android:layout_height="0dp" -->

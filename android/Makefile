@@ -12,7 +12,8 @@ clean:
 	rm -rf libs 
 	rm -f $$(find obj | grep .so)
 	rm -rf obj/local/armeabi/objs/cvext
-	rm build.xml
+	rm -f build.xml
+	rm -rf gen
 
 build.xml:
 	android update project -p . -s --target android-10 --name CompVis

@@ -42,8 +42,8 @@
         android:id="@+id/editorImageView"
         android:layout_width="match_parent"
 				android:layout_height="0px"
-				android:src="@drawable/layers"
  				android:layout_weight = "1" />
+				<!-- android:src="@drawable/layers" -->
 
 		<!-- <ImageView -->
 		<!-- 		android:layout_height="wrap_content" -->
@@ -87,9 +87,9 @@
 							android:text="Eraser"
 							android:padding="10dp"
 							android:drawableTop="@drawable/editor_eraser"
-							android:background="@android:color/transparent"
 							android:textColor="@drawable/button_text_color"
 							/>
+							<!-- android:background="@android:color/transparent" -->
 							<!-- android:background="@drawable/button_background_color" -->
 			<!-- android:gravity="center" -->
 			<!-- android:background="@drawable/shape" -->
@@ -100,9 +100,28 @@
 							android:text="Region"
 							android:padding="10dp"
 							android:drawableTop="@drawable/editor_region"
-							android:background="@android:color/transparent"
 							android:textColor="@drawable/button_text_color"
 							/>
+
+			<Button android:id="@+id/applyButton"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="Apply"
+							android:padding="10dp"
+							android:drawableTop="@drawable/editor_apply"
+							android:textColor="@drawable/button_text_color"
+							/>
+			
+			<Button android:id="@+id/saveButton"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="Save"
+							android:padding="10dp"
+							android:drawableTop="@drawable/editor_save"
+							android:textColor="@drawable/button_text_color"
+							/>
+			
+							<!-- android:background="@android:color/transparent" -->
 							<!-- android:drawableTop="@drawable/gallery" -->
 							<!-- android:background="@android:color/transparent" -->
 							<!-- android:textColor="@drawable/button_text_color" -->

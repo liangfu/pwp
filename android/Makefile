@@ -1,3 +1,4 @@
+default: clean debug install
 
 debug: build.xml
 	ndk-build
@@ -25,3 +26,4 @@ release.keystore:
 	keytool -genkey -v -keystore release.keystore -alias releasekey -keyalg RSA -keysize 2048 -validity 30
 	jarsigner -verbose -keystore release.keystore apk/CompVis-release-unsigned.apk releasekey
 
+.PHONY: default clean debug install

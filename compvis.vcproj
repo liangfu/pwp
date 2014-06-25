@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioProject
+	ProjectType="Visual C++"
+	Version="9,00"
+	Name="compvis"
+	ProjectGUID="{A9E10301-8AE8-3CF0-B9FC-02CCFE2F1BBA}"
+	Keyword="Qt4VSv1.0">
+	<Platforms>
+		<Platform
+			Name="Win32" />
+	</Platforms>
+	<Configurations>
+		<Configuration
+			Name="Debug|Win32"
+			OutputDirectory="debug\"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			ConfigurationType="1"
+			IntermediateDirectory="debug\"
+			UseOfMfc="0">
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="&quot;..\..\Qt\4.8.5\include\QtCore&quot;,&quot;..\..\Qt\4.8.5\include\QtGui&quot;,&quot;..\..\Qt\4.8.5\include&quot;,&quot;..\..\Qt\4.8.5\include\ActiveQt&quot;,&quot;debug&quot;,..\..\Qt\4.8.5\mkspecs\win32-msvc2008"
+				AdditionalOptions="-Zm200 -w34100 -w34189"
+				AssemblerListingLocation="debug\"
+				DebugInformationFormat="3"
+				ExceptionHandling="1"
+				GeneratePreprocessedFile="0"
+				ObjectFile="debug\"
+				Optimization ="4"
+				PreprocessorDefinitions="_WINDOWS,UNICODE,WIN32,QT_DLL,QT_GUI_LIB,QT_CORE_LIB,QT_HAVE_MMX,QT_HAVE_3DNOW,QT_HAVE_SSE,QT_HAVE_MMXEXT,QT_HAVE_SSE2,QT_THREAD_SUPPORT"
+				ProgramDataBaseFileName=".\"
+				RuntimeLibrary="3"
+				RuntimeTypeInfo="true"
+				SuppressStartupBanner="true"
+				TreatWChar_tAsBuiltInType="false"
+				WarningLevel="3" />
+			<Tool
+				Name="VCCustomBuildTool" />
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="d:\Qt\4.8.5\lib\qtmaind.lib d:\Qt\4.8.5\lib\QtGuid4.lib d:\Qt\4.8.5\lib\QtCored4.lib"
+				AdditionalLibraryDirectories="d:\Qt\4.8.5\lib"
+				AdditionalOptions="&quot;/MANIFESTDEPENDENCY:type=&apos;win32&apos; name=&apos;Microsoft.Windows.Common-Controls&apos; version=&apos;6.0.0.0&apos; publicKeyToken=&apos;6595b64144ccf1df&apos; language=&apos;*&apos; processorArchitecture=&apos;*&apos;&quot;"
+				GenerateDebugInformation="true"
+				IgnoreImportLibrary="true"
+				LinkTimeCodeGeneration="0"
+				OutputFile="$(OutDir)\compvis.exe"
+				ProgramDatabaseFile=""
+				SubSystem="2"
+				SuppressStartupBanner="true" />
+			<Tool
+				Name="VCMIDLTool"
+				DefaultCharType="0"
+				EnableErrorChecks="1"
+				WarningLevel="0" />
+			<Tool
+				Name="VCPostBuildEventTool" />
+			<Tool
+				Name="VCPreBuildEventTool" />
+			<Tool
+				Name="VCPreLinkEventTool" />
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_WINDOWS,UNICODE,WIN32,QT_DLL,QT_GUI_LIB,QT_CORE_LIB,QT_HAVE_MMX,QT_HAVE_3DNOW,QT_HAVE_SSE,QT_HAVE_MMXEXT,QT_HAVE_SSE2,QT_THREAD_SUPPORT,_DEBUG" />
+		</Configuration>
+		<Configuration
+			Name="Release|Win32"
+			OutputDirectory="release\"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			ConfigurationType="1"
+			IntermediateDirectory="release\"
+			UseOfMfc="0">
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="&quot;..\..\Qt\4.8.5\include\QtCore&quot;,&quot;..\..\Qt\4.8.5\include\QtGui&quot;,&quot;..\..\Qt\4.8.5\include&quot;,&quot;..\..\Qt\4.8.5\include\ActiveQt&quot;,&quot;release&quot;,..\..\Qt\4.8.5\mkspecs\win32-msvc2008"
+				AdditionalOptions="-Zm200 -w34100 -w34189"
+				AssemblerListingLocation="release\"
+				DebugInformationFormat="0"
+				ExceptionHandling="1"
+				GeneratePreprocessedFile="0"
+				ObjectFile="release\"
+				Optimization ="2"
+				PreprocessorDefinitions="_WINDOWS,UNICODE,WIN32,QT_DLL,QT_NO_DEBUG,QT_GUI_LIB,QT_CORE_LIB,QT_HAVE_MMX,QT_HAVE_3DNOW,QT_HAVE_SSE,QT_HAVE_MMXEXT,QT_HAVE_SSE2,QT_THREAD_SUPPORT,NDEBUG"
+				ProgramDataBaseFileName=".\"
+				RuntimeLibrary="2"
+				RuntimeTypeInfo="true"
+				SuppressStartupBanner="true"
+				TreatWChar_tAsBuiltInType="false"
+				WarningLevel="3" />
+			<Tool
+				Name="VCCustomBuildTool" />
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="d:\Qt\4.8.5\lib\qtmain.lib d:\Qt\4.8.5\lib\QtGui4.lib d:\Qt\4.8.5\lib\QtCore4.lib"
+				AdditionalLibraryDirectories="d:\Qt\4.8.5\lib"
+				AdditionalOptions="&quot;/MANIFESTDEPENDENCY:type=&apos;win32&apos; name=&apos;Microsoft.Windows.Common-Controls&apos; version=&apos;6.0.0.0&apos; publicKeyToken=&apos;6595b64144ccf1df&apos; language=&apos;*&apos; processorArchitecture=&apos;*&apos;&quot;"
+				GenerateDebugInformation="false"
+				IgnoreImportLibrary="true"
+				LinkIncremental="1"
+				LinkTimeCodeGeneration="0"
+				OutputFile="$(OutDir)\compvis.exe"
+				ProgramDatabaseFile=""
+				SubSystem="2"
+				SuppressStartupBanner="true" />
+			<Tool
+				Name="VCMIDLTool"
+				DefaultCharType="0"
+				EnableErrorChecks="1"
+				WarningLevel="0" />
+			<Tool
+				Name="VCPostBuildEventTool" />
+			<Tool
+				Name="VCPreBuildEventTool" />
+			<Tool
+				Name="VCPreLinkEventTool" />
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_WINDOWS,UNICODE,WIN32,QT_DLL,QT_NO_DEBUG,QT_GUI_LIB,QT_CORE_LIB,QT_HAVE_MMX,QT_HAVE_3DNOW,QT_HAVE_SSE,QT_HAVE_MMXEXT,QT_HAVE_SSE2,QT_THREAD_SUPPORT" />
+		</Configuration>
+	</Configurations>
+	<Files />
+	<Globals>
+	</Globals>
+</VisualStudioProject>

@@ -1,4 +1,4 @@
-/*M/////////////////////////////////////////////////////////////////////////////////////// 
+/*M///////////////////////////////////////////////////////////////////////////////////////
 //
 //  IMPORTANT: READ BEFORE DOWNLOADING, COPYING, INSTALLING OR USING.
 //
@@ -39,25 +39,34 @@
 //
 //M*/
 
-#include "_highgui.h"
+#include "precomp.hpp"
 
-#if defined WIN32 || defined WIN64
+#if defined WIN32 || defined _WIN32
 
-#if _MSC_VER >= 1200
-#pragma warning( disable: 4710 )
+#ifdef __GNUC__
+#  pragma GCC diagnostic ignored "-Wmissing-declarations"
 #endif
 
 #include <commctrl.h>
-#include <winuser.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
+#include <windowsx.h>
+
+#ifdef HAVE_OPENGL
+#include <memory>
+#include <algorithm>
+#include <vector>
+#include <functional>
+#include "opencv2/highgui/highgui.hpp"
+#include <GL\gl.h>
+#endif
 
 static const char* trackbar_text =
 "                                                                                             ";
 
-#if defined WIN64 || defined EM64T
+#if defined _M_X64 || defined __x86_64
 
 #define icvGetWindowLongPtr GetWindowLongPtr
 #define icvSetWindowLongPtr( hwnd, id, ptr ) SetWindowLongPtr( hwnd, id, (LONG_PTR)(ptr) )
@@ -81,7 +90,7 @@ static const char* trackbar_text =
 
 #endif
 
-void  FillBitmapInfo( BITMAPINFO* bmi, int width, int height, int bpp, int origin )
+static void FillBitmapInfo( BITMAPINFO* bmi, int width, int height, int bpp, int origin )
 {
     assert( bmi && width >= 0 && height >= 0 && (bpp == 8 || bpp == 24 || bpp == 32));
 
@@ -121,6 +130,8 @@ typedef struct CvTrackbar
     int pos;
     int maxval;
     void (*notify)(int);
+    void (*notify2)(int, void*);
+    void* userdata;
     int id;
 }
 CvTrackbar;
@@ -139,6 +150,7 @@ typedef struct CvWindow
     HGDIOBJ image;
     int last_key;
     int flags;
+    int status;//0 normal, 1 fullscreen (YV)
 
     CvMouseCallback on_mouse;
     void* on_mouse_param;
@@ -152,9 +164,21 @@ typedef struct CvWindow
         CvTrackbar* first;
     }
     toolbar;
+
+    int width;
+    int height;
+
+    // OpenGL support
+
+#ifdef HAVE_OPENGL
+    bool useGl;
+    HGLRC hGLRC;
+
+    CvOpenGlDrawCallback glDrawCallback;
+    void* glDrawData;
+#endif
 }
 CvWindow;
-
 
 #define HG_BUDDY_WIDTH  130
 
@@ -176,12 +200,19 @@ static LRESULT CALLBACK MainWindowProc(  HWND hwnd, UINT uMsg, WPARAM wParam, LP
 static void icvUpdateWindowPos( CvWindow* window );
 
 static CvWindow* hg_windows = 0;
+
+typedef int (CV_CDECL * CvWin32WindowCallback)(HWND, UINT, WPARAM, LPARAM, int*);
 static CvWin32WindowCallback hg_on_preprocess = 0, hg_on_postprocess = 0;
 static HINSTANCE hg_hinstance = 0;
+
+static const char* highGUIclassName = "HighGUI class";
+static const char* mainHighGUIclassName = "Main HighGUI class";
 
 static void icvCleanupHighgui()
 {
     cvDestroyAllWindows();
+    UnregisterClass(highGUIclassName, hg_hinstance);
+    UnregisterClass(mainHighGUIclassName, hg_hinstance);
 }
 
 CV_IMPL int cvInitSystem( int, char** )
@@ -196,21 +227,21 @@ CV_IMPL int cvInitSystem( int, char** )
 
         // Register the class
         WNDCLASS wndc;
-        wndc.style = CS_OWNDC | CS_VREDRAW | CS_HREDRAW;
+        wndc.style = CS_OWNDC | CS_VREDRAW | CS_HREDRAW | CS_DBLCLKS;
         wndc.lpfnWndProc = WindowProc;
         wndc.cbClsExtra = 0;
         wndc.cbWndExtra = 0;
         wndc.hInstance = hg_hinstance;
-        wndc.lpszClassName = "HighGUI class";
-        wndc.lpszMenuName = "HighGUI class";
+        wndc.lpszClassName = highGUIclassName;
+        wndc.lpszMenuName = highGUIclassName;
         wndc.hIcon = LoadIcon(0, IDI_APPLICATION);
         wndc.hCursor = (HCURSOR)LoadCursor(0, (LPSTR)(size_t)IDC_CROSS );
         wndc.hbrBackground = (HBRUSH)GetStockObject(GRAY_BRUSH);
 
         RegisterClass(&wndc);
 
-        wndc.lpszClassName = "Main HighGUI class";
-        wndc.lpszMenuName = "Main HighGUI class";
+        wndc.lpszClassName = mainHighGUIclassName;
+        wndc.lpszMenuName = mainHighGUIclassName;
         wndc.hbrBackground = (HBRUSH)GetStockObject(GRAY_BRUSH);
         wndc.lpfnWndProc = MainWindowProc;
 
@@ -219,6 +250,7 @@ CV_IMPL int cvInitSystem( int, char** )
 
         wasInitialized = 1;
     }
+    setlocale(LC_NUMERIC,"C");
 
     return 0;
 }
@@ -308,7 +340,7 @@ icvSaveWindowPos( const char* name, CvRect rect )
     char rootKey[1024];
     strcpy( szKey, icvWindowPosRootKey );
     strcat( szKey, name );
-    
+
     if( RegOpenKeyEx( HKEY_CURRENT_USER,szKey,0,KEY_READ,&hkey) != ERROR_SUCCESS )
     {
         HKEY hroot;
@@ -332,8 +364,8 @@ icvSaveWindowPos( const char* name, CvRect rect )
                 break;
             count++;
             if( oldestTime.dwHighDateTime > accesstime.dwHighDateTime ||
-                oldestTime.dwHighDateTime == accesstime.dwHighDateTime &&
-                oldestTime.dwLowDateTime > accesstime.dwLowDateTime )
+                (oldestTime.dwHighDateTime == accesstime.dwHighDateTime &&
+                oldestTime.dwLowDateTime > accesstime.dwLowDateTime) )
             {
                 oldestTime = accesstime;
                 strcpy( oldestKey, currentKey );
@@ -353,13 +385,297 @@ icvSaveWindowPos( const char* name, CvRect rect )
         if( RegOpenKeyEx( HKEY_CURRENT_USER,szKey,0,KEY_WRITE,&hkey) != ERROR_SUCCESS )
             return;
     }
-    
+
     RegSetValueEx(hkey, "Left", 0, REG_DWORD, (BYTE*)&rect.x, sizeof(rect.x));
     RegSetValueEx(hkey, "Top", 0, REG_DWORD, (BYTE*)&rect.y, sizeof(rect.y));
     RegSetValueEx(hkey, "Width", 0, REG_DWORD, (BYTE*)&rect.width, sizeof(rect.width));
     RegSetValueEx(hkey, "Height", 0, REG_DWORD, (BYTE*)&rect.height, sizeof(rect.height));
     RegCloseKey(hkey);
 }
+
+double cvGetModeWindow_W32(const char* name)//YV
+{
+    double result = -1;
+
+    CV_FUNCNAME( "cvGetModeWindow_W32" );
+
+    __BEGIN__;
+
+    CvWindow* window;
+
+    if (!name)
+        CV_ERROR( CV_StsNullPtr, "NULL name string" );
+
+    window = icvFindWindowByName( name );
+    if (!window)
+        EXIT; // keep silence here
+
+    result = window->status;
+
+    __END__;
+    return result;
+}
+
+void cvSetModeWindow_W32( const char* name, double prop_value)//Yannick Verdie
+{
+    CV_FUNCNAME( "cvSetModeWindow_W32" );
+
+    __BEGIN__;
+
+    CvWindow* window;
+
+    if(!name)
+        CV_ERROR( CV_StsNullPtr, "NULL name string" );
+
+    window = icvFindWindowByName( name );
+    if( !window )
+        CV_ERROR( CV_StsNullPtr, "NULL window" );
+
+    if(window->flags & CV_WINDOW_AUTOSIZE)//if the flag CV_WINDOW_AUTOSIZE is set
+        EXIT;
+
+    {
+        DWORD dwStyle = (DWORD)GetWindowLongPtr(window->frame, GWL_STYLE);
+        CvRect position;
+
+        if (window->status==CV_WINDOW_FULLSCREEN && prop_value==CV_WINDOW_NORMAL)
+        {
+            icvLoadWindowPos(window->name,position );
+            SetWindowLongPtr(window->frame, GWL_STYLE, dwStyle | WS_CAPTION | WS_THICKFRAME);
+
+            SetWindowPos(window->frame, HWND_TOP, position.x, position.y , position.width,position.height, SWP_NOZORDER | SWP_FRAMECHANGED);
+            window->status=CV_WINDOW_NORMAL;
+
+            EXIT;
+        }
+
+        if (window->status==CV_WINDOW_NORMAL && prop_value==CV_WINDOW_FULLSCREEN)
+        {
+            //save dimension
+            RECT rect;
+            GetWindowRect(window->frame, &rect);
+            CvRect RectCV = cvRect(rect.left, rect.top,rect.right - rect.left, rect.bottom - rect.top);
+            icvSaveWindowPos(window->name,RectCV );
+
+            //Look at coordinate for fullscreen
+            HMONITOR hMonitor;
+            MONITORINFO mi;
+            hMonitor = MonitorFromRect(&rect, MONITOR_DEFAULTTONEAREST);
+
+            mi.cbSize = sizeof(mi);
+            GetMonitorInfo(hMonitor, &mi);
+
+            //fullscreen
+            position.x=mi.rcMonitor.left;position.y=mi.rcMonitor.top;
+            position.width=mi.rcMonitor.right - mi.rcMonitor.left;position.height=mi.rcMonitor.bottom - mi.rcMonitor.top;
+            SetWindowLongPtr(window->frame, GWL_STYLE, dwStyle & ~WS_CAPTION & ~WS_THICKFRAME);
+
+            SetWindowPos(window->frame, HWND_TOP, position.x, position.y , position.width,position.height, SWP_NOZORDER | SWP_FRAMECHANGED);
+            window->status=CV_WINDOW_FULLSCREEN;
+
+            EXIT;
+        }
+    }
+
+    __END__;
+}
+
+double cvGetPropWindowAutoSize_W32(const char* name)
+{
+    double result = -1;
+
+    CV_FUNCNAME( "cvSetCloseCallback" );
+
+    __BEGIN__;
+
+    CvWindow* window;
+
+    if (!name)
+        CV_ERROR( CV_StsNullPtr, "NULL name string" );
+
+    window = icvFindWindowByName( name );
+    if (!window)
+        EXIT; // keep silence here
+
+    result = window->flags & CV_WINDOW_AUTOSIZE;
+
+    __END__;
+
+    return result;
+}
+
+double cvGetRatioWindow_W32(const char* name)
+{
+    double result = -1;
+
+    CV_FUNCNAME( "cvGetRatioWindow_W32" );
+
+    __BEGIN__;
+
+    CvWindow* window;
+
+    if (!name)
+        CV_ERROR( CV_StsNullPtr, "NULL name string" );
+
+    window = icvFindWindowByName( name );
+    if (!window)
+        EXIT; // keep silence here
+
+    result = static_cast<double>(window->width) / window->height;
+
+    __END__;
+
+    return result;
+}
+
+double cvGetOpenGlProp_W32(const char* name)
+{
+    double result = -1;
+
+#ifdef HAVE_OPENGL
+    CV_FUNCNAME( "cvGetOpenGlProp_W32" );
+
+    __BEGIN__;
+
+    CvWindow* window;
+
+    if (!name)
+        CV_ERROR( CV_StsNullPtr, "NULL name string" );
+
+    window = icvFindWindowByName( name );
+    if (!window)
+        EXIT; // keep silence here
+
+    result = window->useGl;
+
+    __END__;
+#endif
+    (void)name;
+
+    return result;
+}
+
+
+// OpenGL support
+
+#ifdef HAVE_OPENGL
+
+namespace
+{
+    void createGlContext(HWND hWnd, HDC& hGLDC, HGLRC& hGLRC, bool& useGl)
+    {
+        CV_FUNCNAME( "createGlContext" );
+
+        __BEGIN__;
+
+        useGl = false;
+
+        int PixelFormat;
+
+        static PIXELFORMATDESCRIPTOR pfd =
+        {
+            sizeof(PIXELFORMATDESCRIPTOR), // Size Of This Pixel Format Descriptor
+            1,                             // Version Number
+            PFD_DRAW_TO_WINDOW |           // Format Must Support Window
+            PFD_SUPPORT_OPENGL |           // Format Must Support OpenGL
+            PFD_DOUBLEBUFFER,              // Must Support Double Buffering
+            PFD_TYPE_RGBA,                 // Request An RGBA Format
+            32,                            // Select Our Color Depth
+            0, 0, 0, 0, 0, 0,              // Color Bits Ignored
+            0,                             // No Alpha Buffer
+            0,                             // Shift Bit Ignored
+            0,                             // No Accumulation Buffer
+            0, 0, 0, 0,                    // Accumulation Bits Ignored
+            32,                            // 32 Bit Z-Buffer (Depth Buffer)
+            0,                             // No Stencil Buffer
+            0,                             // No Auxiliary Buffer
+            PFD_MAIN_PLANE,                // Main Drawing Layer
+            0,                             // Reserved
+            0, 0, 0                        // Layer Masks Ignored
+        };
+
+        hGLDC = GetDC(hWnd);
+        if (!hGLDC)
+            CV_ERROR( CV_OpenGlApiCallError, "Can't Create A GL Device Context" );
+
+        PixelFormat = ChoosePixelFormat(hGLDC, &pfd);
+        if (!PixelFormat)
+            CV_ERROR( CV_OpenGlApiCallError, "Can't Find A Suitable PixelFormat" );
+
+        if (!SetPixelFormat(hGLDC, PixelFormat, &pfd))
+            CV_ERROR( CV_OpenGlApiCallError, "Can't Set The PixelFormat" );
+
+        hGLRC = wglCreateContext(hGLDC);
+        if (!hGLRC)
+            CV_ERROR( CV_OpenGlApiCallError, "Can't Create A GL Rendering Context" );
+
+        if (!wglMakeCurrent(hGLDC, hGLRC))
+            CV_ERROR( CV_OpenGlApiCallError, "Can't Activate The GL Rendering Context" );
+
+        useGl = true;
+
+        __END__;
+    }
+
+    void releaseGlContext(CvWindow* window)
+    {
+        //CV_FUNCNAME( "releaseGlContext" );
+
+        __BEGIN__;
+
+        if (window->hGLRC)
+        {
+            wglDeleteContext(window->hGLRC);
+            window->hGLRC = NULL;
+        }
+
+        if (window->dc)
+        {
+            ReleaseDC(window->hwnd, window->dc);
+            window->dc = NULL;
+        }
+
+        window->useGl = false;
+
+        __END__;
+    }
+
+    void drawGl(CvWindow* window)
+    {
+        CV_FUNCNAME( "drawGl" );
+
+        __BEGIN__;
+
+        if (!wglMakeCurrent(window->dc, window->hGLRC))
+            CV_ERROR( CV_OpenGlApiCallError, "Can't Activate The GL Rendering Context" );
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        if (window->glDrawCallback)
+            window->glDrawCallback(window->glDrawData);
+
+        if (!SwapBuffers(window->dc))
+            CV_ERROR( CV_OpenGlApiCallError, "Can't swap OpenGL buffers" );
+
+        __END__;
+    }
+
+    void resizeGl(CvWindow* window)
+    {
+        CV_FUNCNAME( "resizeGl" );
+
+        __BEGIN__;
+
+        if (!wglMakeCurrent(window->dc, window->hGLRC))
+            CV_ERROR( CV_OpenGlApiCallError, "Can't Activate The GL Rendering Context" );
+
+        glViewport(0, 0, window->width, window->height);
+
+        __END__;
+    }
+}
+
+#endif // HAVE_OPENGL
 
 
 CV_IMPL int cvNamedWindow( const char* name, int flags )
@@ -374,6 +690,11 @@ CV_IMPL int cvNamedWindow( const char* name, int flags )
     DWORD defStyle = WS_VISIBLE | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU;
     int len;
     CvRect rect;
+#ifdef HAVE_OPENGL
+    bool useGl;
+    HDC hGLDC;
+    HGLRC hGLRC;
+#endif
 
     cvInitSystem(0,0);
 
@@ -381,14 +702,15 @@ CV_IMPL int cvNamedWindow( const char* name, int flags )
         CV_ERROR( CV_StsNullPtr, "NULL name string" );
 
     // Check the name in the storage
-    if( icvFindWindowByName( name ) != 0 )
+    window = icvFindWindowByName( name );
+    if (window != 0)
     {
         result = 1;
         EXIT;
     }
 
-    if( (flags & CV_WINDOW_AUTOSIZE) == 0 )
-        defStyle |= WS_SIZEBOX;
+    if( !(flags & CV_WINDOW_AUTOSIZE))//YV add border in order to resize the window
+       defStyle |= WS_SIZEBOX;
 
     icvLoadWindowPos( name, rect );
 
@@ -399,10 +721,22 @@ CV_IMPL int cvNamedWindow( const char* name, int flags )
 
     ShowWindow(mainhWnd, SW_SHOW);
 
-    hWnd = CreateWindow("HighGUI class", "", defStyle | WS_CHILD | WS_SIZEBOX,
-                        CW_USEDEFAULT, 0, rect.width, rect.height, mainhWnd, 0, hg_hinstance, 0);
+    //YV- remove one border by changing the style
+    hWnd = CreateWindow("HighGUI class", "", (defStyle & ~WS_SIZEBOX) | WS_CHILD, CW_USEDEFAULT, 0, rect.width, rect.height, mainhWnd, 0, hg_hinstance, 0);
     if( !hWnd )
         CV_ERROR( CV_StsError, "Frame window can not be created" );
+
+#ifndef HAVE_OPENGL
+    if (flags & CV_WINDOW_OPENGL)
+        CV_ERROR( CV_OpenGlNotSupported, "Library was built without OpenGL support" );
+#else
+    useGl = false;
+    hGLDC = 0;
+    hGLRC = 0;
+
+    if (flags & CV_WINDOW_OPENGL)
+        createGlContext(hWnd, hGLDC, hGLRC, useGl);
+#endif
 
     ShowWindow(hWnd, SW_SHOW);
 
@@ -416,8 +750,29 @@ CV_IMPL int cvNamedWindow( const char* name, int flags )
     memcpy( window->name, name, len + 1 );
     window->flags = flags;
     window->image = 0;
+
+#ifndef HAVE_OPENGL
     window->dc = CreateCompatibleDC(0);
+#else
+    if (!useGl)
+    {
+        window->dc = CreateCompatibleDC(0);
+        window->hGLRC = 0;
+        window->useGl = false;
+    }
+    else
+    {
+        window->dc = hGLDC;
+        window->hGLRC = hGLRC;
+        window->useGl = true;
+    }
+
+    window->glDrawCallback = 0;
+    window->glDrawData = 0;
+#endif
+
     window->last_key = 0;
+    window->status = CV_WINDOW_NORMAL;//YV
 
     window->on_mouse = 0;
     window->on_mouse_param = 0;
@@ -432,7 +787,7 @@ CV_IMPL int cvNamedWindow( const char* name, int flags )
     icvSetWindowLongPtr( hWnd, CV_USERDATA, window );
     icvSetWindowLongPtr( mainhWnd, CV_USERDATA, window );
 
-    // Recalculate window position
+    // Recalculate window pos
     icvUpdateWindowPos( window );
 
     result = 1;
@@ -441,18 +796,101 @@ CV_IMPL int cvNamedWindow( const char* name, int flags )
     return result;
 }
 
+#ifdef HAVE_OPENGL
+
+CV_IMPL void cvSetOpenGlContext(const char* name)
+{
+    CV_FUNCNAME( "cvSetOpenGlContext" );
+
+    __BEGIN__;
+
+    CvWindow* window;
+
+    if(!name)
+        CV_ERROR( CV_StsNullPtr, "NULL name string" );
+
+    window = icvFindWindowByName( name );
+    if (!window)
+        CV_ERROR( CV_StsNullPtr, "NULL window" );
+
+    if (!window->useGl)
+        CV_ERROR( CV_OpenGlNotSupported, "Window doesn't support OpenGL" );
+
+    if (!wglMakeCurrent(window->dc, window->hGLRC))
+        CV_ERROR( CV_OpenGlApiCallError, "Can't Activate The GL Rendering Context" );
+
+    __END__;
+}
+
+CV_IMPL void cvUpdateWindow(const char* name)
+{
+    CV_FUNCNAME( "cvUpdateWindow" );
+
+    __BEGIN__;
+
+    CvWindow* window;
+
+    if (!name)
+        CV_ERROR( CV_StsNullPtr, "NULL name string" );
+
+    window = icvFindWindowByName( name );
+    if (!window)
+        EXIT;
+
+    InvalidateRect(window->hwnd, 0, 0);
+
+    __END__;
+}
+
+CV_IMPL void cvSetOpenGlDrawCallback(const char* name, CvOpenGlDrawCallback callback, void* userdata)
+{
+    CV_FUNCNAME( "cvCreateOpenGLCallback" );
+
+    __BEGIN__;
+
+    CvWindow* window;
+
+    if(!name)
+        CV_ERROR( CV_StsNullPtr, "NULL name string" );
+
+    window = icvFindWindowByName( name );
+    if( !window )
+        EXIT;
+
+    if (!window->useGl)
+        CV_ERROR( CV_OpenGlNotSupported, "Window was created without OpenGL context" );
+
+    window->glDrawCallback = callback;
+    window->glDrawData = userdata;
+
+    __END__;
+}
+
+#endif // HAVE_OPENGL
 
 static void icvRemoveWindow( CvWindow* window )
 {
-    CvTrackbar* trackbar;
-    RECT wrect;
+    CvTrackbar* trackbar = NULL;
+    RECT wrect={0,0,0,0};
 
-    GetWindowRect( window->frame, &wrect );
-    icvSaveWindowPos( window->name, cvRect(wrect.left, wrect.top,
-        wrect.right-wrect.left, wrect.bottom-wrect.top) );
+#ifdef HAVE_OPENGL
+    if (window->useGl)
+        releaseGlContext(window);
+#endif
 
-    icvSetWindowLongPtr( window->hwnd, CV_USERDATA, 0 );
-    icvSetWindowLongPtr( window->frame, CV_USERDATA, 0 );
+    if( window->frame )
+        GetWindowRect( window->frame, &wrect );
+    if( window->name )
+        icvSaveWindowPos( window->name, cvRect(wrect.left, wrect.top,
+            wrect.right-wrect.left, wrect.bottom-wrect.top) );
+
+    if( window->hwnd )
+        icvSetWindowLongPtr( window->hwnd, CV_USERDATA, 0 );
+    if( window->frame )
+        icvSetWindowLongPtr( window->frame, CV_USERDATA, 0 );
+
+    if( window->toolbar.toolbar )
+        icvSetWindowLongPtr(window->toolbar.toolbar, CV_USERDATA, 0);
 
     if( window->prev )
         window->prev->next = window->next;
@@ -464,7 +902,7 @@ static void icvRemoveWindow( CvWindow* window )
 
     window->prev = window->next = 0;
 
-    if( window->image )
+    if( window->dc && window->image )
         DeleteObject(SelectObject(window->dc,window->image));
 
     if( window->dc )
@@ -473,8 +911,11 @@ static void icvRemoveWindow( CvWindow* window )
     for( trackbar = window->toolbar.first; trackbar != 0; )
     {
         CvTrackbar* next = trackbar->next;
-        icvSetWindowLongPtr( trackbar->hwnd, CV_USERDATA, 0 );
-        cvFree( &trackbar );
+        if( trackbar->hwnd )
+        {
+            icvSetWindowLongPtr( trackbar->hwnd, CV_USERDATA, 0 );
+            cvFree( &trackbar );
+        }
         trackbar = next;
     }
 
@@ -609,7 +1050,6 @@ static void icvUpdateWindowPos( CvWindow* window )
                rect.bottom - rect.top + 1, TRUE );
 }
 
-
 CV_IMPL void
 cvShowImage( const char* name, const CvArr* arr )
 {
@@ -630,6 +1070,12 @@ cvShowImage( const char* name, const CvArr* arr )
         CV_ERROR( CV_StsNullPtr, "NULL name" );
 
     window = icvFindWindowByName(name);
+    if(!window)
+    {
+        cvNamedWindow(name, CV_WINDOW_AUTOSIZE);
+        window = icvFindWindowByName(name);
+    }
+
     if( !window || !arr )
         EXIT; // keep silence here.
 
@@ -637,6 +1083,15 @@ cvShowImage( const char* name, const CvArr* arr )
         origin = ((IplImage*)arr)->origin;
 
     CV_CALL( image = cvGetMat( arr, &stub ));
+
+#ifdef HAVE_OPENGL
+    if (window->useGl)
+    {
+        cv::Mat im(image);
+        cv::imshow(name, im);
+        return;
+    }
+#endif
 
     if (window->image)
         // if there is something wrong with these system calls, we cannot display image...
@@ -677,6 +1132,85 @@ cvShowImage( const char* name, const CvArr* arr )
     __END__;
 }
 
+#if 0
+CV_IMPL void
+cvShowImageHWND(HWND w_hWnd, const CvArr* arr)
+{
+    CV_FUNCNAME( "cvShowImageHWND" );
+
+    __BEGIN__;
+
+    SIZE size = { 0, 0 };
+    int channels = 0;
+    void* dst_ptr = 0;
+    const int channels0 = 3;
+    int origin = 0;
+    CvMat stub, dst, *image;
+    bool changed_size = false;
+    BITMAPINFO tempbinfo;
+    HDC hdc = NULL;
+
+    if( !arr )
+        EXIT;
+    if( !w_hWnd )
+        EXIT;
+
+    hdc = GetDC(w_hWnd);
+
+    if( CV_IS_IMAGE_HDR( arr ) )
+        origin = ((IplImage*)arr)->origin;
+
+    CV_CALL( image = cvGetMat( arr, &stub ) );
+
+    if ( hdc )
+    {
+            //GetBitmapData
+            BITMAP bmp;
+            GdiFlush();
+            HGDIOBJ h = GetCurrentObject( hdc, OBJ_BITMAP );
+
+            if (h == NULL)
+            EXIT;
+            if (GetObject(h, sizeof(bmp), &bmp) == 0) //GetObject(): returns size of object, 0 if error
+            EXIT;
+
+            channels = bmp.bmBitsPixel/8;
+            dst_ptr = bmp.bmBits;
+     }
+
+    if( size.cx != image->width || size.cy != image->height || channels != channels0 )
+    {
+        changed_size = true;
+
+        uchar buffer[sizeof(BITMAPINFO) + 255*sizeof(RGBQUAD)];
+        BITMAPINFO* binfo = (BITMAPINFO*)buffer;
+
+        BOOL bDeleteObj = DeleteObject(GetCurrentObject(hdc, OBJ_BITMAP));
+                CV_Assert( FALSE != bDeleteObj );
+
+        size.cx = image->width;
+        size.cy = image->height;
+        channels = channels0;
+
+        FillBitmapInfo( binfo, size.cx, size.cy, channels*8, 1 );
+
+        SelectObject( hdc, CreateDIBSection( hdc, binfo, DIB_RGB_COLORS, &dst_ptr, 0, 0));
+    }
+
+    cvInitMatHeader( &dst, size.cy, size.cx, CV_8UC3, dst_ptr, (size.cx * channels + 3) & -4 );
+    cvConvertImage( image, &dst, origin == 0 ? CV_CVTIMG_FLIP : 0 );
+
+    // Image stretching to fit the window
+    RECT rect;
+    GetClientRect(w_hWnd, &rect);
+    StretchDIBits( hdc, 0, 0, rect.right, rect.bottom, 0, 0, image->width, image->height, dst_ptr, &tempbinfo, DIB_RGB_COLORS, SRCCOPY );
+
+    // ony resize window if needed
+    InvalidateRect(w_hWnd, 0, 0);
+
+    __END__;
+}
+#endif
 
 CV_IMPL void cvResizeWindow(const char* name, int width, int height )
 {
@@ -781,7 +1315,7 @@ MainWindowProc( HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
         {
             WINDOWPOS* pos = (WINDOWPOS*)lParam;
 
-            // Update the toolbar position/size
+            // Update the toolbar pos/size
             if(window->toolbar.toolbar)
             {
                 RECT rect;
@@ -794,6 +1328,36 @@ MainWindowProc( HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 
             break;
         }
+
+    case WM_WINDOWPOSCHANGING:
+       {
+          // Snap window to screen edges with multi-monitor support. // Adi Shavit
+          LPWINDOWPOS pos = (LPWINDOWPOS)lParam;
+
+          RECT rect;
+          GetWindowRect(window->frame, &rect);
+
+          HMONITOR hMonitor;
+          hMonitor = MonitorFromRect(&rect, MONITOR_DEFAULTTONEAREST);
+
+          MONITORINFO mi;
+          mi.cbSize = sizeof(mi);
+          GetMonitorInfo(hMonitor, &mi);
+
+          const int SNAP_DISTANCE = 15;
+
+          if (abs(pos->x - mi.rcMonitor.left) <= SNAP_DISTANCE)
+             pos->x = mi.rcMonitor.left;               // snap to left edge
+          else
+             if (abs(pos->x + pos->cx - mi.rcMonitor.right) <= SNAP_DISTANCE)
+                pos->x = mi.rcMonitor.right - pos->cx; // snap to right edge
+
+          if (abs(pos->y - mi.rcMonitor.top) <= SNAP_DISTANCE)
+             pos->y = mi.rcMonitor.top;                 // snap to top edge
+          else
+             if (abs(pos->y + pos->cy - mi.rcMonitor.bottom) <= SNAP_DISTANCE)
+                pos->y = mi.rcMonitor.bottom - pos->cy; // snap to bottom edge
+       }
 
     case WM_ACTIVATE:
         if(LOWORD(wParam) == WA_ACTIVE || LOWORD(wParam) == WA_CLICKACTIVE)
@@ -873,8 +1437,6 @@ static LRESULT CALLBACK HighGUIProc( HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
         if( window->on_mouse )
         {
             POINT pt;
-            RECT rect;
-            SIZE size = {0,0};
 
             int flags = (wParam & MK_LBUTTON ? CV_EVENT_FLAG_LBUTTON : 0)|
                         (wParam & MK_RBUTTON ? CV_EVENT_FLAG_RBUTTON : 0)|
@@ -897,15 +1459,26 @@ static LRESULT CALLBACK HighGUIProc( HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
             if( uMsg == WM_LBUTTONUP || uMsg == WM_RBUTTONUP || uMsg == WM_MBUTTONUP )
                 ReleaseCapture();
 
-            pt.x = LOWORD( lParam );
-            pt.y = HIWORD( lParam );
+            pt.x = GET_X_LPARAM( lParam );
+            pt.y = GET_Y_LPARAM( lParam );
 
-            GetClientRect( window->hwnd, &rect );
-            icvGetBitmapData( window, &size, 0, 0 );
+            if (window->flags & CV_WINDOW_AUTOSIZE)
+            {
+                // As user can't change window size, do not scale window coordinates. Underlying windowing system
+                // may prevent full window from being displayed and in this case coordinates should not be scaled.
+                window->on_mouse( event, pt.x, pt.y, flags, window->on_mouse_param );
+            } else {
+                // Full window is displayed using different size. Scale coordinates to match underlying positions.
+                RECT rect;
+                SIZE size = {0, 0};
 
-            window->on_mouse( event, pt.x*size.cx/MAX(rect.right - rect.left,1),
-                                     pt.y*size.cy/MAX(rect.bottom - rect.top,1), flags,
-                                     window->on_mouse_param );
+                GetClientRect( window->hwnd, &rect );
+                icvGetBitmapData( window, &size, 0, 0 );
+
+                window->on_mouse( event, pt.x*size.cx/MAX(rect.right - rect.left,1),
+                                         pt.y*size.cy/MAX(rect.bottom - rect.top,1), flags,
+                                         window->on_mouse_param );
+            }
         }
         break;
 
@@ -950,6 +1523,13 @@ static LRESULT CALLBACK HighGUIProc( HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
             //DeleteDC(hdc);
             EndPaint(hwnd, &paint);
         }
+#ifdef HAVE_OPENGL
+        else if(window->useGl)
+        {
+            drawGl(window);
+            return DefWindowProc(hwnd, uMsg, wParam, lParam);
+        }
+#endif
         else
         {
             return DefWindowProc(hwnd, uMsg, wParam, lParam);
@@ -975,6 +1555,15 @@ static LRESULT CALLBACK HighGUIProc( HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
     case WM_KEYDOWN:
         window->last_key = (int)wParam;
         return 0;
+
+    case WM_SIZE:
+        window->width = LOWORD(lParam);
+        window->height = HIWORD(lParam);
+
+#ifdef HAVE_OPENGL
+        if (window->useGl)
+            resizeGl(window);
+#endif
     }
 
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
@@ -988,18 +1577,18 @@ static LRESULT CALLBACK WindowProc( HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
     if( hg_on_preprocess )
     {
         int was_processed = 0;
-        int ret = hg_on_preprocess(hwnd, uMsg, wParam, lParam, &was_processed);
+        int rethg = hg_on_preprocess(hwnd, uMsg, wParam, lParam, &was_processed);
         if( was_processed )
-            return ret;
+            return rethg;
     }
     ret = HighGUIProc(hwnd, uMsg, wParam, lParam);
 
     if(hg_on_postprocess)
     {
         int was_processed = 0;
-        int ret = hg_on_postprocess(hwnd, uMsg, wParam, lParam, &was_processed);
+        int rethg = hg_on_postprocess(hwnd, uMsg, wParam, lParam, &was_processed);
         if( was_processed )
-            return ret;
+            return rethg;
     }
 
     return ret;
@@ -1019,6 +1608,8 @@ static void icvUpdateTrackbar( CvTrackbar* trackbar, int pos )
     if( trackbar->pos != pos )
     {
         trackbar->pos = pos;
+        if( trackbar->notify2 )
+            trackbar->notify2(pos, trackbar->userdata);
         if( trackbar->notify )
             trackbar->notify(pos);
 
@@ -1151,8 +1742,27 @@ cvWaitKey( int delay )
                     DispatchMessage(&message);
                     return (int)message.wParam;
 
+                case WM_SYSKEYDOWN:
+                    if( message.wParam == VK_F10 )
+                    {
+                        is_processed = 1;
+                        return (int)(message.wParam << 16);
+                    }
+                    break;
+
                 case WM_KEYDOWN:
                     TranslateMessage(&message);
+                    if( (message.wParam >= VK_F1 && message.wParam <= VK_F24) ||
+                        message.wParam == VK_HOME || message.wParam == VK_END ||
+                        message.wParam == VK_UP || message.wParam == VK_DOWN ||
+                        message.wParam == VK_LEFT || message.wParam == VK_RIGHT ||
+                        message.wParam == VK_INSERT || message.wParam == VK_DELETE ||
+                        message.wParam == VK_PRIOR || message.wParam == VK_NEXT )
+                    {
+                        DispatchMessage(&message);
+                        is_processed = 1;
+                        return (int)(message.wParam << 16);
+                    }
                 default:
                     DispatchMessage(&message);
                     is_processed = 1;
@@ -1198,14 +1808,14 @@ typedef struct
 ButtonInfo;
 
 
-CV_IMPL int
-cvCreateTrackbar( const char* trackbar_name, const char* window_name,
-                  int* val, int count, CvTrackbarCallback on_notify )
+static int
+icvCreateTrackbar( const char* trackbar_name, const char* window_name,
+                   int* val, int count, CvTrackbarCallback on_notify,
+                   CvTrackbarCallback2 on_notify2, void* userdata )
 {
     int result = 0;
-#if 0
 
-    CV_FUNCNAME( "cvCreateTrackbar" );
+    CV_FUNCNAME( "icvCreateTrackbar" );
 
     __BEGIN__;
 
@@ -1217,7 +1827,7 @@ cvCreateTrackbar( const char* trackbar_name, const char* window_name,
     if( !window_name || !trackbar_name )
         CV_ERROR( CV_StsNullPtr, "NULL window or trackbar name" );
 
-    if( count <= 0 )
+    if( count < 0 )
         CV_ERROR( CV_StsOutOfRange, "Bad trackbar maximal value" );
 
     window = icvFindWindowByName(window_name);
@@ -1238,9 +1848,14 @@ cvCreateTrackbar( const char* trackbar_name, const char* window_name,
         {
             const int default_height = 30;
 
-            window->toolbar.toolbar = CreateToolbarEx(
-                    window->frame, WS_CHILD | CCS_TOP | TBSTYLE_WRAPABLE,
-                    1, 0, 0, 0, 0, 0, 16, 20, 16, 16, sizeof(TBBUTTON));
+            // CreateToolbarEx is deprecated and forces linking against Comctl32.lib.
+            window->toolbar.toolbar = CreateWindowEx(0, TOOLBARCLASSNAME, NULL,
+                                        WS_CHILD | CCS_TOP | TBSTYLE_WRAPABLE | BTNS_AUTOSIZE | BTNS_BUTTON,
+                                        0, 0, 0, 0,
+                                        window->frame, NULL, GetModuleHandle(NULL), NULL);
+            // CreateToolbarEx automatically sends this but CreateWindowEx doesn't.
+            SendMessage(window->toolbar.toolbar, TB_BUTTONSTRUCTSIZE, (WPARAM)sizeof(TBBUTTON), 0);
+
             GetClientRect(window->frame, &rect);
             MoveWindow( window->toolbar.toolbar, 0, 0,
                         rect.right - rect.left, default_height, TRUE);
@@ -1286,8 +1901,12 @@ cvCreateTrackbar( const char* trackbar_name, const char* window_name,
         tbs.fsStyle = 0;
         tbs.iString = 0;
 #else
+
 #ifndef TBSTYLE_AUTOSIZE
 #define TBSTYLE_AUTOSIZE        0x0010
+#endif
+
+#ifndef TBSTYLE_GROUP
 #define TBSTYLE_GROUP           0x0004
 #endif
         //tbs.fsStyle = TBSTYLE_AUTOSIZE;
@@ -1306,7 +1925,7 @@ cvCreateTrackbar( const char* trackbar_name, const char* window_name,
         SendMessage(window->toolbar.toolbar, TB_SETBUTTONINFO,
             (WPARAM)tbs.idCommand, (LPARAM)&tbis);
 
-        /* Get button position */
+        /* Get button pos */
         SendMessage(window->toolbar.toolbar, TB_GETITEMRECT,
             (WPARAM)tbs.idCommand, (LPARAM)&rect);
 
@@ -1314,6 +1933,7 @@ cvCreateTrackbar( const char* trackbar_name, const char* window_name,
         trackbar = (CvTrackbar*)cvAlloc( sizeof(CvTrackbar) + len + 1 );
         trackbar->signature = CV_TRACKBAR_MAGIC_VAL;
         trackbar->notify = 0;
+        trackbar->notify2 = 0;
         trackbar->parent = window;
         trackbar->pos = 0;
         trackbar->data = 0;
@@ -1349,12 +1969,14 @@ cvCreateTrackbar( const char* trackbar_name, const char* window_name,
     {
         trackbar->data = 0;
         trackbar->notify = 0;
+        trackbar->notify2 = 0;
     }
 
     trackbar->maxval = count;
 
     /* Adjust slider parameters */
-    SendMessage(trackbar->hwnd, TBM_SETRANGE, (WPARAM)TRUE, (LPARAM)MAKELONG(0, count));
+    SendMessage(trackbar->hwnd, TBM_SETRANGEMIN, (WPARAM)TRUE, (LPARAM)0);
+    SendMessage(trackbar->hwnd, TBM_SETRANGEMAX, (WPARAM)TRUE, (LPARAM)count);
     SendMessage(trackbar->hwnd, TBM_SETTICFREQ, (WPARAM)1, (LPARAM)0 );
     if( val )
         pos = *val;
@@ -1368,6 +1990,8 @@ cvCreateTrackbar( const char* trackbar_name, const char* window_name,
     ShowWindow( trackbar->hwnd, SW_SHOW );
 
     trackbar->notify = on_notify;
+    trackbar->notify2 = on_notify2;
+    trackbar->userdata = userdata;
     trackbar->data = val;
 
     /* Resize the window to reflect the toolbar resizing*/
@@ -1377,10 +2001,25 @@ cvCreateTrackbar( const char* trackbar_name, const char* window_name,
 
     __END__;
 
-#endif
     return result;
 }
 
+CV_IMPL int
+cvCreateTrackbar( const char* trackbar_name, const char* window_name,
+                  int* val, int count, CvTrackbarCallback on_notify )
+{
+    return icvCreateTrackbar( trackbar_name, window_name, val, count,
+        on_notify, 0, 0 );
+}
+
+CV_IMPL int
+cvCreateTrackbar2( const char* trackbar_name, const char* window_name,
+                   int* val, int count, CvTrackbarCallback2 on_notify2,
+                   void* userdata )
+{
+    return icvCreateTrackbar( trackbar_name, window_name, val, count,
+        0, on_notify2, userdata );
+}
 
 CV_IMPL void
 cvSetMouseCallback( const char* window_name, CvMouseCallback on_mouse, void* param )
@@ -1464,6 +2103,39 @@ CV_IMPL void cvSetTrackbarPos( const char* trackbar_name, const char* window_nam
 }
 
 
+CV_IMPL void cvSetTrackbarMax(const char* trackbar_name, const char* window_name, int maxval)
+{
+    CV_FUNCNAME( "cvSetTrackbarMax" );
+
+    __BEGIN__;
+
+    if (maxval >= 0)
+    {
+        CvWindow* window = 0;
+        CvTrackbar* trackbar = 0;
+        if (trackbar_name == 0 || window_name == 0)
+        {
+            CV_ERROR(CV_StsNullPtr, "NULL trackbar or window name");
+        }
+
+        window = icvFindWindowByName(window_name);
+        if (window)
+        {
+            trackbar = icvFindTrackbarByName(window, trackbar_name);
+            if (trackbar)
+            {
+                // The position will be min(pos, maxval).
+                trackbar->maxval = maxval;
+                SendMessage(trackbar->hwnd, TBM_SETRANGEMAX, (WPARAM)TRUE, (LPARAM)maxval);
+            }
+        }
+    }
+
+    __END__;
+}
+
+
+
 CV_IMPL void* cvGetWindowHandle( const char* window_name )
 {
     void* hwnd = 0;
@@ -1510,23 +2182,16 @@ CV_IMPL const char* cvGetWindowName( void* window_handle )
 }
 
 
-
 CV_IMPL void
-cvSetPreprocessFuncWin32(int (__cdecl *on_preprocess)(HWND, UINT, WPARAM, LPARAM, int*))
+cvSetPreprocessFuncWin32_(const void* callback)
 {
-    if(on_preprocess)
-        hg_on_preprocess = on_preprocess;
-    else
-        assert(on_preprocess);
+    hg_on_preprocess = (CvWin32WindowCallback)callback;
 }
 
 CV_IMPL void
-cvSetPostprocessFuncWin32(int (__cdecl *on_postprocess)(HWND, UINT, WPARAM, LPARAM, int*))
+cvSetPostprocessFuncWin32_(const void* callback)
 {
-    if(on_postprocess)
-        hg_on_postprocess = on_postprocess;
-    else
-        assert(on_postprocess);
+    hg_on_postprocess = (CvWin32WindowCallback)callback;
 }
 
 #endif //WIN32

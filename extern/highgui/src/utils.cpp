@@ -39,46 +39,13 @@
 //
 //M*/
 
-#include "_highgui.h"
-#include "utils.h"
-
-//#if defined WIN32 && defined _MSC_VER && _MSC_VER >= 1200
-//#if defined WIN64 && defined EM64T
-//    #ifdef _DEBUG
-//        #pragma comment(lib, "libjasperd_64.lib")
-//        #pragma comment(lib, "libjpegd_64.lib")
-//        #pragma comment(lib, "libpngd_64.lib")
-//        #pragma comment(lib, "libtiffd_64.lib")
-//        #pragma comment(lib, "zlibd_64.lib")
-//    #else
-//        #pragma comment(lib, "libjasper_64.lib")
-//        #pragma comment(lib, "libjpeg_64.lib")
-//        #pragma comment(lib, "libpng_64.lib")
-//        #pragma comment(lib, "libtiff_64.lib")
-//        #pragma comment(lib, "zlib_64.lib")
-//    #endif
-//#elif !defined WIN64
-//    #ifdef _DEBUG
-//        #pragma comment(lib, "libjasperd.lib")
-//        #pragma comment(lib, "libjpegd.lib")
-//        #pragma comment(lib, "libpngd.lib")
-//        #pragma comment(lib, "libtiffd.lib")
-//        #pragma comment(lib, "zlibd.lib")
-//    #else
-//        #pragma comment(lib, "libjasper.lib")
-//        #pragma comment(lib, "libjpeg.lib")
-//        #pragma comment(lib, "libpng.lib")
-//        #pragma comment(lib, "libtiff.lib")
-//        #pragma comment(lib, "zlib.lib")
-//    #endif
-//#endif
-//#endif
+#include "precomp.hpp"
+#include "utils.hpp"
 
 #define  SCALE  14
 #define  cR  (int)(0.299*(1 << SCALE) + 0.5)
 #define  cG  (int)(0.587*(1 << SCALE) + 0.5)
 #define  cB  ((1 << SCALE) - cR - cG)
-
 
 void icvCvt_BGR2Gray_8u_C3C1R( const uchar* rgb, int rgb_step,
                                uchar* gray, int gray_step,
@@ -99,21 +66,21 @@ void icvCvt_BGR2Gray_8u_C3C1R( const uchar* rgb, int rgb_step,
 }
 
 
-void icvCvt_BGR2Gray_16u_C3C1R( const ushort* rgb, int rgb_step,
+void icvCvt_BGRA2Gray_16u_CnC1R( const ushort* rgb, int rgb_step,
                                 ushort* gray, int gray_step,
-                                CvSize size, int _swap_rb )
+                                CvSize size, int ncn, int _swap_rb )
 {
     int i;
     int swap_rb = _swap_rb ? 2 : 0;
     for( ; size.height--; gray += gray_step )
     {
-        for( i = 0; i < size.width; i++, rgb += 3 )
+        for( i = 0; i < size.width; i++, rgb += ncn )
         {
             int t = descale( rgb[swap_rb]*cB + rgb[1]*cG + rgb[swap_rb^2]*cR, SCALE );
             gray[i] = (ushort)t;
         }
 
-        rgb += rgb_step - size.width*3;
+        rgb += rgb_step - size.width*ncn;
     }
 }
 
@@ -152,6 +119,21 @@ void icvCvt_Gray2BGR_8u_C1C3R( const uchar* gray, int gray_step,
 }
 
 
+void icvCvt_Gray2BGR_16u_C1C3R( const ushort* gray, int gray_step,
+                              ushort* bgr, int bgr_step, CvSize size )
+{
+    int i;
+    for( ; size.height--; gray += gray_step/sizeof(gray[0]) )
+    {
+        for( i = 0; i < size.width; i++, bgr += 3 )
+        {
+            bgr[0] = bgr[1] = bgr[2] = gray[i];
+        }
+        bgr += bgr_step/sizeof(bgr[0]) - size.width*3;
+    }
+}
+
+
 void icvCvt_BGRA2BGR_8u_C4C3R( const uchar* bgra, int bgra_step,
                                uchar* bgr, int bgr_step,
                                CvSize size, int _swap_rb )
@@ -172,6 +154,26 @@ void icvCvt_BGRA2BGR_8u_C4C3R( const uchar* bgra, int bgra_step,
 }
 
 
+void icvCvt_BGRA2BGR_16u_C4C3R( const ushort* bgra, int bgra_step,
+                              ushort* bgr, int bgr_step,
+                              CvSize size, int _swap_rb )
+{
+    int i;
+    int swap_rb = _swap_rb ? 2 : 0;
+    for( ; size.height--; )
+    {
+        for( i = 0; i < size.width; i++, bgr += 3, bgra += 4 )
+        {
+            ushort t0 = bgra[swap_rb], t1 = bgra[1];
+            bgr[0] = t0; bgr[1] = t1;
+            t0 = bgra[swap_rb^2]; bgr[2] = t0;
+        }
+        bgr += bgr_step/sizeof(bgr[0]) - size.width*3;
+        bgra += bgra_step/sizeof(bgra[0]) - size.width*4;
+    }
+}
+
+
 void icvCvt_BGRA2RGBA_8u_C4R( const uchar* bgra, int bgra_step,
                               uchar* rgba, int rgba_step, CvSize size )
 {
@@ -188,6 +190,25 @@ void icvCvt_BGRA2RGBA_8u_C4R( const uchar* bgra, int bgra_step,
         bgra += bgra_step - size.width*4;
         rgba += rgba_step - size.width*4;
     }
+}
+
+void icvCvt_BGRA2RGBA_16u_C4R( const ushort* bgra, int bgra_step,
+                               ushort* rgba, int rgba_step, CvSize size )
+{
+ int i;
+ for( ; size.height--; )
+ {
+     for( i = 0; i < size.width; i++, bgra += 4, rgba += 4 )
+     {
+         ushort t0 = bgra[0], t1 = bgra[1];
+         ushort t2 = bgra[2], t3 = bgra[3];
+
+         rgba[0] = t2; rgba[1] = t1;
+         rgba[2] = t0; rgba[3] = t3;
+     }
+     bgra += bgra_step/sizeof(bgra[0]) - size.width*4;
+     rgba += rgba_step/sizeof(rgba[0]) - size.width*4;
+ }
 }
 
 
@@ -390,7 +411,7 @@ uchar* FillUniColor( uchar* data, uchar*& line_end,
             end = line_end;
 
         count3 -= (int)(end - data);
-        
+
         for( ; data < end; data += 3 )
         {
             WRITE_PIX( data, clr );
@@ -422,7 +443,7 @@ uchar* FillUniGray( uchar* data, uchar*& line_end,
             end = line_end;
 
         count -= (int)(end - data);
-        
+
         for( ; data < end; data++ )
         {
             *data = clr;
@@ -452,7 +473,7 @@ uchar* FillColorRow8( uchar* data, uchar* indices, int len, PaletteEntry* palett
     WRITE_PIX( data - 3, clr );
     return data;
 }
-                       
+
 
 uchar* FillGrayRow8( uchar* data, uchar* indices, int len, uchar* palette )
 {
@@ -528,7 +549,7 @@ uchar* FillColorRow1( uchar* data, uchar* indices, int len, PaletteEntry* palett
         *((PaletteEntry*)(data - 6)) = palette[(idx & 2) != 0];
         *((PaletteEntry*)(data - 3)) = palette[(idx & 1) != 0];
     }
-    
+
     int idx = indices[0] << 24;
     for( data -= 24; data < end; data += 3, idx += idx )
     {
@@ -556,7 +577,7 @@ uchar* FillGrayRow1( uchar* data, uchar* indices, int len, uchar* palette )
         *((uchar*)(data - 2)) = palette[(idx & 2) != 0];
         *((uchar*)(data - 1)) = palette[(idx & 1) != 0];
     }
-    
+
     int idx = indices[0] << 24;
     for( data -= 8; data < end; data++, idx += idx )
     {
@@ -571,9 +592,9 @@ CV_IMPL void
 cvConvertImage( const CvArr* srcarr, CvArr* dstarr, int flags )
 {
     CvMat* temp = 0;
-    
+
     CV_FUNCNAME( "cvConvertImage" );
-    
+
     __BEGIN__;
 
     CvMat srcstub, *src;
@@ -594,13 +615,13 @@ cvConvertImage( const CvArr* srcarr, CvArr* dstarr, int flags )
 
     if( CV_MAT_CN(dst->type) != 1 && CV_MAT_CN(dst->type) != 3 )
         CV_ERROR( CV_BadNumChannels, "Destination image must have 1 or 3 channels" );
-    
+
     if( !CV_ARE_DEPTHS_EQ( src, dst ))
     {
         int src_depth = CV_MAT_DEPTH(src->type);
         double scale = src_depth <= CV_8S ? 1 : src_depth <= CV_32S ? 1./256 : 255;
         double shift = src_depth == CV_8S || src_depth == CV_16S ? 128 : 0;
-        
+
         if( !CV_ARE_CNS_EQ( src, dst ))
         {
             temp = cvCreateMat( src->height, src->width,
@@ -615,7 +636,7 @@ cvConvertImage( const CvArr* srcarr, CvArr* dstarr, int flags )
         }
     }
 
-    if( src_cn != dst_cn || src_cn == 3 && swap_rb )
+    if( src_cn != dst_cn || (src_cn == 3 && swap_rb) )
     {
         uchar *s = src->data.ptr, *d = dst->data.ptr;
         int s_step = src->step, d_step = dst->step;
@@ -628,7 +649,7 @@ cvConvertImage( const CvArr* srcarr, CvArr* dstarr, int flags )
             size.height = 1;
             s_step = d_step = CV_STUB_STEP;
         }
-        
+
         switch( code )
         {
         case 13:

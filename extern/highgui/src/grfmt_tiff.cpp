@@ -7,10 +7,11 @@
 //  copy or use the software.
 //
 //
-//                        Intel License Agreement
+//                           License Agreement
 //                For Open Source Computer Vision Library
 //
-// Copyright (C) 2000, Intel Corporation, all rights reserved.
+// Copyright (C) 2000-2008, Intel Corporation, all rights reserved.
+// Copyright (C) 2009, Willow Garage Inc., all rights reserved.
 // Third party copyrights are property of their respective owners.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -23,7 +24,7 @@
 //     this list of conditions and the following disclaimer in the documentation
 //     and/or other materials provided with the distribution.
 //
-//   * The name of Intel Corporation may not be used to endorse or promote products
+//   * The name of the copyright holders may not be used to endorse or promote products
 //     derived from this software without specific prior written permission.
 //
 // This software is provided by the copyright holders and contributors "as is" and
@@ -44,55 +45,32 @@
     (see otherlibs/_graphics/readme.txt for copyright notice)
 \****************************************************************************************/
 
-#include "_highgui.h"
-#include "grfmt_tiff.h"
+#include <stdarg.h>
 
+#include "precomp.hpp"
+#include "grfmt_tiff.hpp"
+
+#define int64 int64_tiff
+#define uint64 uint64_tiff
+
+#ifdef HAVE_TIFF
+# include "tiff.h"
+# include "tiffio.h"
+#endif
+
+namespace cv
+{
 static const char fmtSignTiffII[] = "II\x2a\x00";
-static const char fmtSignTiffMM[] = "MM\x00\x2a";
-
-GrFmtTiff::GrFmtTiff()
-{
-    m_sign_len = 4;
-    m_signature = "";
-    m_description = "TIFF Files (*.tiff;*.tif)";
-}
-
-GrFmtTiff::~GrFmtTiff()
-{
-}
-
-bool GrFmtTiff::CheckSignature( const char* signature )
-{
-    return memcmp( signature, fmtSignTiffII, 4 ) == 0 ||
-           memcmp( signature, fmtSignTiffMM, 4 ) == 0;
-}
-
-
-GrFmtReader* GrFmtTiff::NewReader( const char* filename )
-{
-    return new GrFmtTiffReader( filename );
-}
-
-
-GrFmtWriter* GrFmtTiff::NewWriter( const char* filename )
-{
-    return new GrFmtTiffWriter( filename );
-}
-
 
 #ifdef HAVE_TIFF
 
-#include "tiff.h"
-#include "tiffio.h"
-
+static const char fmtSignTiffMM[] = "MM\x00\x2a";
 static int grfmt_tiff_err_handler_init = 0;
-
 static void GrFmtSilentTIFFErrorHandler( const char*, const char*, va_list ) {}
 
-GrFmtTiffReader::GrFmtTiffReader( const char* filename ) : GrFmtReader( filename )
+TiffDecoder::TiffDecoder()
 {
     m_tif = 0;
-
     if( !grfmt_tiff_err_handler_init )
     {
         grfmt_tiff_err_handler_init = 1;
@@ -103,12 +81,7 @@ GrFmtTiffReader::GrFmtTiffReader( const char* filename ) : GrFmtReader( filename
 }
 
 
-GrFmtTiffReader::~GrFmtTiffReader()
-{
-}
-
-
-void  GrFmtTiffReader::Close()
+void TiffDecoder::close()
 {
     if( m_tif )
     {
@@ -118,109 +91,282 @@ void  GrFmtTiffReader::Close()
     }
 }
 
-
-bool  GrFmtTiffReader::CheckFormat( const char* signature )
+TiffDecoder::~TiffDecoder()
 {
-    return memcmp( signature, fmtSignTiffII, 4 ) == 0 ||
-           memcmp( signature, fmtSignTiffMM, 4 ) == 0;
+    close();
 }
 
-
-bool  GrFmtTiffReader::ReadHeader()
+size_t TiffDecoder::signatureLength() const
 {
-    char errmsg[1024];
+    return 4;
+}
+
+bool TiffDecoder::checkSignature( const string& signature ) const
+{
+    return signature.size() >= 4 &&
+        (memcmp(signature.c_str(), fmtSignTiffII, 4) == 0 ||
+        memcmp(signature.c_str(), fmtSignTiffMM, 4) == 0);
+}
+
+ImageDecoder TiffDecoder::newDecoder() const
+{
+    return new TiffDecoder;
+}
+
+bool TiffDecoder::readHeader()
+{
     bool result = false;
 
-    Close();
-    TIFF* tif = TIFFOpen( m_filename, "r" );
+    close();
+    // TIFFOpen() mode flags are different to fopen().  A 'b' in mode "rb" has no effect when reading.
+    // http://www.remotesensing.org/libtiff/man/TIFFOpen.3tiff.html
+    TIFF* tif = TIFFOpen( m_filename.c_str(), "r" );
 
     if( tif )
     {
-        int width = 0, height = 0, photometric = 0, compression = 0;
+        uint32 wdth = 0, hght = 0;
+        uint16 photometric = 0;
         m_tif = tif;
 
-        if( TIFFRGBAImageOK( tif, errmsg ) &&
-            TIFFGetField( tif, TIFFTAG_IMAGEWIDTH, &width ) &&
-            TIFFGetField( tif, TIFFTAG_IMAGELENGTH, &height ) &&
-            TIFFGetField( tif, TIFFTAG_PHOTOMETRIC, &photometric ) && 
-            (!TIFFGetField( tif, TIFFTAG_COMPRESSION, &compression ) ||
-            (compression != COMPRESSION_LZW &&
-             compression != COMPRESSION_OJPEG)))
+        if( TIFFGetField( tif, TIFFTAG_IMAGEWIDTH, &wdth ) &&
+            TIFFGetField( tif, TIFFTAG_IMAGELENGTH, &hght ) &&
+            TIFFGetField( tif, TIFFTAG_PHOTOMETRIC, &photometric ))
         {
-            m_width = width;
-            m_height = height;
-            m_iscolor = photometric > 1;
-            
+            uint16 bpp=8, ncn = photometric > 1 ? 3 : 1;
+            TIFFGetField( tif, TIFFTAG_BITSPERSAMPLE, &bpp );
+            TIFFGetField( tif, TIFFTAG_SAMPLESPERPIXEL, &ncn );
+
+            m_width = wdth;
+            m_height = hght;
+            if( bpp > 8 &&
+               ((photometric != 2 && photometric != 1) ||
+                (ncn != 1 && ncn != 3 && ncn != 4)))
+                bpp = 8;
+
+            switch(bpp)
+            {
+                case 8:
+                    m_type = CV_MAKETYPE(CV_8U, photometric > 1 ? 3 : 1);
+                    break;
+                case 16:
+                    m_type = CV_MAKETYPE(CV_16U, photometric > 1 ? 3 : 1);
+                    break;
+
+                case 32:
+                    m_type = CV_MAKETYPE(CV_32F, photometric > 1 ? 3 : 1);
+                    break;
+                case 64:
+                    m_type = CV_MAKETYPE(CV_64F, photometric > 1 ? 3 : 1);
+                    break;
+
+                default:
+                    result = false;
+            }
             result = true;
         }
     }
 
     if( !result )
-        Close();
+        close();
 
     return result;
 }
 
 
-bool  GrFmtTiffReader::ReadData( uchar* data, int step, int color )
+bool  TiffDecoder::readData( Mat& img )
 {
     bool result = false;
-    uchar* buffer = 0;
+    bool color = img.channels() > 1;
+    uchar* data = img.data;
 
-    color = color > 0 || (color < 0 && m_iscolor);
+    if( img.depth() != CV_8U && img.depth() != CV_16U && img.depth() != CV_32F && img.depth() != CV_64F )
+        return false;
 
     if( m_tif && m_width && m_height )
     {
         TIFF* tif = (TIFF*)m_tif;
-        int tile_width0 = m_width, tile_height0 = 0;
+        uint32 tile_width0 = m_width, tile_height0 = 0;
         int x, y, i;
         int is_tiled = TIFFIsTiled(tif);
-        
-        if( !is_tiled &&
-            TIFFGetField( tif, TIFFTAG_ROWSPERSTRIP, &tile_height0 ) ||
-            is_tiled &&
-            TIFFGetField( tif, TIFFTAG_TILEWIDTH, &tile_width0 ) &&
-            TIFFGetField( tif, TIFFTAG_TILELENGTH, &tile_height0 ))
+        uint16 photometric;
+        TIFFGetField( tif, TIFFTAG_PHOTOMETRIC, &photometric );
+        uint16 bpp = 8, ncn = photometric > 1 ? 3 : 1;
+        TIFFGetField( tif, TIFFTAG_BITSPERSAMPLE, &bpp );
+        TIFFGetField( tif, TIFFTAG_SAMPLESPERPIXEL, &ncn );
+        const int bitsPerByte = 8;
+        int dst_bpp = (int)(img.elemSize1() * bitsPerByte);
+
+        if(dst_bpp == 8)
         {
+            char errmsg[1024];
+            if(!TIFFRGBAImageOK( tif, errmsg ))
+            {
+                close();
+                return false;
+            }
+        }
+
+        if( (!is_tiled) ||
+            (is_tiled &&
+            TIFFGetField( tif, TIFFTAG_TILEWIDTH, &tile_width0 ) &&
+            TIFFGetField( tif, TIFFTAG_TILELENGTH, &tile_height0 )))
+        {
+            if(!is_tiled)
+                TIFFGetField( tif, TIFFTAG_ROWSPERSTRIP, &tile_height0 );
+
             if( tile_width0 <= 0 )
                 tile_width0 = m_width;
 
-            if( tile_height0 <= 0 )
+            if( tile_height0 <= 0 ||
+                (!is_tiled && tile_height0 == std::numeric_limits<uint32>::max()) )
                 tile_height0 = m_height;
-            
-            buffer = new uchar[tile_height0*tile_width0*4];
 
-            for( y = 0; y < m_height; y += tile_height0, data += step*tile_height0 )
+            const size_t buffer_size = bpp * ncn * tile_height0 * tile_width0;
+            AutoBuffer<uchar> _buffer( buffer_size );
+            uchar* buffer = _buffer;
+            ushort* buffer16 = (ushort*)buffer;
+            float* buffer32 = (float*)buffer;
+            double* buffer64 = (double*)buffer;
+            int tileidx = 0;
+
+            for( y = 0; y < m_height; y += tile_height0, data += img.step*tile_height0 )
             {
                 int tile_height = tile_height0;
 
                 if( y + tile_height > m_height )
                     tile_height = m_height - y;
 
-                for( x = 0; x < m_width; x += tile_width0 )
+                for( x = 0; x < m_width; x += tile_width0, tileidx++ )
                 {
                     int tile_width = tile_width0, ok;
 
                     if( x + tile_width > m_width )
                         tile_width = m_width - x;
 
-                    if( !is_tiled )
-                        ok = TIFFReadRGBAStrip( tif, y, (uint32*)buffer );
-                    else
-                        ok = TIFFReadRGBATile( tif, x, y, (uint32*)buffer );
+                    switch(dst_bpp)
+                    {
+                        case 8:
+                        {
+                            uchar * bstart = buffer;
+                            if( !is_tiled )
+                                ok = TIFFReadRGBAStrip( tif, y, (uint32*)buffer );
+                            else
+                            {
+                                ok = TIFFReadRGBATile( tif, x, y, (uint32*)buffer );
+                                //Tiles fill the buffer from the bottom up
+                                bstart += (tile_height0 - tile_height) * tile_width0 * 4;
+                            }
+                            if( !ok )
+                            {
+                                close();
+                                return false;
+                            }
 
-                    if( !ok )
-                        goto exit_func;
+                            for( i = 0; i < tile_height; i++ )
+                                if( color )
+                                    icvCvt_BGRA2BGR_8u_C4C3R( bstart + i*tile_width0*4, 0,
+                                                             data + x*3 + img.step*(tile_height - i - 1), 0,
+                                                             cvSize(tile_width,1), 2 );
+                                else
+                                    icvCvt_BGRA2Gray_8u_C4C1R( bstart + i*tile_width0*4, 0,
+                                                              data + x + img.step*(tile_height - i - 1), 0,
+                                                              cvSize(tile_width,1), 2 );
+                            break;
+                        }
 
-                    for( i = 0; i < tile_height; i++ )
-                        if( color )
-                            icvCvt_BGRA2BGR_8u_C4C3R( buffer + i*tile_width*4, 0,
-                                          data + x*3 + step*(tile_height - i - 1), 0,
-                                          cvSize(tile_width,1), 2 );
-                        else
-                            icvCvt_BGRA2Gray_8u_C4C1R( buffer + i*tile_width*4, 0,
-                                           data + x + step*(tile_height - i - 1), 0,
-                                           cvSize(tile_width,1), 2 );
+                        case 16:
+                        {
+                            if( !is_tiled )
+                                ok = (int)TIFFReadEncodedStrip( tif, tileidx, (uint32*)buffer, buffer_size ) >= 0;
+                            else
+                                ok = (int)TIFFReadEncodedTile( tif, tileidx, (uint32*)buffer, buffer_size ) >= 0;
+
+                            if( !ok )
+                            {
+                                close();
+                                return false;
+                            }
+
+                            for( i = 0; i < tile_height; i++ )
+                            {
+                                if( color )
+                                {
+                                    if( ncn == 1 )
+                                    {
+                                        icvCvt_Gray2BGR_16u_C1C3R(buffer16 + i*tile_width0*ncn, 0,
+                                                                  (ushort*)(data + img.step*i) + x*3, 0,
+                                                                  cvSize(tile_width,1) );
+                                    }
+                                    else if( ncn == 3 )
+                                    {
+                                        icvCvt_RGB2BGR_16u_C3R(buffer16 + i*tile_width0*ncn, 0,
+                                                               (ushort*)(data + img.step*i) + x*3, 0,
+                                                               cvSize(tile_width,1) );
+                                    }
+                                    else
+                                    {
+                                        icvCvt_BGRA2BGR_16u_C4C3R(buffer16 + i*tile_width0*ncn, 0,
+                                                               (ushort*)(data + img.step*i) + x*3, 0,
+                                                               cvSize(tile_width,1), 2 );
+                                    }
+                                }
+                                else
+                                {
+                                    if( ncn == 1 )
+                                    {
+                                        memcpy((ushort*)(data + img.step*i)+x,
+                                               buffer16 + i*tile_width0*ncn,
+                                               tile_width*sizeof(buffer16[0]));
+                                    }
+                                    else
+                                    {
+                                        icvCvt_BGRA2Gray_16u_CnC1R(buffer16 + i*tile_width0*ncn, 0,
+                                                               (ushort*)(data + img.step*i) + x, 0,
+                                                               cvSize(tile_width,1), ncn, 2 );
+                                    }
+                                }
+                            }
+                            break;
+                        }
+
+                        case 32:
+                        case 64:
+                        {
+                            if( !is_tiled )
+                                ok = (int)TIFFReadEncodedStrip( tif, tileidx, buffer, buffer_size ) >= 0;
+                            else
+                                ok = (int)TIFFReadEncodedTile( tif, tileidx, buffer, buffer_size ) >= 0;
+
+                            if( !ok || ncn != 1 )
+                            {
+                                close();
+                                return false;
+                            }
+
+                            for( i = 0; i < tile_height; i++ )
+                            {
+                                if(dst_bpp == 32)
+                                {
+                                    memcpy((float*)(data + img.step*i)+x,
+                                           buffer32 + i*tile_width0*ncn,
+                                           tile_width*sizeof(buffer32[0]));
+                                }
+                                else
+                                {
+                                    memcpy((double*)(data + img.step*i)+x,
+                                         buffer64 + i*tile_width0*ncn,
+                                         tile_width*sizeof(buffer64[0]));
+                                }
+                            }
+
+                            break;
+                        }
+                        default:
+                        {
+                            close();
+                            return false;
+                        }
+                    }
                 }
             }
 
@@ -228,431 +374,7 @@ bool  GrFmtTiffReader::ReadData( uchar* data, int step, int color )
         }
     }
 
-exit_func:
-
-    Close();
-    delete[] buffer;
-
-    return result;
-}
-
-#else
-
-static const int  tiffMask[] = { 0xff, 0xff, 0xffffffff, 0xffff, 0xffffffff };
-
-/************************ TIFF reader *****************************/
-
-GrFmtTiffReader::GrFmtTiffReader( const char* filename ) : GrFmtReader( filename )
-{
-    m_offsets = 0;
-    m_maxoffsets = 0;
-    m_strips = -1;
-    m_max_pal_length = 0;
-    m_temp_palette = 0;
-}
-
-
-GrFmtTiffReader::~GrFmtTiffReader()
-{
-    Close();
-
-    delete[] m_offsets;
-    delete[] m_temp_palette;
-}
-
-void  GrFmtTiffReader::Close()
-{
-    m_strm.Close();
-}
-
-
-bool  GrFmtTiffReader::CheckFormat( const char* signature )
-{
-    return memcmp( signature, fmtSignTiffII, 4 ) == 0 ||
-           memcmp( signature, fmtSignTiffMM, 4 ) == 0;
-}
-
-
-int   GrFmtTiffReader::GetWordEx()
-{
-    int val = m_strm.GetWord();
-    if( m_byteorder == TIFF_ORDER_MM )
-        val = ((val)>>8)|(((val)&0xff)<<8);
-    return val;
-}
-
-
-int   GrFmtTiffReader::GetDWordEx()
-{
-    int val = m_strm.GetDWord();
-    if( m_byteorder == TIFF_ORDER_MM )
-        val = BSWAP( val );
-    return val;
-}
-
-
-int  GrFmtTiffReader::ReadTable( int offset, int count,
-                                 TiffFieldType fieldType,
-                                 int*& array, int& arraysize )
-{
-    int i;
-    
-    if( count < 0 )
-        return RBS_BAD_HEADER;
-    
-    if( fieldType != TIFF_TYPE_SHORT &&
-        fieldType != TIFF_TYPE_LONG &&
-        fieldType != TIFF_TYPE_BYTE )
-        return RBS_BAD_HEADER;
-
-    if( count > arraysize )
-    {
-        delete[] array;
-        arraysize = arraysize*3/2;
-        if( arraysize < count )
-            arraysize = count;
-        array = new int[arraysize];
-    }
-
-    if( count > 1 )
-    {
-        int pos = m_strm.GetPos();
-        m_strm.SetPos( offset );
-
-        if( fieldType == TIFF_TYPE_LONG )
-        {
-            if( m_byteorder == TIFF_ORDER_MM )
-                for( i = 0; i < count; i++ )
-                    array[i] = ((RMByteStream&)m_strm).GetDWord();
-            else
-                for( i = 0; i < count; i++ )
-                    array[i] = ((RLByteStream&)m_strm).GetDWord();
-        }
-        else if( fieldType == TIFF_TYPE_SHORT )
-        {
-            if( m_byteorder == TIFF_ORDER_MM )
-                for( i = 0; i < count; i++ )
-                    array[i] = ((RMByteStream&)m_strm).GetWord();
-            else
-                for( i = 0; i < count; i++ )
-                    array[i] = ((RLByteStream&)m_strm).GetWord();
-        }
-        else // fieldType == TIFF_TYPE_BYTE
-            for( i = 0; i < count; i++ )
-                array[i] = m_strm.GetByte();
-
-        m_strm.SetPos(pos);
-    }
-    else
-    {
-        assert( (offset & ~tiffMask[fieldType]) == 0 );
-        array[0] = offset;
-    }
-
-    return 0;
-}
-
-
-bool  GrFmtTiffReader::ReadHeader()
-{
-    bool result = false;
-    int  photometric = -1;
-    int  channels = 1;
-    int  pal_length = -1;
-
-    const int MAX_CHANNELS = 4;
-    int  bpp_arr[MAX_CHANNELS];
-
-    assert( strlen(m_filename) != 0 );
-    if( !m_strm.Open( m_filename )) return false;
-
-    m_width = -1;
-    m_height = -1;
-    m_strips = -1;
-    m_bpp = 1;
-    m_compression = TIFF_UNCOMP;
-    m_rows_per_strip = -1;
-    m_iscolor = false;
-
-    if( setjmp( m_strm.JmpBuf()) == 0 )
-    {
-        m_byteorder = (TiffByteOrder)m_strm.GetWord();
-        m_strm.Skip( 2 );
-        int header_offset = GetDWordEx();
-
-        m_strm.SetPos( header_offset );
-
-        // read the first tag directory
-        int i, j, count = GetWordEx();
-
-        for( i = 0; i < count; i++ )
-        {
-            // read tag
-            TiffTag tag = (TiffTag)GetWordEx();
-            TiffFieldType fieldType = (TiffFieldType)GetWordEx();
-            int count = GetDWordEx();
-            int value = GetDWordEx();
-            if( count == 1 )
-            {
-                if( m_byteorder == TIFF_ORDER_MM )
-                {
-                    if( fieldType == TIFF_TYPE_SHORT )
-                        value = (unsigned)value >> 16;
-                    else if( fieldType == TIFF_TYPE_BYTE )
-                        value = (unsigned)value >> 24;
-                }
-
-                value &= tiffMask[fieldType];
-            }
-
-            switch( tag )
-            {
-            case  TIFF_TAG_WIDTH:
-                m_width = value;
-                break;
-
-            case  TIFF_TAG_HEIGHT:
-                m_height = value;
-                break;
-
-            case  TIFF_TAG_BITS_PER_SAMPLE:
-                {
-                    int* bpp_arr_ref = bpp_arr;
-
-                    if( count > MAX_CHANNELS )
-                        BAD_HEADER_ERR();
-
-                    if( ReadTable( value, count, fieldType, bpp_arr_ref, count ) < 0 )
-                        BAD_HEADER_ERR();
-                
-                    for( j = 1; j < count; j++ )
-                    {
-                        if( bpp_arr[j] != bpp_arr[0] )
-                            BAD_HEADER_ERR();
-                    }
-
-                    m_bpp = bpp_arr[0];
-                }
-
-                break;
-
-            case  TIFF_TAG_COMPRESSION:
-                m_compression = (TiffCompression)value;
-                if( m_compression != TIFF_UNCOMP &&
-                    m_compression != TIFF_HUFFMAN &&
-                    m_compression != TIFF_PACKBITS )
-                    BAD_HEADER_ERR();
-                break;
-
-            case  TIFF_TAG_PHOTOMETRIC:
-                photometric = value;
-                if( (unsigned)photometric > 3 )
-                    BAD_HEADER_ERR();
-                break;
-
-            case  TIFF_TAG_STRIP_OFFSETS:
-                m_strips = count;
-                if( ReadTable( value, count, fieldType, m_offsets, m_maxoffsets ) < 0 )
-                    BAD_HEADER_ERR();
-                break;
-
-            case  TIFF_TAG_SAMPLES_PER_PIXEL:
-                channels = value;
-                if( channels != 1 && channels != 3 && channels != 4 )
-                    BAD_HEADER_ERR();
-                break;
-
-            case  TIFF_TAG_ROWS_PER_STRIP:
-                m_rows_per_strip = value;
-                break;
-
-            case  TIFF_TAG_PLANAR_CONFIG:
-                {
-                int planar_config = value;
-                if( planar_config != 1 )
-                    BAD_HEADER_ERR();
-                }
-                break;
-
-            case  TIFF_TAG_COLOR_MAP:
-                if( fieldType != TIFF_TYPE_SHORT || count < 2 )
-                    BAD_HEADER_ERR();
-                if( ReadTable( value, count, fieldType,
-                               m_temp_palette, m_max_pal_length ) < 0 )
-                    BAD_HEADER_ERR();
-                pal_length = count / 3;
-                if( pal_length > 256 )
-                    BAD_HEADER_ERR();
-                for( i = 0; i < pal_length; i++ )
-                {
-                    m_palette[i].r = (uchar)(m_temp_palette[i] >> 8);
-                    m_palette[i].g = (uchar)(m_temp_palette[i + pal_length] >> 8);
-                    m_palette[i].b = (uchar)(m_temp_palette[i + pal_length*2] >> 8);
-                }
-                break;
-            case  TIFF_TAG_STRIP_COUNTS:
-                break;
-            }
-        }
-
-        if( m_strips == 1 && m_rows_per_strip == -1 )
-            m_rows_per_strip = m_height;
-
-        if( m_width > 0 && m_height > 0 && m_strips > 0 &&
-            (m_height + m_rows_per_strip - 1)/m_rows_per_strip == m_strips )
-        {
-            switch( m_bpp )
-            {
-            case 1:
-                if( photometric == 0 || photometric == 1 && channels == 1 )
-                {
-                    FillGrayPalette( m_palette, m_bpp, photometric == 0 );
-                    result = true;
-                    m_iscolor = false;
-                }
-                break;
-            case 4:
-            case 8:
-                if( (photometric == 0 || photometric == 1 ||
-                     photometric == 3 && pal_length == (1 << m_bpp)) &&
-                    m_compression != TIFF_HUFFMAN && channels == 1 )
-                {
-                    if( pal_length < 0 )
-                    {
-                        FillGrayPalette( m_palette, m_bpp, photometric == 0 );
-                        m_iscolor = false;
-                    }
-                    else
-                    {
-                        m_iscolor = IsColorPalette( m_palette, m_bpp );
-                    }
-                    result = true;
-                }
-                else if( photometric == 2 && pal_length < 0 &&
-                         (channels == 3 || channels == 4) &&
-                         m_compression == TIFF_UNCOMP )
-                {
-                    m_bpp = 8*channels;
-                    m_iscolor = true;
-                    result = true;
-                }
-                break;
-            default:
-                BAD_HEADER_ERR();
-            }
-        }
-bad_header_exit:
-        ;
-    }
-
-    if( !result )
-    {
-        m_strips = -1;
-        m_width = m_height = -1;
-        m_strm.Close();
-    }
-
-    return result;
-}
-
-
-bool  GrFmtTiffReader::ReadData( uchar* data, int step, int color )
-{
-    const  int buffer_size = 1 << 12;
-    uchar  buffer[buffer_size];
-    uchar  gray_palette[256];
-    bool   result = false;
-    uchar* src = buffer;
-    int    src_pitch = (m_width*m_bpp + 7)/8;
-    int    y = 0;
-
-    if( m_strips < 0 || !m_strm.IsOpened())
-        return false;
-    
-    if( src_pitch+32 > buffer_size )
-        src = new uchar[src_pitch+32];
-
-    if( !color )
-        if( m_bpp <= 8 )
-        {
-            CvtPaletteToGray( m_palette, gray_palette, 1 << m_bpp );
-        }
-
-    if( setjmp( m_strm.JmpBuf()) == 0 )
-    {
-        for( int s = 0; s < m_strips; s++ )
-        {
-            int y_limit = m_rows_per_strip;
-
-            y_limit += y;
-            if( y_limit > m_height ) y_limit = m_height;
-
-            m_strm.SetPos( m_offsets[s] );
-
-            if( m_compression == TIFF_UNCOMP )
-            {
-                for( ; y < y_limit; y++, data += step )
-                {
-                    m_strm.GetBytes( src, src_pitch );
-                    if( color )
-                        switch( m_bpp )
-                        {
-                        case 1:
-                            FillColorRow1( data, src, m_width, m_palette );
-                            break;
-                        case 4:
-                            FillColorRow4( data, src, m_width, m_palette );
-                            break;
-                        case 8:
-                            FillColorRow8( data, src, m_width, m_palette );
-                            break;
-                        case 24:
-                            icvCvt_RGB2BGR_8u_C3R( src, 0, data, 0, cvSize(m_width,1) );
-                            break;
-                        case 32:
-                            icvCvt_BGRA2BGR_8u_C4C3R( src, 0, data, 0, cvSize(m_width,1), 2 );
-                            break;
-                        default:
-                            assert(0);
-                            goto bad_decoding_end;
-                        }
-                    else
-                        switch( m_bpp )
-                        {
-                        case 1:
-                            FillGrayRow1( data, src, m_width, gray_palette );
-                            break;
-                        case 4:
-                            FillGrayRow4( data, src, m_width, gray_palette );
-                            break;
-                        case 8:
-                            FillGrayRow8( data, src, m_width, gray_palette );
-                            break;
-                        case 24:
-                            icvCvt_BGR2Gray_8u_C3C1R( src, 0, data, 0, cvSize(m_width,1), 2 );
-                            break;
-                        case 32:
-                            icvCvt_BGRA2Gray_8u_C4C1R( src, 0, data, 0, cvSize(m_width,1), 2 );
-                            break;
-                        default:
-                            assert(0);
-                            goto bad_decoding_end;
-                        }
-                }
-            }
-            else
-            {
-            }
-
-            result = true;
-
-bad_decoding_end:
-
-            ;
-        }
-    }
-
-    if( src != buffer ) delete[] src; 
+    close();
     return result;
 }
 
@@ -660,152 +382,360 @@ bad_decoding_end:
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-GrFmtTiffWriter::GrFmtTiffWriter( const char* filename ) : GrFmtWriter( filename )
+TiffEncoder::TiffEncoder()
+{
+    m_description = "TIFF Files (*.tiff;*.tif)";
+#ifdef HAVE_TIFF
+    m_buf_supported = false;
+#else
+    m_buf_supported = true;
+#endif
+}
+
+TiffEncoder::~TiffEncoder()
 {
 }
 
-GrFmtTiffWriter::~GrFmtTiffWriter()
+ImageEncoder TiffEncoder::newEncoder() const
 {
+    return new TiffEncoder;
 }
 
-void  GrFmtTiffWriter::WriteTag( TiffTag tag, TiffFieldType fieldType,
-                                 int count, int value )
+bool TiffEncoder::isFormatSupported( int depth ) const
 {
-    m_strm.PutWord( tag );
-    m_strm.PutWord( fieldType );
-    m_strm.PutDWord( count );
-    m_strm.PutDWord( value );
+    return depth == CV_8U || depth == CV_16U;
 }
 
-
-bool  GrFmtTiffWriter::WriteImage( const uchar* data, int step,
-                                   int width, int height, int /*depth*/, int channels )
+void  TiffEncoder::writeTag( WLByteStream& strm, TiffTag tag,
+                             TiffFieldType fieldType,
+                             int count, int value )
 {
-    bool result = false;
-    int fileStep = width*channels;
+    strm.putWord( tag );
+    strm.putWord( fieldType );
+    strm.putDWord( count );
+    strm.putDWord( value );
+}
 
-    assert( data && width > 0 && height > 0 && step >= fileStep);
+#ifdef HAVE_TIFF
 
-    if( m_strm.Open( m_filename ) )
+static void readParam(const vector<int>& params, int key, int& value)
+{
+    for(size_t i = 0; i + 1 < params.size(); i += 2)
+        if(params[i] == key)
+        {
+            value = params[i+1];
+            break;
+        }
+}
+
+bool  TiffEncoder::writeLibTiff( const Mat& img, const vector<int>& params)
+{
+    int channels = img.channels();
+    int width = img.cols, height = img.rows;
+    int depth = img.depth();
+
+    int bitsPerChannel = -1;
+    switch (depth)
     {
-        int rowsPerStrip = (1 << 13)/fileStep;
+        case CV_8U:
+        {
+            bitsPerChannel = 8;
+            break;
+        }
+        case CV_16U:
+        {
+            bitsPerChannel = 16;
+            break;
+        }
+        default:
+        {
+            return false;
+        }
+    }
 
-        if( rowsPerStrip < 1 )
-            rowsPerStrip = 1;
+    const int bitsPerByte = 8;
+    size_t fileStep = (width * channels * bitsPerChannel) / bitsPerByte;
 
-        if( rowsPerStrip > height )
-            rowsPerStrip = height;
+    int rowsPerStrip = (int)((1 << 13)/fileStep);
+    readParam(params, TIFFTAG_ROWSPERSTRIP, rowsPerStrip);
 
-        int i, stripCount = (height + rowsPerStrip - 1) / rowsPerStrip;
+    if( rowsPerStrip < 1 )
+        rowsPerStrip = 1;
+
+    if( rowsPerStrip > height )
+        rowsPerStrip = height;
+
+
+    // do NOT put "wb" as the mode, because the b means "big endian" mode, not "binary" mode.
+    // http://www.remotesensing.org/libtiff/man/TIFFOpen.3tiff.html
+    TIFF* pTiffHandle = TIFFOpen(m_filename.c_str(), "w");
+    if (!pTiffHandle)
+    {
+        return false;
+    }
+
+    // defaults for now, maybe base them on params in the future
+    int   compression  = COMPRESSION_LZW;
+    int   predictor    = PREDICTOR_HORIZONTAL;
+
+    readParam(params, TIFFTAG_COMPRESSION, compression);
+    readParam(params, TIFFTAG_PREDICTOR, predictor);
+
+    int   colorspace = channels > 1 ? PHOTOMETRIC_RGB : PHOTOMETRIC_MINISBLACK;
+
+    if ( !TIFFSetField(pTiffHandle, TIFFTAG_IMAGEWIDTH, width)
+      || !TIFFSetField(pTiffHandle, TIFFTAG_IMAGELENGTH, height)
+      || !TIFFSetField(pTiffHandle, TIFFTAG_BITSPERSAMPLE, bitsPerChannel)
+      || !TIFFSetField(pTiffHandle, TIFFTAG_COMPRESSION, compression)
+      || !TIFFSetField(pTiffHandle, TIFFTAG_PHOTOMETRIC, colorspace)
+      || !TIFFSetField(pTiffHandle, TIFFTAG_SAMPLESPERPIXEL, channels)
+      || !TIFFSetField(pTiffHandle, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG)
+      || !TIFFSetField(pTiffHandle, TIFFTAG_ROWSPERSTRIP, rowsPerStrip)
+      || !TIFFSetField(pTiffHandle, TIFFTAG_PREDICTOR, predictor)
+       )
+    {
+        TIFFClose(pTiffHandle);
+        return false;
+    }
+
+    // row buffer, because TIFFWriteScanline modifies the original data!
+    size_t scanlineSize = TIFFScanlineSize(pTiffHandle);
+    AutoBuffer<uchar> _buffer(scanlineSize+32);
+    uchar* buffer = _buffer;
+    if (!buffer)
+    {
+        TIFFClose(pTiffHandle);
+        return false;
+    }
+
+    for (int y = 0; y < height; ++y)
+    {
+        switch(channels)
+        {
+            case 1:
+            {
+                memcpy(buffer, img.data + img.step * y, scanlineSize);
+                break;
+            }
+
+            case 3:
+            {
+                if (depth == CV_8U)
+                    icvCvt_BGR2RGB_8u_C3R( img.data + img.step*y, 0, buffer, 0, cvSize(width,1) );
+                else
+                    icvCvt_BGR2RGB_16u_C3R( (const ushort*)(img.data + img.step*y), 0, (ushort*)buffer, 0, cvSize(width,1) );
+                break;
+            }
+
+            case 4:
+            {
+                if (depth == CV_8U)
+                    icvCvt_BGRA2RGBA_8u_C4R( img.data + img.step*y, 0, buffer, 0, cvSize(width,1) );
+                else
+                    icvCvt_BGRA2RGBA_16u_C4R( (const ushort*)(img.data + img.step*y), 0, (ushort*)buffer, 0, cvSize(width,1) );
+                break;
+            }
+
+            default:
+            {
+                TIFFClose(pTiffHandle);
+                return false;
+            }
+        }
+
+        int writeResult = TIFFWriteScanline(pTiffHandle, buffer, y, 0);
+        if (writeResult != 1)
+        {
+            TIFFClose(pTiffHandle);
+            return false;
+        }
+    }
+
+    TIFFClose(pTiffHandle);
+    return true;
+}
+
+#endif
+
+#ifdef HAVE_TIFF
+bool  TiffEncoder::write( const Mat& img, const vector<int>& params)
+#else
+bool  TiffEncoder::write( const Mat& img, const vector<int>& /*params*/)
+#endif
+{
+    int channels = img.channels();
+    int width = img.cols, height = img.rows;
+    int depth = img.depth();
+
+    if (depth != CV_8U && depth != CV_16U)
+        return false;
+
+    int bytesPerChannel = depth == CV_8U ? 1 : 2;
+    int fileStep = width * channels * bytesPerChannel;
+
+    WLByteStream strm;
+
+    if( m_buf )
+    {
+        if( !strm.open(*m_buf) )
+            return false;
+    }
+    else
+    {
+#ifdef HAVE_TIFF
+      return writeLibTiff(img, params);
+#else
+      if( !strm.open(m_filename) )
+          return false;
+#endif
+    }
+
+    int rowsPerStrip = (1 << 13)/fileStep;
+
+    if( rowsPerStrip < 1 )
+        rowsPerStrip = 1;
+
+    if( rowsPerStrip > height )
+        rowsPerStrip = height;
+
+    int i, stripCount = (height + rowsPerStrip - 1) / rowsPerStrip;
+
+    if( m_buf )
+        m_buf->reserve( alignSize(stripCount*8 + fileStep*height + 256, 256) );
+
 /*#if defined _DEBUG || !defined WIN32
-        int uncompressedRowSize = rowsPerStrip * fileStep;
+    int uncompressedRowSize = rowsPerStrip * fileStep;
 #endif*/
-        int directoryOffset = 0;
+    int directoryOffset = 0;
 
-        int* stripOffsets = new int[stripCount];
-        short* stripCounts = new short[stripCount];
-        uchar* buffer = new uchar[fileStep + 32];
-        int  stripOffsetsOffset = 0;
-        int  stripCountsOffset = 0;
-        int  bitsPerSample = 8; // TODO support 16 bit
-        int  y = 0;
+    AutoBuffer<int> stripOffsets(stripCount);
+    AutoBuffer<short> stripCounts(stripCount);
+    AutoBuffer<uchar> _buffer(fileStep+32);
+    uchar* buffer = _buffer;
+    int  stripOffsetsOffset = 0;
+    int  stripCountsOffset = 0;
+    int  bitsPerSample = 8 * bytesPerChannel;
+    int  y = 0;
 
-        m_strm.PutBytes( fmtSignTiffII, 4 );
-        m_strm.PutDWord( directoryOffset );
+    strm.putBytes( fmtSignTiffII, 4 );
+    strm.putDWord( directoryOffset );
 
-        // write an image data first (the most reasonable way
-        // for compressed images)
+    // write an image data first (the most reasonable way
+    // for compressed images)
+    for( i = 0; i < stripCount; i++ )
+    {
+        int limit = y + rowsPerStrip;
+
+        if( limit > height )
+            limit = height;
+
+        stripOffsets[i] = strm.getPos();
+
+        for( ; y < limit; y++ )
+        {
+            if( channels == 3 )
+            {
+                if (depth == CV_8U)
+                    icvCvt_BGR2RGB_8u_C3R( img.data + img.step*y, 0, buffer, 0, cvSize(width,1) );
+                else
+                    icvCvt_BGR2RGB_16u_C3R( (const ushort*)(img.data + img.step*y), 0, (ushort*)buffer, 0, cvSize(width,1) );
+            }
+            else
+            {
+              if( channels == 4 )
+              {
+                if (depth == CV_8U)
+                    icvCvt_BGRA2RGBA_8u_C4R( img.data + img.step*y, 0, buffer, 0, cvSize(width,1) );
+                else
+                    icvCvt_BGRA2RGBA_16u_C4R( (const ushort*)(img.data + img.step*y), 0, (ushort*)buffer, 0, cvSize(width,1) );
+              }
+            }
+
+            strm.putBytes( channels > 1 ? buffer : img.data + img.step*y, fileStep );
+        }
+
+        stripCounts[i] = (short)(strm.getPos() - stripOffsets[i]);
+        /*assert( stripCounts[i] == uncompressedRowSize ||
+                stripCounts[i] < uncompressedRowSize &&
+                i == stripCount - 1);*/
+    }
+
+    if( stripCount > 2 )
+    {
+        stripOffsetsOffset = strm.getPos();
         for( i = 0; i < stripCount; i++ )
+            strm.putDWord( stripOffsets[i] );
+
+        stripCountsOffset = strm.getPos();
+        for( i = 0; i < stripCount; i++ )
+            strm.putWord( stripCounts[i] );
+    }
+    else if(stripCount == 2)
+    {
+        stripOffsetsOffset = strm.getPos();
+        for (i = 0; i < stripCount; i++)
         {
-            int limit = y + rowsPerStrip;
-
-            if( limit > height )
-                limit = height;
-
-            stripOffsets[i] = m_strm.GetPos();
-
-            for( ; y < limit; y++, data += step )
-            {
-                if( channels == 3 )
-                    icvCvt_BGR2RGB_8u_C3R( data, 0, buffer, 0, cvSize(width,1) );
-                else if( channels == 4 )
-                    icvCvt_BGRA2RGBA_8u_C4R( data, 0, buffer, 0, cvSize(width,1) );
-
-                m_strm.PutBytes( channels > 1 ? buffer : data, fileStep );
-            }
-
-            stripCounts[i] = (short)(m_strm.GetPos() - stripOffsets[i]);
-            /*assert( stripCounts[i] == uncompressedRowSize ||
-                    stripCounts[i] < uncompressedRowSize &&
-                    i == stripCount - 1);*/
+            strm.putDWord (stripOffsets [i]);
         }
+        stripCountsOffset = stripCounts [0] + (stripCounts [1] << 16);
+    }
+    else
+    {
+        stripOffsetsOffset = stripOffsets[0];
+        stripCountsOffset = stripCounts[0];
+    }
 
-        if( stripCount > 2 )
-        {
-            stripOffsetsOffset = m_strm.GetPos();
-            for( i = 0; i < stripCount; i++ )
-                m_strm.PutDWord( stripOffsets[i] );
+    if( channels > 1 )
+    {
+        int bitsPerSamplePos = strm.getPos();
+        strm.putWord(bitsPerSample);
+        strm.putWord(bitsPerSample);
+        strm.putWord(bitsPerSample);
+        if( channels == 4 )
+            strm.putWord(bitsPerSample);
+        bitsPerSample = bitsPerSamplePos;
+    }
 
-            stripCountsOffset = m_strm.GetPos();
-            for( i = 0; i < stripCount; i++ )
-                m_strm.PutWord( stripCounts[i] );
-        }
-        else if(stripCount == 2)
-        {
-            stripOffsetsOffset = m_strm.GetPos();
-            for (i = 0; i < stripCount; i++)
-            {
-                m_strm.PutDWord (stripOffsets [i]);
-            }
-            stripCountsOffset = stripCounts [0] + (stripCounts [1] << 16);
-        }
-        else
-        {
-            stripOffsetsOffset = stripOffsets[0];
-            stripCountsOffset = stripCounts[0];
-        }
+    directoryOffset = strm.getPos();
 
-        if( channels > 1 )
-        {
-            bitsPerSample = m_strm.GetPos();
-            m_strm.PutWord(8);
-            m_strm.PutWord(8);
-            m_strm.PutWord(8);
-            if( channels == 4 )
-                m_strm.PutWord(8);
-        }
+    // write header
+    strm.putWord( 9 );
 
-        directoryOffset = m_strm.GetPos();
+    /* warning: specification 5.0 of Tiff want to have tags in
+       ascending order. This is a non-fatal error, but this cause
+       warning with some tools. So, keep this in ascending order */
 
-        // write header
-        m_strm.PutWord( 9 );
+    writeTag( strm, TIFF_TAG_WIDTH, TIFF_TYPE_LONG, 1, width );
+    writeTag( strm, TIFF_TAG_HEIGHT, TIFF_TYPE_LONG, 1, height );
+    writeTag( strm, TIFF_TAG_BITS_PER_SAMPLE,
+              TIFF_TYPE_SHORT, channels, bitsPerSample );
+    writeTag( strm, TIFF_TAG_COMPRESSION, TIFF_TYPE_LONG, 1, TIFF_UNCOMP );
+    writeTag( strm, TIFF_TAG_PHOTOMETRIC, TIFF_TYPE_SHORT, 1, channels > 1 ? 2 : 1 );
 
-        /* warning: specification 5.0 of Tiff want to have tags in
-           ascending order. This is a non-fatal error, but this cause
-           warning with some tools. So, keep this in ascending order */
+    writeTag( strm, TIFF_TAG_STRIP_OFFSETS, TIFF_TYPE_LONG,
+              stripCount, stripOffsetsOffset );
 
-        WriteTag( TIFF_TAG_WIDTH, TIFF_TYPE_LONG, 1, width );
-        WriteTag( TIFF_TAG_HEIGHT, TIFF_TYPE_LONG, 1, height );
-        WriteTag( TIFF_TAG_BITS_PER_SAMPLE,
-                  TIFF_TYPE_SHORT, channels, bitsPerSample );
-        WriteTag( TIFF_TAG_COMPRESSION, TIFF_TYPE_LONG, 1, TIFF_UNCOMP );
-        WriteTag( TIFF_TAG_PHOTOMETRIC, TIFF_TYPE_SHORT, 1, channels > 1 ? 2 : 1 );
+    writeTag( strm, TIFF_TAG_SAMPLES_PER_PIXEL, TIFF_TYPE_SHORT, 1, channels );
+    writeTag( strm, TIFF_TAG_ROWS_PER_STRIP, TIFF_TYPE_LONG, 1, rowsPerStrip );
 
-        WriteTag( TIFF_TAG_STRIP_OFFSETS, TIFF_TYPE_LONG,
-                  stripCount, stripOffsetsOffset );
+    writeTag( strm, TIFF_TAG_STRIP_COUNTS,
+              stripCount > 1 ? TIFF_TYPE_SHORT : TIFF_TYPE_LONG,
+              stripCount, stripCountsOffset );
 
-        WriteTag( TIFF_TAG_SAMPLES_PER_PIXEL, TIFF_TYPE_SHORT, 1, channels );
-        WriteTag( TIFF_TAG_ROWS_PER_STRIP, TIFF_TYPE_LONG, 1, rowsPerStrip );
-        
-        WriteTag( TIFF_TAG_STRIP_COUNTS,
-                  stripCount > 1 ? TIFF_TYPE_SHORT : TIFF_TYPE_LONG,
-                  stripCount, stripCountsOffset );
+    strm.putDWord(0);
+    strm.close();
 
-        m_strm.PutDWord(0);
-        m_strm.Close();
-
+    if( m_buf )
+    {
+        (*m_buf)[4] = (uchar)directoryOffset;
+        (*m_buf)[5] = (uchar)(directoryOffset >> 8);
+        (*m_buf)[6] = (uchar)(directoryOffset >> 16);
+        (*m_buf)[7] = (uchar)(directoryOffset >> 24);
+    }
+    else
+    {
         // write directory offset
-        FILE* f = fopen( m_filename, "r+b" );
+        FILE* f = fopen( m_filename.c_str(), "r+b" );
         buffer[0] = (uchar)directoryOffset;
         buffer[1] = (uchar)(directoryOffset >> 8);
         buffer[2] = (uchar)(directoryOffset >> 16);
@@ -814,13 +744,9 @@ bool  GrFmtTiffWriter::WriteImage( const uchar* data, int step,
         fseek( f, 4, SEEK_SET );
         fwrite( buffer, 1, 4, f );
         fclose(f);
-
-        delete[]  stripOffsets;
-        delete[]  stripCounts;
-        delete[] buffer;
-
-        result = true;
     }
-    return result;
+
+    return true;
 }
 
+}

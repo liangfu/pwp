@@ -7,10 +7,11 @@
 //  copy or use the software.
 //
 //
-//                        Intel License Agreement
+//                           License Agreement
 //                For Open Source Computer Vision Library
 //
-// Copyright (C) 2000, Intel Corporation, all rights reserved.
+// Copyright (C) 2000-2008, Intel Corporation, all rights reserved.
+// Copyright (C) 2009, Willow Garage Inc., all rights reserved.
 // Third party copyrights are property of their respective owners.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -23,7 +24,7 @@
 //     this list of conditions and the following disclaimer in the documentation
 //     and/or other materials provided with the distribution.
 //
-//   * The name of Intel Corporation may not be used to endorse or promote products
+//   * The name of the copyright holders may not be used to endorse or promote products
 //     derived from this software without specific prior written permission.
 //
 // This software is provided by the copyright holders and contributors "as is" and
@@ -39,24 +40,27 @@
 //
 //M*/
 
-#include "_highgui.h"
+#include "precomp.hpp"
 
-#ifdef HAVE_ILMIMF
-
-#include <OpenEXR/ImfHeader.h>
-#include <OpenEXR/ImfInputFile.h>
-#include <OpenEXR/ImfOutputFile.h>
-#include <OpenEXR/ImfChannelList.h>
-#include <OpenEXR/ImfStandardAttributes.h>
-#include <OpenEXR/half.h>
-#include "grfmt_exr.h"
+#ifdef HAVE_OPENEXR
 
 #if defined _MSC_VER && _MSC_VER >= 1200
-#pragma comment(lib, "Half.lib")
-#pragma comment(lib, "Iex.lib")
-#pragma comment(lib, "IlmImf.lib")
-#pragma comment(lib, "IlmThread.lib")
-#pragma comment(lib, "Imath.lib")
+#  pragma warning( disable: 4100 4244 4267 )
+#endif
+
+#if defined __GNUC__ && defined __APPLE__
+#  pragma GCC diagnostic ignored "-Wshadow"
+#endif
+
+#include <ImfHeader.h>
+#include <ImfInputFile.h>
+#include <ImfOutputFile.h>
+#include <ImfChannelList.h>
+#include <ImfStandardAttributes.h>
+#include <half.h>
+#include "grfmt_exr.hpp"
+
+#if defined _WIN32
 
 #undef UINT
 #define UINT ((Imf::PixelType)0)
@@ -64,66 +68,49 @@
 #define HALF ((Imf::PixelType)1)
 #undef FLOAT
 #define FLOAT ((Imf::PixelType)2)
-#undef uint
-#define uint unsigned
 
 #endif
 
-// Exr Filter Factory
-GrFmtExr::GrFmtExr()
+namespace cv
 {
-    m_sign_len = 4;
+
+/////////////////////// ExrDecoder ///////////////////
+
+ExrDecoder::ExrDecoder()
+{
     m_signature = "\x76\x2f\x31\x01";
-    m_description = "OpenEXR Image files (*.exr)";
-}
-
-
-GrFmtExr::~GrFmtExr()
-{
-}
-
-
-GrFmtReader* GrFmtExr::NewReader( const char* filename )
-{
-    return new GrFmtExrReader( filename );
-}
-
-
-GrFmtWriter* GrFmtExr::NewWriter( const char* filename )
-{
-    return new GrFmtExrWriter( filename );
-}
-
-
-/////////////////////// GrFmtExrReader ///////////////////
-
-GrFmtExrReader::GrFmtExrReader( const char* filename ) : GrFmtReader( filename )
-{
-    m_file = new InputFile( filename );
+    m_file = 0;
     m_red = m_green = m_blue = 0;
 }
 
 
-GrFmtExrReader::~GrFmtExrReader()
+ExrDecoder::~ExrDecoder()
 {
-    Close();
+    close();
 }
 
 
-void  GrFmtExrReader::Close()
+void  ExrDecoder::close()
 {
     if( m_file )
     {
         delete m_file;
         m_file = 0;
     }
-
-    GrFmtReader::Close();
 }
 
-bool  GrFmtExrReader::ReadHeader()
+
+int  ExrDecoder::type() const
+{
+    return CV_MAKETYPE((m_isfloat ? CV_32F : CV_32S), m_iscolor ? 3 : 1);
+}
+
+
+bool  ExrDecoder::readHeader()
 {
     bool result = false;
+
+    m_file = new InputFile( m_filename.c_str() );
 
     if( !m_file ) // probably paranoid
         return false;
@@ -184,19 +171,24 @@ bool  GrFmtExrReader::ReadHeader()
             uintcnt += ( m_blue->type == UINT );
         }
         m_type = (chcnt == uintcnt) ? UINT : FLOAT;
-    
+
         m_isfloat = (m_type == FLOAT);
     }
 
     if( !result )
-        Close();
+        close();
 
     return result;
 }
 
 
-bool  GrFmtExrReader::ReadData( uchar* data, int step, int color )
+bool  ExrDecoder::readData( Mat& img )
 {
+    m_native_depth = CV_MAT_DEPTH(type()) == img.depth();
+    bool color = img.channels() > 1;
+
+    uchar* data = img.data;
+    int step = img.step;
     bool justcopy = m_native_depth;
     bool chromatorgb = false;
     bool rgbtogray = false;
@@ -362,10 +354,10 @@ bool  GrFmtExrReader::ReadData( uchar* data, int step, int color )
                 }
                 else
                 {
-                    uint *ui = (uint *)buffer;
+                    unsigned *ui = (unsigned *)buffer;
                     for( x = 0; x < m_width * 3; x++)
                     {
-                        uint t = ui[x];
+                        unsigned t = ui[x];
                         out[x] = CV_CAST_8U(t);
                     }
                 }
@@ -389,7 +381,7 @@ bool  GrFmtExrReader::ReadData( uchar* data, int step, int color )
     if( chromatorgb )
         ChromaToBGR( (float *)data, m_height, step / xstep );
 
-    Close();
+    close();
 
     return result;
 }
@@ -398,7 +390,7 @@ bool  GrFmtExrReader::ReadData( uchar* data, int step, int color )
 // on entry pixel values are stored packed in the upper left corner of the image
 // this functions expands them by duplication to cover the whole image
  */
-void  GrFmtExrReader::UpSample( uchar *data, int xstep, int ystep, int xsample, int ysample )
+void  ExrDecoder::UpSample( uchar *data, int xstep, int ystep, int xsample, int ysample )
 {
     for( int y = (m_height - 1) / ysample, yre = m_height - ysample; y >= 0; y--, yre -= ysample )
     {
@@ -413,7 +405,7 @@ void  GrFmtExrReader::UpSample( uchar *data, int xstep, int ystep, int xsample, 
                     else if( m_type == FLOAT )
                         ((float *)data)[(yre + i) * ystep + (xre + n) * xstep] = ((float *)data)[y * ystep + x * xstep];
                     else
-                        ((uint *)data)[(yre + i) * ystep + (xre + n) * xstep] = ((uint *)data)[y * ystep + x * xstep];
+                        ((unsigned *)data)[(yre + i) * ystep + (xre + n) * xstep] = ((unsigned *)data)[y * ystep + x * xstep];
                 }
             }
         }
@@ -424,7 +416,7 @@ void  GrFmtExrReader::UpSample( uchar *data, int xstep, int ystep, int xsample, 
 // on entry pixel values are stored packed in the upper left corner of the image
 // this functions expands them by duplication to cover the whole image
  */
-void  GrFmtExrReader::UpSampleX( float *data, int xstep, int xsample )
+void  ExrDecoder::UpSampleX( float *data, int xstep, int xsample )
 {
     for( int x = (m_width - 1) / xsample, xre = m_width - xsample; x >= 0; x--, xre -= xsample )
     {
@@ -433,7 +425,7 @@ void  GrFmtExrReader::UpSampleX( float *data, int xstep, int xsample )
             if( m_type == FLOAT )
                 ((float *)data)[(xre + n) * xstep] = ((float *)data)[x * xstep];
             else
-                ((uint *)data)[(xre + n) * xstep] = ((uint *)data)[x * xstep];
+                ((unsigned *)data)[(xre + n) * xstep] = ((unsigned *)data)[x * xstep];
         }
     }
 }
@@ -442,7 +434,7 @@ void  GrFmtExrReader::UpSampleX( float *data, int xstep, int xsample )
 // on entry pixel values are stored packed in the upper left corner of the image
 // this functions expands them by duplication to cover the whole image
  */
-void  GrFmtExrReader::UpSampleY( uchar *data, int xstep, int ystep, int ysample )
+void  ExrDecoder::UpSampleY( uchar *data, int xstep, int ystep, int ysample )
 {
     for( int y = m_height - ysample, yre = m_height - ysample; y >= 0; y -= ysample, yre -= ysample )
     {
@@ -455,7 +447,7 @@ void  GrFmtExrReader::UpSampleY( uchar *data, int xstep, int ystep, int ysample 
                 else if( m_type == FLOAT )
                     ((float *)data)[(yre + i) * ystep + x * xstep] = ((float *)data)[y * ystep + x * xstep];
                 else
-                    ((uint *)data)[(yre + i) * ystep + x * xstep] = ((uint *)data)[y * ystep + x * xstep];
+                    ((unsigned *)data)[(yre + i) * ystep + x * xstep] = ((unsigned *)data)[y * ystep + x * xstep];
             }
         }
     }
@@ -464,13 +456,11 @@ void  GrFmtExrReader::UpSampleY( uchar *data, int xstep, int ystep, int ysample 
 /**
 // algorithm from ImfRgbaYca.cpp
  */
-void  GrFmtExrReader::ChromaToBGR( float *data, int numlines, int step )
+void  ExrDecoder::ChromaToBGR( float *data, int numlines, int step )
 {
-    int x, y, t;
-    
-    for( y = 0; y < numlines; y++ )
+    for( int y = 0; y < numlines; y++ )
     {
-        for( x = 0; x < m_width; x++ )
+        for( int x = 0; x < m_width; x++ )
         {
             double b, Y, r;
             if( !m_native_depth )
@@ -487,9 +477,9 @@ void  GrFmtExrReader::ChromaToBGR( float *data, int numlines, int step )
             }
             else
             {
-                b = ((uint *)data)[y * step + x * 3];
-                Y = ((uint *)data)[y * step + x * 3 + 1];
-                r = ((uint *)data)[y * step + x * 3 + 2];
+                b = ((unsigned *)data)[y * step + x * 3];
+                Y = ((unsigned *)data)[y * step + x * 3 + 1];
+                r = ((unsigned *)data)[y * step + x * 3 + 2];
             }
             r = (r + 1) * Y;
             b = (b + 1) * Y;
@@ -513,11 +503,11 @@ void  GrFmtExrReader::ChromaToBGR( float *data, int numlines, int step )
             else
             {
                 int t = cvRound(b);
-                ((uint *)data)[y * step + x * 3] = (uint)MAX(t,0);
+                ((unsigned *)data)[y * step + x * 3] = (unsigned)MAX(t,0);
                 t = cvRound(Y);
-                ((uint *)data)[y * step + x * 3 + 1] = (uint)MAX(t,0);
+                ((unsigned *)data)[y * step + x * 3 + 1] = (unsigned)MAX(t,0);
                 t = cvRound(r);
-                ((uint *)data)[y * step + x * 3 + 2] = (uint)MAX(t,0);
+                ((unsigned *)data)[y * step + x * 3 + 2] = (unsigned)MAX(t,0);
             }
         }
     }
@@ -527,7 +517,7 @@ void  GrFmtExrReader::ChromaToBGR( float *data, int numlines, int step )
 /**
 // convert one row to gray
 */
-void  GrFmtExrReader::RGBToGray( float *in, float *out )
+void  ExrDecoder::RGBToGray( float *in, float *out )
 {
     if( m_type == FLOAT )
     {
@@ -547,7 +537,7 @@ void  GrFmtExrReader::RGBToGray( float *in, float *out )
     {
         if( m_native_depth )
         {
-            uint *ui = (uint *)in;
+            unsigned *ui = (unsigned *)in;
             for( int i = 0; i < m_width * 3; i++ )
                 ui[i] -= 0x80000000;
             int *si = (int *)in;
@@ -556,54 +546,60 @@ void  GrFmtExrReader::RGBToGray( float *in, float *out )
         }
         else // how to best convert float to uchar?
         {
-            uint *ui = (uint *)in;
+            unsigned *ui = (unsigned *)in;
             for( int i = 0, n = 0; i < m_width; i++, n += 3 )
                 ((uchar *)out)[i] = uchar((ui[n] * m_chroma.blue[0] + ui[n + 1] * m_chroma.green[0] + ui[n + 2] * m_chroma.red[0]) * (256.0 / 4294967296.0));
         }
     }
 }
 
-/////////////////////// GrFmtExrWriter ///////////////////
+
+ImageDecoder ExrDecoder::newDecoder() const
+{
+    return new ExrDecoder;
+}
+
+/////////////////////// ExrEncoder ///////////////////
 
 
-GrFmtExrWriter::GrFmtExrWriter( const char* filename ) : GrFmtWriter( filename )
+ExrEncoder::ExrEncoder()
+{
+    m_description = "OpenEXR Image files (*.exr)";
+}
+
+
+ExrEncoder::~ExrEncoder()
 {
 }
 
 
-GrFmtExrWriter::~GrFmtExrWriter()
+bool  ExrEncoder::isFormatSupported( int depth ) const
 {
-}
-
-
-bool  GrFmtExrWriter::IsFormatSupported( int depth )
-{
-    return depth == IPL_DEPTH_8U || depth == IPL_DEPTH_8S ||
-           depth == IPL_DEPTH_16U || depth == IPL_DEPTH_16S ||
-           depth == IPL_DEPTH_32S || depth == IPL_DEPTH_32F;
-           // TODO: do (or should) we support 64f?
+    return CV_MAT_DEPTH(depth) >= CV_8U && CV_MAT_DEPTH(depth) < CV_64F;
 }
 
 
 // TODO scale appropriately
-bool  GrFmtExrWriter::WriteImage( const uchar* data, int step,
-                                  int width, int height, int depth, int channels )
+bool  ExrEncoder::write( const Mat& img, const vector<int>& )
 {
+    int width = img.cols, height = img.rows;
+    int depth = img.depth(), channels = img.channels();
     bool result = false;
+    bool issigned = depth == CV_8S || depth == CV_16S || depth == CV_32S;
+    bool isfloat = depth == CV_32F || depth == CV_64F;
+    depth = CV_ELEM_SIZE1(depth)*8;
+    uchar* data = img.data;
+    int step = img.step;
 
     Header header( width, height );
-    PixelType type;
-    bool issigned = depth < 0;
-    bool isfloat = depth == IPL_DEPTH_32F || depth == IPL_DEPTH_64F;
+    Imf::PixelType type;
 
-    if(depth == IPL_DEPTH_8U || depth == IPL_DEPTH_8S)
+    if(depth == 8)
         type = HALF;
     else if(isfloat)
         type = FLOAT;
     else
         type = UINT;
-
-    depth &= 255;
 
     if( channels == 3 )
     {
@@ -618,7 +614,7 @@ bool  GrFmtExrWriter::WriteImage( const uchar* data, int step,
         //printf("gray\n");
     }
 
-    OutputFile file( m_filename, header );
+    OutputFile file( m_filename.c_str(), header );
 
     FrameBuffer frame;
 
@@ -633,7 +629,7 @@ bool  GrFmtExrWriter::WriteImage( const uchar* data, int step,
     }
     else if( depth > 16 || type == UINT )
     {
-        buffer = (char *)new uint[width * channels];
+        buffer = (char *)new unsigned[width * channels];
         bufferstep = 0;
         size = 4;
     }
@@ -679,7 +675,7 @@ bool  GrFmtExrWriter::WriteImage( const uchar* data, int step,
         {
             if(type == UINT)
             {
-                uint *buf = (uint *)buffer; // FIXME 64-bit problems
+                unsigned *buf = (unsigned*)buffer; // FIXME 64-bit problems
 
                 if( depth <= 8 )
                 {
@@ -696,7 +692,7 @@ bool  GrFmtExrWriter::WriteImage( const uchar* data, int step,
                 {
                     int *sd = (int *)data; // FIXME 64-bit problems
                     for(int i = 0; i < width * channels; i++)
-                        buf[i] = (uint) sd[i] + offset;
+                        buf[i] = (unsigned) sd[i] + offset;
                 }
             }
             else
@@ -726,10 +722,18 @@ bool  GrFmtExrWriter::WriteImage( const uchar* data, int step,
             }
             data += step;
         }
-        delete buffer;
+        delete[] buffer;
     }
 
     return result;
+}
+
+
+ImageEncoder ExrEncoder::newEncoder() const
+{
+    return new ExrEncoder;
+}
+
 }
 
 #endif

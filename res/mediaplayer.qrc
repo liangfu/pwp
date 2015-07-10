@@ -1,0 +1,12 @@
+<RCC>
+  <qresource>
+    <file>sync-32.png</file>
+    <file>copy.png</file>
+    <file>cut.png</file>
+    <file>delete-32.png</file>
+    <file>open.png</file>
+    <file>plus-32.png</file>
+    <file>save.png</file>
+    <file>services-32.png</file>
+  </qresource>
+</RCC>

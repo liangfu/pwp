@@ -24,15 +24,41 @@ void MainWindow::on_actionOpen_triggered()
   loadVideo((char*)fileName_str);
 }
 
+void MainWindow::on_pushButton_option_clicked()
+{
+}
+
+void MainWindow::on_pushButton_save_clicked()
+{
+}
+
 void MainWindow::on_pushButton_newobj_clicked()
 {
   mediaplayer->pause();
   mediaplayer->videoWidget()->setCurrentState(1);
 }
 
+void MainWindow::displayVideo(char * fname)
+{
+  mediaplayer->openFile(fname);
+
+  pushButton_option->setEnabled(1);
+  pushButton_save->setEnabled(1);
+  pushButton_newobj->setEnabled(1);
+
+  groupBox_objlist->clearSelection();
+
+  connect(mediaplayer->videoWidget(),SIGNAL(objectSelected()),
+		  this,SLOT(listObjects()),Qt::UniqueConnection);
+  connect(mediaplayer,SIGNAL(frameChanged(const QString)),
+		  statusBar(),SLOT(showMessage(const QString)),Qt::UniqueConnection);
+}
+
 void MainWindow::listObjects()
 {
-  CvRect roi = mediaplayer->videoWidget()->selectedObject();
+  CvAnnotatedObject obj = mediaplayer->videoWidget()->lastSelectedObject();
+  CvRect roi = obj.roi;
+  CvScalar color = obj.color;
   
   // widget_newobj->setVisible(0);
   pushButton_newobj->setEnabled(0);

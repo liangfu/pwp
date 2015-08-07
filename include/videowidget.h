@@ -45,7 +45,7 @@ class VideoWidget : public QWidget
   CvPoint m_dragStart;
   CvPoint m_dragCurrent;
 
-  QList<CvRect> m_currentObjectList;
+  QList<CvAnnotatedObject> m_objlist;
 
   void adjustSize();
   
@@ -78,9 +78,16 @@ public:
 
   void setCurrentState(int state);
 
-  CvRect selectedObject(){return m_dispRect;}
+  CvAnnotatedObject lastSelectedObject(){ 
+	if (m_objlist.size()>0){
+	  return m_objlist[m_objlist.size()-1];
+	}else{
+	  CvAnnotatedObject obj;
+	  return obj;
+	}
+  }
 
-  QList<CvRect> currentObjectList(){return m_currentObjectList;}
+  QList<CvAnnotatedObject> currentObjectList(){return m_objlist;}
   
 signals:
   void objectSelected();

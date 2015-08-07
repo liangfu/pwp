@@ -39,8 +39,18 @@ QPixmap cvGetQtPixmap(CvMat * bgr)
   return retval;
 }
 
+CvScalar cvGetRandomColor()
+{
+  CvRNG rng_state = cvRNG(time(0));
+  uchar values_data[3];
+  CvMat values = cvMat( 3, 1, CV_8U, values_data );
+  cvRandArr( &rng_state, &values, CV_RAND_UNI, cvScalar(0,0,0), cvScalar(255,255,255) );
+  return cvScalar(values_data[0],values_data[1],values_data[2]);
+}
+
 void VideoWidget::paintEvent(QPaintEvent *)
 {
+  int idx=0;
   float w = width();
   float h = height();
   QPainter painter(this);
@@ -56,15 +66,32 @@ void VideoWidget::paintEvent(QPaintEvent *)
 	QRect dispRect = QRect(m_dispRect.x,m_dispRect.y,m_dispRect.width,m_dispRect.height);
 	painter.drawPixmap(dispRect,cvGetQtPixmap(m_dispImage));
 
+	// draw active object boundary
 	if (m_dragging && m_currentState==1){
-	  int x = MIN(m_dragCurrent.x,m_dragStart.x);
-	  int w = MAX(m_dragCurrent.x,m_dragStart.x)-x;
-	  int y = MIN(m_dragCurrent.y,m_dragStart.y);
-	  int h = MAX(m_dragCurrent.y,m_dragStart.y)-y;
+	  int xx = MIN(m_dragCurrent.x,m_dragStart.x);
+	  int ww = MAX(m_dragCurrent.x,m_dragStart.x)-xx;
+	  int yy = MIN(m_dragCurrent.y,m_dragStart.y);
+	  int hh = MAX(m_dragCurrent.y,m_dragStart.y)-yy;
 	  painter.setBrush(Qt::NoBrush);
 	  QPen pen(Qt::red);pen.setWidth(3);
 	  painter.setPen(pen);
-	  painter.drawRect(x,y,w,h);
+	  painter.drawRect(xx,yy,ww,hh);
+	  // qDebug() << __LINE__ << xx << yy << ww << hh;
+	}
+
+	// draw existing object boundaries
+	for (idx=0;idx<m_objlist.size();idx++){
+	  CvRect roi = m_objlist[idx].roi;
+	  CvScalar color = m_objlist[idx].color;
+	  int xx = roi.x*m_globalScale+m_offset.x;
+	  int ww = roi.width*m_globalScale;
+	  int yy = roi.y*m_globalScale+m_offset.y;
+	  int hh = roi.height*m_globalScale;
+	  painter.setBrush(Qt::NoBrush);
+	  QPen pen(QColor(color.val[0],color.val[1],color.val[2]));pen.setWidth(3);
+	  painter.setPen(pen);
+	  painter.drawRect(xx,yy,ww,hh);
+	  // qDebug() << __LINE__ << xx << yy << ww << hh;
 	}
   }
 }
@@ -98,8 +125,16 @@ void VideoWidget::mouseReleaseEvent(QMouseEvent * evt)
 	  int y = MIN(dragCurrent.y,m_dragStart.y);
 	  int h = MAX(dragCurrent.y,m_dragStart.y)-y;
 	  float invscale = 1./m_globalScale;
-	  // m_roilist.push_back(cvRect((x-m_offset.x)*invscale,(y-m_offset.y)*invscale,
-	  // 							 w*invscale,h*invscale));
+
+	  int xx = cvRound((x-m_offset.x)*invscale);
+	  int yy = cvRound((y-m_offset.y)*invscale);
+	  int ww = cvRound(w*invscale);
+	  int hh = cvRound(h*invscale);
+	  CvAnnotatedObject obj;
+	  obj.roi = cvRect(xx,yy,ww,hh);
+	  obj.color = cvGetRandomColor();
+	  m_objlist.push_back(obj);
+
 	  setCurrentState(2);
 	  emit objectSelected();
 	}  

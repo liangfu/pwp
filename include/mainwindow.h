@@ -36,27 +36,43 @@ public:
   {
 	setupUi(this);
 
+	pushButton_option->setEnabled(0);
+	pushButton_save->setEnabled(0);
+
 	groupBox_objlist->setVisible(0);
 	groupBox_objstat->setVisible(0);
+
+	delayedEvent();
   }
   ~MainWindow(){}
 
 private slots:
 
   void on_actionOpen_triggered();
+  void on_pushButton_option_clicked();
+  void on_pushButton_save_clicked();
   void on_pushButton_newobj_clicked();
 
   void listObjects();
   void listOptions(int index);
+
+protected:
+  void closeEvent(QCloseEvent * evt){evt->accept();}
 
 private:
   QList<Behavior> m_behavior;
   int m_prevStatus;
   int m_currStatus;
 
+  void delayedEvent(){
+	QStringList args = QCoreApplication::arguments();
+	if (args.size()>1){loadVideo(args[1].toLocal8Bit().data());}
+  }
+
   void recordEvent();
   void updateHistoryTable();
 
+  void displayVideo(char * fname);
   void loadVideo(char *  fname)
   {
 	typedef void (MainWindow::*CvTestFuncType)(char *);
@@ -66,18 +82,6 @@ private:
 	(this->*func[0])(fname);
   }
   
-  void displayVideo(char * fname)
-  {
-	mediaplayer->openFile(fname);
-
-	pushButton_newobj->setEnabled(1);
-	groupBox_objlist->clearSelection();
-
-	connect(mediaplayer->videoWidget(),SIGNAL(objectSelected()),
-			this,SLOT(listObjects()),Qt::UniqueConnection);
-	connect(mediaplayer,SIGNAL(frameChanged(const QString)),
-			statusBar(),SLOT(showMessage(const QString)),Qt::UniqueConnection);
-  }
 };
 
 #endif // __MAIN_WINDOW_H__

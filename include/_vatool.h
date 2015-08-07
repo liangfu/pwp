@@ -21,4 +21,10 @@ namespace Qt{
   enum SelectionState{SelectionDenied=0,SelectionReady=1,SelectionFinished=2};
 }
 
+typedef struct 
+{
+  CvRect roi;
+  CvScalar color;
+} CvAnnotatedObject;
+
 #endif // __VA_TOOL_H__
